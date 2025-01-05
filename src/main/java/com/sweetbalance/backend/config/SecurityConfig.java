@@ -117,11 +117,17 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/**").hasAnyAuthority(ADMIN.getValue(), USER.getValue())
                         .anyRequest().authenticated())
 
-                .exceptionHandling(customizer -> customizer.authenticationEntryPoint((request, response, authException) -> {
-
-                    InnerFilterResponseSender.sendInnerResponse(response, 500, 0,
-                            "서버 오류가 발생했습니다.", null);
-                }));
+                .exceptionHandling(customizer -> customizer
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            // 인증 실패 처리 (401 Unauthorized)
+                            InnerFilterResponseSender.sendInnerResponse(response, 401, 999,
+                                    "인증이 필요합니다. 로그인해주세요.", null);
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            // 권한 부족 처리 (403 Forbidden)
+                            InnerFilterResponseSender.sendInnerResponse(response, 403, 999,
+                                    "권한이 부족합니다.", null);
+                        }));
 
         //LoginFilter 추가 - BASIC
         httpSecurity
