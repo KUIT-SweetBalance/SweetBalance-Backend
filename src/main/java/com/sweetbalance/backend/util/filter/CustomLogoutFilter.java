@@ -48,6 +48,42 @@ public class CustomLogoutFilter extends GenericFilterBean {
             return;
         }
 
+        String authorization = request.getHeader("Authorization");
+
+        // Authorization 헤더가 없는 경우
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
+
+            InnerFilterResponseSender.sendInnerResponse(response, 400, 999,
+                    "Authorization 헤더 미설정", null);
+            return;
+        }
+
+        String accessToken = authorization.split(" ")[1];
+
+        // 엑세스 토큰 검증
+        try {
+            jwtUtil.isExpired(accessToken);
+        } catch (ExpiredJwtException e) {
+
+            InnerFilterResponseSender.sendInnerResponse(response, 400, 999,
+                    "엑세스 토큰 만료", null);
+            return;
+        } catch (JwtException e) {
+
+            InnerFilterResponseSender.sendInnerResponse(response, 400, 999,
+                    "유효하지 않은 엑세스 토큰", null);
+            return;
+        }
+
+        // 토큰 타입 검증 - 엑세스
+        String accessTokenType = jwtUtil.getTokenType(accessToken);
+        if (!accessTokenType.equals("access")) {
+
+            InnerFilterResponseSender.sendInnerResponse(response, 400, 999,
+                    "엑세스 토큰 타입 미일치", null);
+            return;
+        }
+
         Cookie[] cookies = request.getCookies();
 
         if (cookies == null) {
@@ -85,16 +121,16 @@ public class CustomLogoutFilter extends GenericFilterBean {
         } catch (JwtException e) {
 
             InnerFilterResponseSender.sendInnerResponse(response, 400, 999,
-                    "유효하지 않은 토큰", null);
+                    "유효하지 않은 리프레시 토큰", null);
             return;
         }
 
-        // 토큰이 refresh인지 확인 (발급시 페이로드에 명시)
+        // 토큰 타입 검증 - 리프레시
         String tokenType = jwtUtil.getTokenType(refresh);
         if (!tokenType.equals("refresh")) {
 
             InnerFilterResponseSender.sendInnerResponse(response, 400, 999,
-                    "토큰 타입 미일치", null);
+                    "리프레시 토큰 타입 미일치", null);
             return;
         }
 
