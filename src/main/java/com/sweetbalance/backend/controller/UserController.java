@@ -1,13 +1,13 @@
 package com.sweetbalance.backend.controller;
 
+import com.sweetbalance.backend.dto.DefaultResponseDTO;
 import com.sweetbalance.backend.dto.identity.UserIdHolder;
 import com.sweetbalance.backend.entity.Beverage;
 import com.sweetbalance.backend.entity.User;
 import com.sweetbalance.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,32 +24,35 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<User> findUserById(@PathVariable("userId") Long userId) {
-        // 아래 로직을 통해 토큰의 username 값을 Controller 로직에서 가져올 수 있음. role 값도 가능
-        UserIdHolder userIdHolder = (UserIdHolder) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        System.out.println(userIdHolder.getUserId()+" requested "+userId+"'s INFO");
+    @GetMapping("/my-info")
+    public ResponseEntity<?> findClientInfo(@AuthenticationPrincipal UserIdHolder userIdHolder) {
+
+        Long userId = userIdHolder.getUserId();
 
         Optional<User> userOptional = userService.findUserByUserId(userId);
 
         if (userOptional.isPresent()) {
-            return ResponseEntity.ok(userOptional.get());
+
+            return ResponseEntity.status(200).body(
+                    DefaultResponseDTO.success("본인 정보 반환 성공", userOptional.get())
+            );
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+
+            return ResponseEntity.status(404).body(
+                    DefaultResponseDTO.error(404, 999, "등록된 User 정보를 찾을 수 없습니다.")
+            );
         }
     }
 
-    @GetMapping("/{userId}/beverages")
-    public ResponseEntity<List<Beverage>> getBeveragesByUserId(@PathVariable("userId") Long userId) {
+    @GetMapping("/my-beverages")
+    public ResponseEntity<?> getBeveragesOfClient(@AuthenticationPrincipal UserIdHolder userIdHolder) {
+
+        Long userId = userIdHolder.getUserId();
+
         List<Beverage> beverages = userService.findBeveragesByUserId(userId);
-        return ResponseEntity.ok(beverages);
-    }
-
-    @GetMapping("/username")
-    public ResponseEntity<User> findUserById(@RequestParam("username") String username) {
-        Optional<User> userOptional = userService.findUserByUsername(username);
-
-        if (userOptional.isPresent()) return ResponseEntity.ok(userOptional.get());
-        else                          return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        
+        return ResponseEntity.status(200).body(
+                DefaultResponseDTO.success("음료 리스트 반환 성공", beverages)
+        );
     }
 }

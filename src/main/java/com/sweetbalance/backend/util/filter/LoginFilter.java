@@ -2,12 +2,12 @@ package com.sweetbalance.backend.util.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sweetbalance.backend.dto.identity.CustomUserDetails;
+import com.sweetbalance.backend.util.InnerFilterResponseSender;
 import com.sweetbalance.backend.util.JWTUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -66,8 +66,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         Long userId = customUserDetails.getUserId();
         String username = customUserDetails.getUsername();
 
-        // String username = authentication.getName(); // 이 경우 username 은 가져오지만 userId는 따로 받아오지 못함
-
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority auth = iterator.next();
@@ -79,13 +77,17 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         //응답 설정
         response.setHeader("Authorization", "Bearer " + accessToken);
         response.addCookie(createCookie("refresh", refreshToken));
-        response.setStatus(HttpStatus.OK.value());
+
+        InnerFilterResponseSender.sendInnerResponse(response, 200, 0,
+                "로그인 성공, 토큰 발급 성공", null);
     }
 
     //로그인 실패시 실행하는 메소드
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
-        response.setStatus(401);
+
+        InnerFilterResponseSender.sendInnerResponse(response, 400, 999,
+                "로그인 인증 실패", null);
     }
 
     private Cookie createCookie(String key, String value) {

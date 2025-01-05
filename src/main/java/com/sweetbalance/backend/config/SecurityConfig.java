@@ -92,7 +92,6 @@ public class SecurityConfig {
         httpSecurity
                 .formLogin((auth) -> auth.disable());
 
-
         //HTTP Basic 인증 방식 disable
         httpSecurity
                 .httpBasic((auth) -> auth.disable());
@@ -113,12 +112,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/sign-out").hasAnyAuthority(ADMIN.getValue(), USER.getValue())
                         .requestMatchers("/api/users/**").hasAnyAuthority(ADMIN.getValue(), USER.getValue())
                         .anyRequest().authenticated())
-                
-                // 인증 실패 시 로그인 페이지로 리다이렉트가 아닌 401 응답 뱉도록 설정
+
                 .exceptionHandling(customizer -> customizer.authenticationEntryPoint((request, response, authException) -> {
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.setContentType("application/json");
-                    response.getWriter().write("{\"error\": \"Authentication required.\"}");
+
+                    InnerFilterResponseSender.sendInnerResponse(response, 500, 0,
+                            "서버 오류가 발생했습니다.", null);
                 }));
 
         //LoginFilter 추가 - BASIC
@@ -132,7 +130,6 @@ public class SecurityConfig {
         //JWTFilter 추가
         httpSecurity
                 .addFilterAfter(new JWTFilter(jwtUtil), OAuth2LoginAuthenticationFilter.class);
-        //.addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
         //세션 설정 : STATELESS
         httpSecurity

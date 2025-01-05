@@ -1,6 +1,6 @@
 package com.sweetbalance.backend.service;
 
-import com.sweetbalance.backend.dto.SignUpDTO;
+import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
 import com.sweetbalance.backend.entity.Beverage;
 import com.sweetbalance.backend.entity.User;
 import com.sweetbalance.backend.repository.UserRepository;
@@ -23,12 +23,12 @@ public class UserServiceImpl implements UserService {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
-    public void join(SignUpDTO signUpDTO){
+    public void join(SignUpRequestDTO signUpRequestDTO){
         // 정규식 처리 등 가입 불가 문자에 대한 처리도 진행해주어야 한다.
-        boolean userExists = userRepository.existsByUsername(signUpDTO.getUsername());
-        if(userExists) throw new RuntimeException("The username '" + signUpDTO.getUsername() + "' is already taken.");
+        boolean userExists = userRepository.existsByUsername(signUpRequestDTO.getUsername());
+        if(userExists) throw new RuntimeException("The username '" + signUpRequestDTO.getUsername() + "' is already taken.");
 
-        User bCryptPasswordEncodedUser = makeBCryptPasswordEncodedUser(signUpDTO);
+        User bCryptPasswordEncodedUser = makeBCryptPasswordEncodedUser(signUpRequestDTO);
         userRepository.save(bCryptPasswordEncodedUser);
     }
 
@@ -45,8 +45,8 @@ public class UserServiceImpl implements UserService {
         return userRepository.findBeveragesByUserId(userId);
     }
 
-    private User makeBCryptPasswordEncodedUser(SignUpDTO signUpDTO){
-        User user = signUpDTO.toActiveUser();
+    private User makeBCryptPasswordEncodedUser(SignUpRequestDTO signUpRequestDTO){
+        User user = signUpRequestDTO.toActiveUser();
         String rawPassword = user.getPassword();
         String encodedPassword = bCryptPasswordEncoder.encode(rawPassword);
         user.setPassword(encodedPassword);

@@ -1,4 +1,4 @@
-package com.sweetbalance.backend.dto;
+package com.sweetbalance.backend.dto.request;
 
 import com.sweetbalance.backend.entity.User;
 import lombok.Getter;
@@ -8,7 +8,7 @@ import static com.sweetbalance.backend.enums.user.LoginType.BASIC;
 import static com.sweetbalance.backend.enums.user.Role.USER;
 
 @Getter
-public class SignUpDTO {
+public class SignUpRequestDTO {
     private String username;
 
     private String password;
