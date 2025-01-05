@@ -1,9 +1,9 @@
 package com.sweetbalance.backend.controller;
 
-import com.sweetbalance.backend.dto.SignUpDTO;
+import com.sweetbalance.backend.dto.DefaultResponseDTO;
+import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
 import com.sweetbalance.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,12 +20,18 @@ public class SignUpController {
     }
 
     @PostMapping("/api/auth/sign-up")
-    public ResponseEntity<?> signUp(@RequestBody SignUpDTO signUpDTO){
+    public ResponseEntity<?> signUp(@RequestBody SignUpRequestDTO signUpRequestDTO){
         try {
-            userService.join(signUpDTO);
-            return new ResponseEntity<>(HttpStatus.OK);
+
+            userService.join(signUpRequestDTO);
+            return ResponseEntity.status(200).body(
+                    DefaultResponseDTO.success("회원가입 성공", null)
+            );
         } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+
+            return ResponseEntity.status(400).body(
+                    DefaultResponseDTO.error(400, 999, "중복된 username 또는 email")
+            );
         }
     }
 }

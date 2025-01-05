@@ -9,6 +9,7 @@ import com.sweetbalance.backend.util.handler.CustomSuccessHandler;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,6 +32,9 @@ import static com.sweetbalance.backend.enums.user.Role.*;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    @Value("${spring.front.origin}")
+    private String frontOrigin;
 
     private final AuthenticationConfiguration authenticationConfiguration;
     private final CustomOAuth2UserService customOAuth2UserService;
@@ -71,10 +75,10 @@ public class SecurityConfig {
 
                         CorsConfiguration configuration = new CorsConfiguration();
 
-                        configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+                        configuration.setAllowedOrigins(Collections.singletonList(frontOrigin));
+                        configuration.setAllowedHeaders(Collections.singletonList("*"));
                         configuration.setAllowedMethods(Collections.singletonList("*"));
                         configuration.setAllowCredentials(true);
-                        configuration.setAllowedHeaders(Collections.singletonList("*"));
                         configuration.setMaxAge(3600L);
 
                         configuration.setExposedHeaders(Collections.singletonList("Set-Cookie"));
@@ -91,7 +95,6 @@ public class SecurityConfig {
         //From 로그인 방식 disable
         httpSecurity
                 .formLogin((auth) -> auth.disable());
-
 
         //HTTP Basic 인증 방식 disable
         httpSecurity
@@ -113,13 +116,18 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/sign-out").hasAnyAuthority(ADMIN.getValue(), USER.getValue())
                         .requestMatchers("/api/users/**").hasAnyAuthority(ADMIN.getValue(), USER.getValue())
                         .anyRequest().authenticated())
-                
-                // 인증 실패 시 로그인 페이지로 리다이렉트가 아닌 401 응답 뱉도록 설정
-                .exceptionHandling(customizer -> customizer.authenticationEntryPoint((request, response, authException) -> {
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.setContentType("application/json");
-                    response.getWriter().write("{\"error\": \"Authentication required.\"}");
-                }));
+
+                .exceptionHandling(customizer -> customizer
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            // 인증 실패 처리 (401 Unauthorized)
+                            InnerFilterResponseSender.sendInnerResponse(response, 401, 999,
+                                    "인증이 필요합니다. 로그인해주세요.", null);
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            // 권한 부족 처리 (403 Forbidden)
+                            InnerFilterResponseSender.sendInnerResponse(response, 403, 999,
+                                    "권한이 부족합니다.", null);
+                        }));
 
         //LoginFilter 추가 - BASIC
         httpSecurity
@@ -132,7 +140,6 @@ public class SecurityConfig {
         //JWTFilter 추가
         httpSecurity
                 .addFilterAfter(new JWTFilter(jwtUtil), OAuth2LoginAuthenticationFilter.class);
-        //.addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
         //세션 설정 : STATELESS
         httpSecurity

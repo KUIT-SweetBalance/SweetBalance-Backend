@@ -1,7 +1,9 @@
 package com.sweetbalance.backend.util.filter;
 
+import com.sweetbalance.backend.util.InnerFilterResponseSender;
 import com.sweetbalance.backend.util.JWTUtil;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
@@ -32,7 +34,6 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
     private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
-        //path and method verify
         String requestUri = request.getRequestURI();
 
         if (!requestUri.matches("^/api/auth/sign-out$")) {
@@ -47,21 +48,65 @@ public class CustomLogoutFilter extends GenericFilterBean {
             return;
         }
 
-        //get refresh token
-        String refresh = null;
+        String authorization = request.getHeader("Authorization");
+
+        // Authorization 헤더가 없는 경우
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
+
+            InnerFilterResponseSender.sendInnerResponse(response, 400, 999,
+                    "Authorization 헤더 미설정", null);
+            return;
+        }
+
+        String accessToken = authorization.split(" ")[1];
+
+        // 엑세스 토큰 검증
+        try {
+            jwtUtil.isExpired(accessToken);
+        } catch (ExpiredJwtException e) {
+
+            InnerFilterResponseSender.sendInnerResponse(response, 400, 999,
+                    "엑세스 토큰 만료", null);
+            return;
+        } catch (JwtException e) {
+
+            InnerFilterResponseSender.sendInnerResponse(response, 400, 999,
+                    "유효하지 않은 엑세스 토큰", null);
+            return;
+        }
+
+        // 토큰 타입 검증 - 엑세스
+        String accessTokenType = jwtUtil.getTokenType(accessToken);
+        if (!accessTokenType.equals("access")) {
+
+            InnerFilterResponseSender.sendInnerResponse(response, 400, 999,
+                    "엑세스 토큰 타입 미일치", null);
+            return;
+        }
+
         Cookie[] cookies = request.getCookies();
+
+        if (cookies == null) {
+
+            InnerFilterResponseSender.sendInnerResponse(response, 400, 999,
+                    "쿠키 값 미설정", null);
+            return;
+        }
+
+        String refresh = null;
         for (Cookie cookie : cookies) {
 
             if (cookie.getName().equals("refresh")) {
 
                 refresh = cookie.getValue();
+                break;
             }
         }
 
-        //refresh null check
         if (refresh == null) {
 
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            InnerFilterResponseSender.sendInnerResponse(response, 400, 999,
+                    "리프레시 토큰 미설정", null);
             return;
         }
 
@@ -70,29 +115,33 @@ public class CustomLogoutFilter extends GenericFilterBean {
             jwtUtil.isExpired(refresh);
         } catch (ExpiredJwtException e) {
 
-            //response status code
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            InnerFilterResponseSender.sendInnerResponse(response, 400, 999,
+                    "리프레시 토큰 만료", null);
+            return;
+        } catch (JwtException e) {
+
+            InnerFilterResponseSender.sendInnerResponse(response, 400, 999,
+                    "유효하지 않은 리프레시 토큰", null);
             return;
         }
 
-        // 토큰이 refresh인지 확인 (발급시 페이로드에 명시)
+        // 토큰 타입 검증 - 리프레시
         String tokenType = jwtUtil.getTokenType(refresh);
         if (!tokenType.equals("refresh")) {
 
-            //response status code
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            InnerFilterResponseSender.sendInnerResponse(response, 400, 999,
+                    "리프레시 토큰 타입 미일치", null);
             return;
         }
 
         //DB에 저장되어 있는지 확인
         if (!jwtUtil.isRefreshExist(refresh)) {
 
-            //response status code
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            InnerFilterResponseSender.sendInnerResponse(response, 400, 999,
+                    "사용이 제한된 리프레시 토큰", null);
             return;
         }
 
-        //로그아웃 진행
         //Refresh 토큰 DB에서 제거
         jwtUtil.deleteRefreshEntity(refresh);
 
@@ -102,6 +151,8 @@ public class CustomLogoutFilter extends GenericFilterBean {
         cookie.setPath("/");
 
         response.addCookie(cookie);
-        response.setStatus(HttpServletResponse.SC_OK);
+
+        InnerFilterResponseSender.sendInnerResponse(response, 200, 0,
+                "로그아웃 성공", null);
     }
 }
