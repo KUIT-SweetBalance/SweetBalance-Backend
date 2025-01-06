@@ -33,6 +33,9 @@ jobs:
       - name: build with Gradle(without test)
         run: ./gradlew clean build -x test --stacktrace
 
+      - name: Disable BuildKit
+        run: echo "::set-env name=DOCKER_BUILDKIT::0"
+        
       - name: Docker build & push
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
