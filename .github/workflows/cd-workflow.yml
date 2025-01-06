@@ -40,8 +40,8 @@ jobs:
           docker push ${{ secrets.DOCKER_USERNAME }} / ${{ secrets.DOCKER_IMAGE }}
 
       - name: 🚀 deploy to server
-          run: appleboy/ssh-action@v1.2.0
-          with:
+        uses: appleboy/ssh-action@1.2.0
+        with:
             host: ${{ secrets.EC2_HOST }}
             username: ${{ secrets.EC2_USERNAME }}
             key: ${{ secrets.EC2_KEY }}
@@ -63,6 +63,7 @@ jobs:
               echo "Cleaning up old images"
               sudo docker image prune -f
 
+        
           
           
       
