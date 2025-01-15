@@ -34,12 +34,6 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-impl:0.12.5'
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.12.5'
 
-	// Selenium
-	implementation 'org.seleniumhq.selenium:selenium-java:4.27.0'
-
-	// Chrome Driver 자동 설정 지원
-	implementation 'io.github.bonigarcia:webdrivermanager:5.9.2'
-
 	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'

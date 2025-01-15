@@ -1,10 +1,12 @@
 package com.sweetbalance.backend.entity;
 
 import com.sweetbalance.backend.enums.beverage.BeverageCategory;
-import com.sweetbalance.backend.enums.beverage.BeverageSize;
 import com.sweetbalance.backend.enums.common.Status;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "beverages")
@@ -23,30 +25,37 @@ public class Beverage extends BaseEntity{
     @Column(nullable = false, length = 50)
     private String brand;
 
+    @Column(name = "img_url", length = 500)
+    private String imgUrl;
+
     @Enumerated(EnumType.STRING)
     private BeverageCategory category;
 
-    @Enumerated(EnumType.STRING)
-    private BeverageSize size;
-
-    /*
-     * 음료 영양정보의 경우 소수점을 포함 할 수 있기에 long 타입으로 자료형 변환 고려
-     */
-    
     @Column(nullable = false)
-    private int sugar;
+    private double sugar;
 
     @Column(nullable = false)
-    private int calories;
+    private double calories;
 
     @Column(nullable = false)
-    private int caffeine;
-
-    @Column(nullable = false)
-    private int volume;
+    private double caffeine;
 
     @Enumerated(EnumType.STRING)
     @Column
     private Status status;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "beverage", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BeverageSize> sizes = new ArrayList<>();
+
+    public void addSize(BeverageSize size) {
+        sizes.add(size);
+        size.setBeverage(this);
+    }
+
+    public void removeSize(BeverageSize size) {
+        sizes.remove(size);
+        size.setBeverage(null);
+    }
 }
 
