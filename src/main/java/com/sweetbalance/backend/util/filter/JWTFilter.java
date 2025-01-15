@@ -86,6 +86,14 @@ public class JWTFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String requestURI = request.getRequestURI();
+
+        // 필터를 건너뛰어야 하는 URL 정의
+        return requestURI.equals("/api/auth/reissue");
+    }
+
     private Authentication getAuthentication(String userType, AuthUserDTO authUserDTO) {
         Authentication authToken = null;
 
