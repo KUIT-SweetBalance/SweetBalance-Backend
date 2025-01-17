@@ -28,7 +28,10 @@ jobs:
           setting-path: ${{ github.workspace }}
 
       - name: add application.yml to directory
-        run: echo "${{ secrets.APPLICATION_YML }}" > application.yml
+        run: |
+          var = "${{ secrets.APPLICATION_YML }}"
+          echo $var > application.yml
+              
 
       - name: grant execute permission for gradlew
         run: chmod +x gradlew
