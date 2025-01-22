@@ -71,12 +71,22 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         GrantedAuthority auth = iterator.next();
         String role = auth.getAuthority();
 
+//        String accessToken = jwtUtil.generateBasicAccessToken(userId, username, role);
+//        String refreshToken = jwtUtil.generateBasicRefreshToken(userId, username, role);
+//
+//        //응답 설정
+//        response.setHeader("Authorization", "Bearer " + accessToken);
+//        response.addCookie(createCookie("refresh", refreshToken));
+//
+//        InnerFilterResponseSender.sendInnerResponse(response, 200, 0,
+//                "로그인 성공, 토큰 발급 성공", null);
+
         String accessToken = jwtUtil.generateBasicAccessToken(userId, username, role);
         String refreshToken = jwtUtil.generateBasicRefreshToken(userId, username, role);
 
-        //응답 설정
+        // 응답 설정
         response.setHeader("Authorization", "Bearer " + accessToken);
-        response.addCookie(createCookie("refresh", refreshToken));
+        setRefreshTokenCookie(response, refreshToken);
 
         InnerFilterResponseSender.sendInnerResponse(response, 200, 0,
                 "로그인 성공, 토큰 발급 성공", null);
@@ -90,14 +100,9 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
                 "로그인 인증 실패", null);
     }
 
-    private Cookie createCookie(String key, String value) {
-
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(24*60*60);
-        cookie.setPath("/");
-        cookie.setSecure(true);
-        //cookie.setHttpOnly(true);
-
-        return cookie;
+    private void setRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
+        String cookieValue = String.format("refresh=%s; Max-Age=%d; Path=/; Secure; SameSite=None",
+                refreshToken, 24*60*60);
+        response.setHeader("Set-Cookie", cookieValue);
     }
 }
