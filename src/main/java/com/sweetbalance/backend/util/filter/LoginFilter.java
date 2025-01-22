@@ -95,6 +95,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         Cookie cookie = new Cookie(key, value);
         cookie.setMaxAge(24*60*60);
         cookie.setPath("/");
+        cookie.setDomain("localhost");
         //cookie.setHttpOnly(true);
         //cookie.setSecure(true);
 
