@@ -77,7 +77,7 @@ public class SecurityConfig {
 
                         CorsConfiguration configuration = new CorsConfiguration();
 
-                        configuration.setAllowedOrigins(List.of(frontOrigin, "http://localhost:3000"));
+                        configuration.setAllowedOrigins(List.of(frontOrigin, "https://localhost:3000"));
                         configuration.setAllowedHeaders(Collections.singletonList("*"));
                         configuration.setAllowedMethods(Collections.singletonList("*"));
                         configuration.setAllowCredentials(true);
