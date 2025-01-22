@@ -76,16 +76,10 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         //응답 설정
         response.setHeader("Authorization", "Bearer " + accessToken);
-        setRefreshTokenCookie(response, refreshToken);
+        response.addCookie(createCookie("refresh", refreshToken));
 
         InnerFilterResponseSender.sendInnerResponse(response, 200, 0,
                 "로그인 성공, 토큰 발급 성공", null);
-    }
-
-    private void setRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
-        String cookieValue = String.format("refresh=%s; Max-Age=%d; Path=/; Secure; SameSite=None",
-                refreshToken, 24*60*60);
-        response.setHeader("Set-Cookie", cookieValue);
     }
 
     //로그인 실패시 실행하는 메소드
@@ -94,5 +88,16 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         InnerFilterResponseSender.sendInnerResponse(response, 400, 999,
                 "로그인 인증 실패", null);
+    }
+
+    private Cookie createCookie(String key, String value) {
+
+        Cookie cookie = new Cookie(key, value);
+        cookie.setMaxAge(24*60*60);
+        cookie.setPath("/");
+        //cookie.setHttpOnly(true);
+        //cookie.setSecure(true);
+
+        return cookie;
     }
 }
