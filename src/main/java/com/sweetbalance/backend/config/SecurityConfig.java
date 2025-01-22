@@ -27,6 +27,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static com.sweetbalance.backend.enums.user.Role.*;
 
@@ -76,7 +77,7 @@ public class SecurityConfig {
 
                         CorsConfiguration configuration = new CorsConfiguration();
 
-                        configuration.setAllowedOrigins(Collections.singletonList(frontOrigin));
+                        configuration.setAllowedOrigins(List.of(frontOrigin, "http://localhost:3000"));
                         configuration.setAllowedHeaders(Collections.singletonList("*"));
                         configuration.setAllowedMethods(Collections.singletonList("*"));
                         configuration.setAllowCredentials(true);
