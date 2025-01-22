@@ -83,7 +83,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     }
 
     private void setRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
-        String cookieValue = String.format("refresh=%s; Max-Age=%d; Path=/; Domain=.localhost; Secure; SameSite=None",
+        String cookieValue = String.format("refresh=%s; Max-Age=%d; Path=/; Secure; SameSite=None",
                 refreshToken, 24*60*60);
         response.setHeader("Set-Cookie", cookieValue);
     }
