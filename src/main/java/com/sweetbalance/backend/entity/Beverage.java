@@ -40,6 +40,9 @@ public class Beverage extends BaseEntity{
     @Column(nullable = false)
     private double caffeine;
 
+    @Column(nullable = false)
+    private Integer consumeCount;
+
     @Enumerated(EnumType.STRING)
     @Column
     private Status status;
