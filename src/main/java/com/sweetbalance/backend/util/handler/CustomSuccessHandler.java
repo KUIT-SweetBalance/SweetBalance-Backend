@@ -42,8 +42,9 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         String refreshToken = jwtUtil.generateSocialRefreshToken(userId, username, role);
 
-        //refresh 토큰 발급을 통해 클라이언트가 reissue 할 수 있도록 함
-        response.addCookie(createCookie("refresh", refreshToken));
+        // refresh 토큰 발급을 통해 클라이언트가 reissue 할 수 있도록 함
+        // 프론트 HTTPS 배포 이전 까지는 쿠키 방식 응답 미사용
+//        response.addCookie(createCookie("refresh", refreshToken));
         response.sendRedirect("http://localhost:5173/?refresh="+refreshToken);    // 프론트 측 특정 URL
     }
 

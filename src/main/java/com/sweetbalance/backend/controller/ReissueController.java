@@ -1,6 +1,8 @@
 package com.sweetbalance.backend.controller;
 
 import com.sweetbalance.backend.dto.DefaultResponseDTO;
+import com.sweetbalance.backend.dto.response.TokenPairDTO;
+import com.sweetbalance.backend.util.InnerFilterResponseSender;
 import com.sweetbalance.backend.util.JWTUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -99,11 +101,13 @@ public class ReissueController {
         }
         jwtUtil.deleteRefreshEntity(refresh);
 
-        response.setHeader("Authorization", "Bearer " + newAccessToken);
-        response.addCookie(createCookie("refresh", newRefreshToken));
+        // 프론트 HTTPS 배포 이전 까지는 쿠키 방식 응답 미사용
+//        response.setHeader("Authorization", "Bearer " + newAccessToken);
+//        response.addCookie(createCookie("refresh", newRefreshToken));
 
+        TokenPairDTO tokens = new TokenPairDTO(newAccessToken, newRefreshToken);
         return ResponseEntity.status(200).body(
-                DefaultResponseDTO.success("토큰 재발급 성공", null)
+                DefaultResponseDTO.success("토큰 재발급 성공", tokens)
         );
     }
 

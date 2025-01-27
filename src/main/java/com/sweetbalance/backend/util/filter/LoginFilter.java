@@ -2,6 +2,7 @@ package com.sweetbalance.backend.util.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sweetbalance.backend.dto.identity.CustomUserDetails;
+import com.sweetbalance.backend.dto.response.TokenPairDTO;
 import com.sweetbalance.backend.util.InnerFilterResponseSender;
 import com.sweetbalance.backend.util.JWTUtil;
 import jakarta.servlet.FilterChain;
@@ -74,12 +75,13 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String accessToken = jwtUtil.generateBasicAccessToken(userId, username, role);
         String refreshToken = jwtUtil.generateBasicRefreshToken(userId, username, role);
 
-        //응답 설정
-        response.setHeader("Authorization", "Bearer " + accessToken);
-        response.addCookie(createCookie("refresh", refreshToken));
+        // 프론트 HTTPS 배포 이전 까지는 쿠키 방식 응답 미사용
+//        response.setHeader("Authorization", "Bearer " + accessToken);
+//        response.addCookie(createCookie("refresh", refreshToken));
 
+        TokenPairDTO tokens = new TokenPairDTO(accessToken, refreshToken);
         InnerFilterResponseSender.sendInnerResponse(response, 200, 0,
-                "로그인 성공, 토큰 발급 성공", null);
+                "로그인 성공, 토큰 발급 성공", tokens);
     }
 
     //로그인 실패시 실행하는 메소드
