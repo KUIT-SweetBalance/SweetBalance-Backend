@@ -25,6 +25,10 @@ public class DefaultResponseDTO<T> {
         return new DefaultResponseDTO<>(status, code, message, null);
     }
 
+    public static <T> DefaultResponseDTO<T> of(int status, int code, String message, T data) {
+        return new DefaultResponseDTO<>(status, code, message, data);
+    }
+
     @Override
     public String toString() {
         ObjectMapper objectMapper = new ObjectMapper();
