@@ -1,5 +1,6 @@
 package com.sweetbalance.backend.service;
 
+import com.sweetbalance.backend.dto.request.MetadataRequestDTO;
 import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
 import com.sweetbalance.backend.entity.Beverage;
 import com.sweetbalance.backend.entity.User;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,6 +47,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.findBeveragesByUserId(userId);
     }
 
+
     private User makeBCryptPasswordEncodedUser(SignUpRequestDTO signUpRequestDTO){
         User user = signUpRequestDTO.toActiveUser();
         String rawPassword = user.getPassword();
@@ -52,4 +55,17 @@ public class UserServiceImpl implements UserService {
         user.setPassword(encodedPassword);
         return user;
     }
+
+    @Override
+    public void updateMetaData(User user, MetadataRequestDTO metaDataRequestDTO) {
+        user.setGender(metaDataRequestDTO.getGender());
+        user.setNickname(metaDataRequestDTO.getNickname());
+        // user에 one_liner 추가하면 주석 해제
+        // user.setOne_liner(metaDataRequestDTO.getOne_liner());
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
+
+    }
+
+
 }

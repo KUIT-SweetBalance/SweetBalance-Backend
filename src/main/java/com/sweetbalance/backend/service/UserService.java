@@ -1,5 +1,6 @@
 package com.sweetbalance.backend.service;
 
+import com.sweetbalance.backend.dto.request.MetadataRequestDTO;
 import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
 import com.sweetbalance.backend.entity.Beverage;
 import com.sweetbalance.backend.entity.User;
@@ -14,4 +15,6 @@ public interface UserService {
     public Optional<User> findUserByUserId(Long userId);
 
     public List<Beverage> findBeveragesByUserId(Long userId);
+
+    public void updateMetaData(User user, MetadataRequestDTO metaDataRequestDTO);
 }
