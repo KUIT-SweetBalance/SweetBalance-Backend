@@ -2,11 +2,13 @@ package com.sweetbalance.backend.controller;
 
 import com.sweetbalance.backend.dto.DefaultResponseDTO;
 import com.sweetbalance.backend.dto.identity.UserIdHolder;
+import com.sweetbalance.backend.dto.request.AddBeverageRecordRequestDTO;
 import com.sweetbalance.backend.dto.request.MetadataRequestDTO;
 import com.sweetbalance.backend.entity.Beverage;
 import com.sweetbalance.backend.entity.User;
+import com.sweetbalance.backend.service.BeverageService;
 import com.sweetbalance.backend.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -16,14 +18,12 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
+@RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
+    private final BeverageService beverageService;
 
-    @Autowired
-    public UserController(UserService userService){
-        this.userService = userService;
-    }
 
     @GetMapping("/my-info")
     public ResponseEntity<?> findClientInfo(@AuthenticationPrincipal UserIdHolder userIdHolder) {
@@ -61,7 +61,6 @@ public class UserController {
     public ResponseEntity<?> setMetaDataOfClient(@AuthenticationPrincipal UserIdHolder userIdHolder, @RequestBody MetadataRequestDTO metaDataRequestDTO){
 
         Long userId = userIdHolder.getUserId();
-
         Optional<User> userOptional = userService.findUserByUserId(userId);
 
         if (userOptional.isPresent()) {
@@ -108,10 +107,32 @@ public class UserController {
 //    }
 //
 //
-//    @PostMapping("/api/user/beverage-record/{beverage-id}")
-//    public ResponseEntity<?> addBeverageRecord(@AuthenticationPrincipal UserIdHolder userIdHolder, @PathVariable("beverage-id") String parameter){
-//
-//    }
+    @PostMapping("/beverage-record/{beverageId}")
+    public ResponseEntity<?> addBeverageRecord(@AuthenticationPrincipal UserIdHolder userIdHolder,
+                                               @PathVariable("beverageId") Long beverageId,
+                                               @RequestBody AddBeverageRecordRequestDTO addBeverageRecordRequestDTO){
+        Long userId = userIdHolder.getUserId();
+
+        Optional<User> userOptional = userService.findUserByUserId(userId);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    DefaultResponseDTO.error(404, 999, "등록된 User 정보를 찾을 수 없습니다.")
+            );
+        }
+
+        Optional<Beverage> beverageOptional = beverageService.findBeverageByBeverageId(beverageId);
+        if (beverageOptional.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    DefaultResponseDTO.error(404, 999, "등록된 음료 정보를 찾을 수 없습니다.")
+            );
+        }
+
+        userService.addBeverageRecord(userOptional.get(), beverageOptional.get(), addBeverageRecordRequestDTO);
+
+        return ResponseEntity.ok(
+                DefaultResponseDTO.success("음료 섭취 기록 추가 성공", null)
+        );
+    }
 //
 //    @PostMapping("/api/user/favorite/{beverage-id}")
 //    public ResponseEntity<?> addFavorite(@AuthenticationPrincipal UserIdHolder userIdHolder, @PathVariable("beverage-id") String parameter){

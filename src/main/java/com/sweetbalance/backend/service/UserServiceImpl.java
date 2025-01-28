@@ -1,10 +1,15 @@
 package com.sweetbalance.backend.service;
 
+import com.sweetbalance.backend.dto.request.AddBeverageRecordRequestDTO;
 import com.sweetbalance.backend.dto.request.MetadataRequestDTO;
 import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
 import com.sweetbalance.backend.entity.Beverage;
+import com.sweetbalance.backend.entity.BeverageLog;
 import com.sweetbalance.backend.entity.User;
+import com.sweetbalance.backend.repository.BeverageLogRepository;
+import com.sweetbalance.backend.repository.BeverageRepository;
 import com.sweetbalance.backend.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,16 +19,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final BeverageLogRepository beverageLogRepository;
 
-    @Autowired
-    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
-        this.userRepository = userRepository;
-        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-    }
 
     public void join(SignUpRequestDTO signUpRequestDTO){
         // 정규식 처리 등 가입 불가 문자에 대한 처리도 진행해주어야 한다.
@@ -67,5 +69,15 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    @Override
+    public void addBeverageRecord(User user, Beverage beverage, AddBeverageRecordRequestDTO addBeverageRecordRequestDTO) {
+        BeverageLog beverageLog = new BeverageLog();
+        beverageLog.setUser(user);
+        beverageLog.setBeverage(beverage);
+        beverageLog.setCreatedAt(LocalDateTime.now());
+        beverageLog.setUpdatedAt(LocalDateTime.now());
+//        beverageLog.setCount(addBeverageRecordRequestDTO.getCount());
 
+        beverageLogRepository.save(beverageLog);
+    }
 }

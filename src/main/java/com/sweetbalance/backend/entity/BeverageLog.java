@@ -20,4 +20,7 @@ public class BeverageLog extends BaseEntity{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "beverage_id", nullable = false)
     private Beverage beverage;
+
+//    @Column(nullable = false)
+//    private int count;
 }

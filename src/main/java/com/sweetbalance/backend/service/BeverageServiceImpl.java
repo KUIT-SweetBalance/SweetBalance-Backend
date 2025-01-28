@@ -4,11 +4,13 @@ import com.sweetbalance.backend.dto.response.BeverageListInfoDTO;
 import com.sweetbalance.backend.dto.response.BeverageSizeDetailDTO;
 import com.sweetbalance.backend.entity.Beverage;
 import com.sweetbalance.backend.entity.BeverageSize;
+import com.sweetbalance.backend.entity.User;
 import com.sweetbalance.backend.repository.BeverageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,4 +63,9 @@ public class BeverageServiceImpl implements BeverageService {
                 .caffeine((int) Math.round(beverage.getCaffeine() * volumeRatio))
                 .build();
     }
+
+    public Optional<Beverage> findBeverageByBeverageId(Long beverageId) {
+        return beverageRepository.findById(beverageId);
+    }
+
 }
