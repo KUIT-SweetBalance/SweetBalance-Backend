@@ -14,6 +14,8 @@ public interface UserService {
 
     public Optional<User> findUserByUserId(Long userId);
 
+    public Optional<User> findUserByUsername(String username);
+
     public List<Beverage> findBeveragesByUserId(Long userId);
 
     public void updateMetaData(User user, MetadataRequestDTO metaDataRequestDTO);

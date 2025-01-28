@@ -2,26 +2,28 @@ package com.sweetbalance.backend.controller;
 
 import com.sweetbalance.backend.dto.DefaultResponseDTO;
 import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
+import com.sweetbalance.backend.entity.User;
 import com.sweetbalance.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
-public class SignUpController {
+@RequestMapping("/api/auth")
+public class AuthController {
 
     private final UserService userService;
 
     @Autowired
-    public SignUpController(UserService userService){
+    public AuthController(UserService userService){
         this.userService = userService;
     }
 
-    @PostMapping("/api/auth/sign-up")
+    @PostMapping("/sign-up")
     public ResponseEntity<?> signUp(@RequestBody SignUpRequestDTO signUpRequestDTO){
         try {
 
@@ -33,6 +35,23 @@ public class SignUpController {
 
             return ResponseEntity.status(400).body(
                     DefaultResponseDTO.error(400, 999, "중복된 username 또는 email")
+            );
+        }
+    }
+
+    @PostMapping("/id-duplicate")
+    public ResponseEntity<?> idDuplicateCheck(@RequestBody Map<String, String> requestBody){
+        String username = requestBody.get("username");
+
+        Optional<User> user = userService.findUserByUsername(username);
+        if(user.isPresent()) {
+            return ResponseEntity.status(200).body(
+                    DefaultResponseDTO.of(200, 1, "이미 사용중인 username 입니다.", null)
+            );
+        }
+        else{
+            return ResponseEntity.status(200).body(
+                    DefaultResponseDTO.of(200, 0, "사용 가능한 username 입니다.", null)
             );
         }
     }
