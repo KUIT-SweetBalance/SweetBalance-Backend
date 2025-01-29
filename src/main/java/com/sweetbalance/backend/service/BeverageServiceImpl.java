@@ -1,6 +1,6 @@
 package com.sweetbalance.backend.service;
 
-import com.sweetbalance.backend.dto.response.BeverageListInfoDTO;
+import com.sweetbalance.backend.dto.response.BeverageDetailDTO;
 import com.sweetbalance.backend.dto.response.BeverageSizeDetailDTO;
 import com.sweetbalance.backend.entity.Beverage;
 import com.sweetbalance.backend.entity.BeverageSize;
@@ -25,15 +25,15 @@ public class BeverageServiceImpl implements BeverageService {
         return beverageRepository.findDistinctBrands();
     }
 
-    public List<BeverageListInfoDTO> getPopularBeveragesByBrand(String brandName, int limit) {
+    public List<BeverageDetailDTO> getPopularBeveragesByBrand(String brandName, int limit) {
         List<Beverage> beverages = beverageRepository.findTopBeveragesByBrandOrderByConsumeCountDesc(brandName, limit);
         return beverages.stream()
                 .map(this::convertToBeverageListInfoDTO)
                 .collect(Collectors.toList());
     }
 
-    private BeverageListInfoDTO convertToBeverageListInfoDTO(Beverage beverage) {
-        return BeverageListInfoDTO.builder()
+    private BeverageDetailDTO convertToBeverageListInfoDTO(Beverage beverage) {
+        return BeverageDetailDTO.builder()
                 .beverageId(beverage.getBeverageId())
                 .name(beverage.getName())
                 .brand(beverage.getBrand())

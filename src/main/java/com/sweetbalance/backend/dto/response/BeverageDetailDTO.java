@@ -8,7 +8,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter @Setter @Builder
-public class BeverageListInfoDTO {
+public class BeverageDetailDTO {
     private Long beverageId;
 
     private String name;
