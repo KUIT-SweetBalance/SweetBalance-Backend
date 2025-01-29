@@ -1,0 +1,24 @@
+package com.sweetbalance.backend.repository;
+
+import com.sweetbalance.backend.dto.response.RecommendedBeverageDTO;
+import com.sweetbalance.backend.entity.BeverageSize;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface BeverageSizeRepository extends JpaRepository<BeverageSize, Long> {
+
+    @Query(value = "SELECT bs.* FROM beverage_sizes bs " +
+            "JOIN beverages b ON bs.beverage_id = b.beverage_id " +
+            "WHERE b.beverage_id != :excludeBeverageId " +
+            "ORDER BY ABS(bs.sugar - :targetSugar) ASC " +
+            "LIMIT :limit", nativeQuery = true)
+    List<BeverageSize> findTopSimilarSizesBySugar(
+            @Param("excludeBeverageId") Long excludeBeverageId,
+            @Param("targetSugar") double targetSugar,
+            @Param("limit") int limit);
+}

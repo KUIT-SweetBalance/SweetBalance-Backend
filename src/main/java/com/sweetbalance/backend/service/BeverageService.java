@@ -1,12 +1,14 @@
 package com.sweetbalance.backend.service;
 
-import com.sweetbalance.backend.dto.response.BeverageListInfoDTO;
-import com.sweetbalance.backend.entity.Beverage;
+import com.sweetbalance.backend.dto.response.BeverageDetailsDTO;
+import com.sweetbalance.backend.dto.response.BrandPopularBeverageDTO;
 
 import java.util.List;
 
 public interface BeverageService {
     List<String> getUniqueBrands();
 
-    List<BeverageListInfoDTO> getPopularBeveragesByBrand(String brandName, int limit);
+    List<BrandPopularBeverageDTO> getPopularBeveragesByBrand(String brandName, int limit);
+
+    BeverageDetailsDTO getBeverageDetails(Long beverageId);
 }
