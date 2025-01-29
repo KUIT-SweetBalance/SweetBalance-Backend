@@ -1,7 +1,7 @@
 package com.sweetbalance.backend.controller;
 
 import com.sweetbalance.backend.dto.DefaultResponseDTO;
-import com.sweetbalance.backend.dto.response.BeverageDetailDTO;
+import com.sweetbalance.backend.dto.response.BrandPopularBeverageDTO;
 import com.sweetbalance.backend.service.BeverageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -46,7 +46,7 @@ public class BeverageController {
             @RequestParam("top") int top
     ) {
         try {
-            List<BeverageDetailDTO> popularBeverages = beverageService.getPopularBeveragesByBrand(brandName, top);
+            List<BrandPopularBeverageDTO> popularBeverages = beverageService.getPopularBeveragesByBrand(brandName, top);
             return ResponseEntity.ok(
                     DefaultResponseDTO.success("인기 음료 조회 성공", popularBeverages)
             );

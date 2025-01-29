@@ -1,9 +1,7 @@
 package com.sweetbalance.backend.service;
 
-import com.sweetbalance.backend.dto.response.BeverageDetailDTO;
-import com.sweetbalance.backend.dto.response.BeverageSizeDetailDTO;
+import com.sweetbalance.backend.dto.response.BrandPopularBeverageDTO;
 import com.sweetbalance.backend.entity.Beverage;
-import com.sweetbalance.backend.entity.BeverageSize;
 import com.sweetbalance.backend.repository.BeverageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,39 +23,21 @@ public class BeverageServiceImpl implements BeverageService {
         return beverageRepository.findDistinctBrands();
     }
 
-    public List<BeverageDetailDTO> getPopularBeveragesByBrand(String brandName, int limit) {
+    public List<BrandPopularBeverageDTO> getPopularBeveragesByBrand(String brandName, int limit) {
         List<Beverage> beverages = beverageRepository.findTopBeveragesByBrandOrderByConsumeCountDesc(brandName, limit);
         return beverages.stream()
-                .map(this::convertToBeverageDetailDTO)
+                .map(this::convertToBrandPopularBeverageDTO)
                 .collect(Collectors.toList());
     }
 
-    private BeverageDetailDTO convertToBeverageDetailDTO(Beverage beverage) {
-        return BeverageDetailDTO.builder()
+    private BrandPopularBeverageDTO convertToBrandPopularBeverageDTO(Beverage beverage) {
+        return BrandPopularBeverageDTO.builder()
                 .beverageId(beverage.getBeverageId())
                 .name(beverage.getName())
                 .brand(beverage.getBrand())
                 .imgUrl(beverage.getImgUrl())
                 .category(beverage.getCategory())
-                .sugar(beverage.getSugar())
-                .calories(beverage.getCalories())
-                .caffeine(beverage.getCaffeine())
                 .consumeCount(beverage.getConsumeCount())
-                .sizes(beverage.getSizes().stream()
-                        .map(this::convertToBeverageSizeDetailDTO)
-                        .collect(Collectors.toList()))
-                .build();
-    }
-
-    private BeverageSizeDetailDTO convertToBeverageSizeDetailDTO(BeverageSize size) {
-
-        return BeverageSizeDetailDTO.builder()
-                .id(size.getId())
-                .sizeType(size.getSizeType())
-                .volume(size.getVolume())
-                .sugar((int) Math.round(size.getSugar()))
-                .calories((int) Math.round(size.getCalories()))
-                .caffeine((int) Math.round(size.getCaffeine()))
                 .build();
     }
 }
