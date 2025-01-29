@@ -28,11 +28,11 @@ public class BeverageServiceImpl implements BeverageService {
     public List<BeverageDetailDTO> getPopularBeveragesByBrand(String brandName, int limit) {
         List<Beverage> beverages = beverageRepository.findTopBeveragesByBrandOrderByConsumeCountDesc(brandName, limit);
         return beverages.stream()
-                .map(this::convertToBeverageListInfoDTO)
+                .map(this::convertToBeverageDetailDTO)
                 .collect(Collectors.toList());
     }
 
-    private BeverageDetailDTO convertToBeverageListInfoDTO(Beverage beverage) {
+    private BeverageDetailDTO convertToBeverageDetailDTO(Beverage beverage) {
         return BeverageDetailDTO.builder()
                 .beverageId(beverage.getBeverageId())
                 .name(beverage.getName())
@@ -44,21 +44,20 @@ public class BeverageServiceImpl implements BeverageService {
                 .caffeine(beverage.getCaffeine())
                 .consumeCount(beverage.getConsumeCount())
                 .sizes(beverage.getSizes().stream()
-                        .map(size -> convertToBeverageSizeDetailDTO(size, beverage))
+                        .map(this::convertToBeverageSizeDetailDTO)
                         .collect(Collectors.toList()))
                 .build();
     }
 
-    private BeverageSizeDetailDTO convertToBeverageSizeDetailDTO(BeverageSize size, Beverage beverage) {
-        double volumeRatio = size.getVolume() / 100.0;
+    private BeverageSizeDetailDTO convertToBeverageSizeDetailDTO(BeverageSize size) {
 
         return BeverageSizeDetailDTO.builder()
                 .id(size.getId())
                 .sizeType(size.getSizeType())
                 .volume(size.getVolume())
-                .sugar((int) Math.round(beverage.getSugar() * volumeRatio))
-                .calories((int) Math.round(beverage.getCalories() * volumeRatio))
-                .caffeine((int) Math.round(beverage.getCaffeine() * volumeRatio))
+                .sugar((int) Math.round(size.getSugar()))
+                .calories((int) Math.round(size.getCalories()))
+                .caffeine((int) Math.round(size.getCaffeine()))
                 .build();
     }
 }
