@@ -74,9 +74,12 @@ public class BeverageServiceImpl implements BeverageService {
     }
 
     private BeverageSizeDetailsWithRecommendDTO createBeverageSizeDetailsWithRecommend(BeverageSize size) {
-        // Fetch similar sizes for recommendations
-        List<BeverageSize> similarSizes = beverageSizeRepository.findTopSimilarSizesBySugar(
-                size.getBeverage().getBeverageId(), size.getSugar(), 5);
+        // Fetch similar sizes for recommendations within the same brand
+        List<BeverageSize> similarSizes = beverageSizeRepository.findTopSimilarSizesByBrandAndSugar(
+                size.getBeverage().getBeverageId(),
+                size.getBeverage().getBrand(),
+                size.getSugar(),
+                5);
 
         // Convert similar sizes to RecommendedBeverageDTOs
         List<RecommendedBeverageDTO> recommends = similarSizes.stream()
@@ -88,7 +91,7 @@ public class BeverageServiceImpl implements BeverageService {
                 .id(size.getId())
                 .sizeType(size.getSizeType())
                 .volume(size.getVolume())
-                .sugar((int) size.getSugar()) // Cast to int for DTO compatibility
+                .sugar((int) size.getSugar())
                 .calories((int) size.getCalories())
                 .caffeine((int) size.getCaffeine())
                 .recommends(recommends)

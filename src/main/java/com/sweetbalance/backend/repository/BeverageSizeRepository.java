@@ -15,10 +15,12 @@ public interface BeverageSizeRepository extends JpaRepository<BeverageSize, Long
     @Query(value = "SELECT bs.* FROM beverage_sizes bs " +
             "JOIN beverages b ON bs.beverage_id = b.beverage_id " +
             "WHERE b.beverage_id != :excludeBeverageId " +
+            "AND b.brand = :brand " +
             "ORDER BY ABS(bs.sugar - :targetSugar) ASC " +
             "LIMIT :limit", nativeQuery = true)
-    List<BeverageSize> findTopSimilarSizesBySugar(
+    List<BeverageSize> findTopSimilarSizesByBrandAndSugar(
             @Param("excludeBeverageId") Long excludeBeverageId,
+            @Param("brand") String brand,
             @Param("targetSugar") double targetSugar,
             @Param("limit") int limit);
 }
