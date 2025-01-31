@@ -1,14 +1,12 @@
 package com.sweetbalance.backend.controller;
 
 import com.sweetbalance.backend.dto.DefaultResponseDTO;
-import com.sweetbalance.backend.dto.response.BeverageListInfoDTO;
+import com.sweetbalance.backend.dto.response.BeverageDetailsDTO;
+import com.sweetbalance.backend.dto.response.BrandPopularBeverageDTO;
 import com.sweetbalance.backend.service.BeverageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -46,13 +44,28 @@ public class BeverageController {
             @RequestParam("top") int top
     ) {
         try {
-            List<BeverageListInfoDTO> popularBeverages = beverageService.getPopularBeveragesByBrand(brandName, top);
+            List<BrandPopularBeverageDTO> popularBeverages = beverageService.getPopularBeveragesByBrand(brandName, top);
             return ResponseEntity.ok(
                     DefaultResponseDTO.success("인기 음료 조회 성공", popularBeverages)
             );
         } catch (Exception e) {
             return ResponseEntity.status(500).body(
                     DefaultResponseDTO.error(500, 999, "인기 음료 조회 실패")
+            );
+        }
+    }
+
+    @GetMapping("/{beverage-id}")
+    public ResponseEntity<?> getBeverageDetail(@PathVariable("beverage-id") Long beverageId) {
+        try {
+            BeverageDetailsDTO beverageDetails = beverageService.getBeverageDetails(beverageId);
+            return ResponseEntity.ok(
+                    DefaultResponseDTO.success("음료 상세 정보 조회 성공", beverageDetails)
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(
+                    DefaultResponseDTO.error(500, 999, "음료 상세 정보 조회 실패")
             );
         }
     }
