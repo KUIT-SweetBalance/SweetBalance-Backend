@@ -49,6 +49,11 @@ public class UserServiceImpl implements UserService {
         return userRepository.findBeveragesByUserId(userId);
     }
 
+    @Override
+    public Optional<BeverageLog> findBeverageLogByBeverageLogId(Long beverageLogId) {
+        return beverageLogRepository.findById(beverageLogId);
+    }
+
 
     private User makeBCryptPasswordEncodedUser(SignUpRequestDTO signUpRequestDTO){
         User user = signUpRequestDTO.toActiveUser();
@@ -77,6 +82,11 @@ public class UserServiceImpl implements UserService {
         beverageLog.setSyrupCount(addBeverageRecordRequestDTO.getSyrupCount());
 
         beverageLogRepository.save(beverageLog);
+    }
+
+    @Override
+    public void deleteBeverageRecord(BeverageLog beverageLog) {
+        beverageLogRepository.delete(beverageLog);
     }
 
     @Override

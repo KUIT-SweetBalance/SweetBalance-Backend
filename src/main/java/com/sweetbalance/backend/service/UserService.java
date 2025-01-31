@@ -21,9 +21,13 @@ public interface UserService {
 
     public List<Beverage> findBeveragesByUserId(Long userId);
 
+    public Optional<BeverageLog> findBeverageLogByBeverageLogId(Long beverageLogId);
+
     public void updateMetaData(User user, MetadataRequestDTO metaDataRequestDTO);
 
     public void addBeverageRecord(User user, BeverageSize beverageSize, AddBeverageRecordRequestDTO addBeverageRecordRequestDTO);
+
+    public void deleteBeverageRecord(BeverageLog beverageLog);
 
     public void addFavoriteRecord(User user, Beverage beverage);
 

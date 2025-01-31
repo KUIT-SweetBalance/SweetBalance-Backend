@@ -5,6 +5,7 @@ import com.sweetbalance.backend.dto.identity.UserIdHolder;
 import com.sweetbalance.backend.dto.request.AddBeverageRecordRequestDTO;
 import com.sweetbalance.backend.dto.request.MetadataRequestDTO;
 import com.sweetbalance.backend.entity.Beverage;
+import com.sweetbalance.backend.entity.BeverageLog;
 import com.sweetbalance.backend.entity.BeverageSize;
 import com.sweetbalance.backend.entity.User;
 import com.sweetbalance.backend.service.BeverageService;
@@ -114,7 +115,7 @@ public class UserController {
     public ResponseEntity<?> addBeverageRecord(@AuthenticationPrincipal UserIdHolder userIdHolder,
                                                @PathVariable("beverageId") Long beverageId,
                                                @RequestBody AddBeverageRecordRequestDTO addBeverageRecordRequestDTO){
-        System.out.println("beverageId = " + beverageId);
+
         Long userId = userIdHolder.getUserId();
 
         Optional<User> userOptional = userService.findUserByUserId(userId);
@@ -147,7 +148,32 @@ public class UserController {
         );
     }
 
-    @PostMapping("/api/user/favorite/{beverageId}")
+    @DeleteMapping("/beverage-record/{beverageLogId}")
+    public ResponseEntity<?> deleteBeverageRecord(@AuthenticationPrincipal UserIdHolder userIdHolder,
+                                               @PathVariable("beverageLogId") Long beverageLogId){
+        Long userId = userIdHolder.getUserId();
+
+        Optional<User> userOptional = userService.findUserByUserId(userId);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    DefaultResponseDTO.error(404, 999, "등록된 User 정보를 찾을 수 없습니다.")
+            );
+        }
+
+        Optional<BeverageLog> logOptional = userService.findBeverageLogByBeverageLogId(beverageLogId);
+        if (logOptional.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    DefaultResponseDTO.error(404, 999, "일치하는 음료 기록을 찾을 수 없습니다.")
+            );
+        }
+
+        userService.deleteBeverageRecord(logOptional.get());
+        return ResponseEntity.ok(
+                DefaultResponseDTO.success("음료 섭취 기록 삭제 성공", null)
+        );
+    }
+
+    @PostMapping("/favorite/{beverageId}")
     public ResponseEntity<?> addFavorite(@AuthenticationPrincipal UserIdHolder userIdHolder, @PathVariable("beverageId") Long beverageId){
         Long userId = userIdHolder.getUserId();
 
@@ -172,7 +198,7 @@ public class UserController {
         );
     }
 
-    @DeleteMapping("/api/user/favorite/{beverageId}")
+    @DeleteMapping("/favorite/{beverageId}")
     public ResponseEntity<?> deleteFavorite(@AuthenticationPrincipal UserIdHolder userIdHolder, @PathVariable("beverageId") Long beverageId){
         Long userId = userIdHolder.getUserId();
 
