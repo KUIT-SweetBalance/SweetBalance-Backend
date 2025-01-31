@@ -4,6 +4,7 @@ import com.sweetbalance.backend.dto.request.AddBeverageRecordRequestDTO;
 import com.sweetbalance.backend.dto.request.MetadataRequestDTO;
 import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
 import com.sweetbalance.backend.entity.*;
+import com.sweetbalance.backend.enums.common.Status;
 import com.sweetbalance.backend.repository.BeverageLogRepository;
 import com.sweetbalance.backend.repository.BeverageRepository;
 import com.sweetbalance.backend.repository.FavoriteRepository;
@@ -87,6 +88,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteBeverageRecord(BeverageLog beverageLog) {
         beverageLogRepository.delete(beverageLog);
+
+//        beverageLog.setStatus(Status.DELETED);
+//        beverageLogRepository.save(beverageLog);
     }
 
     @Override
