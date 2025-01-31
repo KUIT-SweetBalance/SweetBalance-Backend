@@ -6,6 +6,11 @@ import lombok.Setter;
 @Getter
 @Setter
 
+
 public class AddBeverageRecordRequestDTO {
-    private int count;
+
+    private int volume;
+    private String syrupName;
+    private int syrupCount;
+
 }

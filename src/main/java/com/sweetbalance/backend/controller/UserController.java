@@ -5,8 +5,10 @@ import com.sweetbalance.backend.dto.identity.UserIdHolder;
 import com.sweetbalance.backend.dto.request.AddBeverageRecordRequestDTO;
 import com.sweetbalance.backend.dto.request.MetadataRequestDTO;
 import com.sweetbalance.backend.entity.Beverage;
+import com.sweetbalance.backend.entity.BeverageSize;
 import com.sweetbalance.backend.entity.User;
 import com.sweetbalance.backend.service.BeverageService;
+import com.sweetbalance.backend.service.BeverageSizeService;
 import com.sweetbalance.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +25,7 @@ public class UserController {
 
     private final UserService userService;
     private final BeverageService beverageService;
+    private final BeverageSizeService beverageSizeService;
 
 
     @GetMapping("/my-info")
@@ -111,6 +114,41 @@ public class UserController {
     public ResponseEntity<?> addBeverageRecord(@AuthenticationPrincipal UserIdHolder userIdHolder,
                                                @PathVariable("beverageId") Long beverageId,
                                                @RequestBody AddBeverageRecordRequestDTO addBeverageRecordRequestDTO){
+        System.out.println("beverageId = " + beverageId);
+        Long userId = userIdHolder.getUserId();
+
+        Optional<User> userOptional = userService.findUserByUserId(userId);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    DefaultResponseDTO.error(404, 999, "등록된 User 정보를 찾을 수 없습니다.")
+            );
+        }
+
+
+        Optional<Beverage> beverageOptional = beverageService.findBeverageByBeverageId(beverageId);
+        if (beverageOptional.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    DefaultResponseDTO.error(404, 999, "등록된 음료 정보를 찾을 수 없습니다.")
+            );
+        }
+
+        Optional<BeverageSize> beverageSizeOptional = beverageSizeService.findBeverageSizeByBeverageAndVolume(beverageOptional.get(),addBeverageRecordRequestDTO.getVolume());
+        if (beverageSizeOptional.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    DefaultResponseDTO.error(404, 999, "등록된 음료 사이즈 정보를 찾을 수 없습니다.")
+            );
+        }
+
+
+        userService.addBeverageRecord(userOptional.get(), beverageSizeOptional.get(), addBeverageRecordRequestDTO);
+
+        return ResponseEntity.ok(
+                DefaultResponseDTO.success("음료 섭취 기록 추가 성공", null)
+        );
+    }
+
+    @PostMapping("/api/user/favorite/{beverageId}")
+    public ResponseEntity<?> addFavorite(@AuthenticationPrincipal UserIdHolder userIdHolder, @PathVariable("beverageId") Long beverageId){
         Long userId = userIdHolder.getUserId();
 
         Optional<User> userOptional = userService.findUserByUserId(userId);
@@ -127,21 +165,36 @@ public class UserController {
             );
         }
 
-        userService.addBeverageRecord(userOptional.get(), beverageOptional.get(), addBeverageRecordRequestDTO);
+        userService.addFavoriteRecord(userOptional.get(), beverageOptional.get());
 
         return ResponseEntity.ok(
-                DefaultResponseDTO.success("음료 섭취 기록 추가 성공", null)
+                DefaultResponseDTO.success("즐겨찾기 추가 성공", null)
         );
     }
-//
-//    @PostMapping("/api/user/favorite/{beverage-id}")
-//    public ResponseEntity<?> addFavorite(@AuthenticationPrincipal UserIdHolder userIdHolder, @PathVariable("beverage-id") String parameter){
-//
-//    }
-//
-//    @DeleteMapping("/api/user/favorite/{beverage-id}")
-//    public ResponseEntity<?> deleteFavorite(@AuthenticationPrincipal UserIdHolder userIdHolder, @PathVariable("beverage-id") String parameter){
-//
-//    }
+
+    @DeleteMapping("/api/user/favorite/{beverageId}")
+    public ResponseEntity<?> deleteFavorite(@AuthenticationPrincipal UserIdHolder userIdHolder, @PathVariable("beverageId") Long beverageId){
+        Long userId = userIdHolder.getUserId();
+
+        Optional<User> userOptional = userService.findUserByUserId(userId);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    DefaultResponseDTO.error(404, 999, "등록된 User 정보를 찾을 수 없습니다.")
+            );
+        }
+
+        Optional<Beverage> beverageOptional = beverageService.findBeverageByBeverageId(beverageId);
+        if (beverageOptional.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    DefaultResponseDTO.error(404, 999, "등록된 음료 정보를 찾을 수 없습니다.")
+            );
+        }
+
+        userService.deleteFavoriteRecord(userOptional.get(), beverageOptional.get());
+
+        return ResponseEntity.ok(
+                DefaultResponseDTO.success("즐겨찾기 삭제 성공", null)
+        );
+    }
 
 }

@@ -3,11 +3,10 @@ package com.sweetbalance.backend.service;
 import com.sweetbalance.backend.dto.request.AddBeverageRecordRequestDTO;
 import com.sweetbalance.backend.dto.request.MetadataRequestDTO;
 import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
-import com.sweetbalance.backend.entity.Beverage;
-import com.sweetbalance.backend.entity.BeverageLog;
-import com.sweetbalance.backend.entity.User;
+import com.sweetbalance.backend.entity.*;
 import com.sweetbalance.backend.repository.BeverageLogRepository;
 import com.sweetbalance.backend.repository.BeverageRepository;
+import com.sweetbalance.backend.repository.FavoriteRepository;
 import com.sweetbalance.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +24,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final BeverageLogRepository beverageLogRepository;
+    private final FavoriteRepository favoriteRepository;
 
 
     public void join(SignUpRequestDTO signUpRequestDTO){
@@ -64,20 +64,36 @@ public class UserServiceImpl implements UserService {
         user.setNickname(metaDataRequestDTO.getNickname());
         // user에 one_liner 추가하면 주석 해제
         // user.setOne_liner(metaDataRequestDTO.getOne_liner());
-        user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
 
     }
 
     @Override
-    public void addBeverageRecord(User user, Beverage beverage, AddBeverageRecordRequestDTO addBeverageRecordRequestDTO) {
+    public void addBeverageRecord(User user, BeverageSize beverageSize, AddBeverageRecordRequestDTO addBeverageRecordRequestDTO) {
         BeverageLog beverageLog = new BeverageLog();
         beverageLog.setUser(user);
-        beverageLog.setBeverage(beverage);
-        beverageLog.setCreatedAt(LocalDateTime.now());
-        beverageLog.setUpdatedAt(LocalDateTime.now());
-//        beverageLog.setCount(addBeverageRecordRequestDTO.getCount());
+        beverageLog.setBeverageSize(beverageSize);
+        beverageLog.setSyrupName(addBeverageRecordRequestDTO.getSyrupName());
+        beverageLog.setSyrupCount(addBeverageRecordRequestDTO.getSyrupCount());
 
         beverageLogRepository.save(beverageLog);
     }
+
+    @Override
+    public void addFavoriteRecord(User user, Beverage beverage) {
+        Favorite favorite = new Favorite();
+        favorite.setUser(user);
+        favorite.setBeverage(beverage);
+
+        favoriteRepository.save(favorite);
+    }
+
+    @Override
+    public void deleteFavoriteRecord(User user, Beverage beverage) {
+        Optional<Favorite> favoriteOptional = favoriteRepository.findByUserAndBeverage(user, beverage);
+
+        favoriteOptional.ifPresent(favoriteRepository::delete);
+    }
+
+
 }

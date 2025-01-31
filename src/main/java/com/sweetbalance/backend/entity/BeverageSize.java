@@ -12,6 +12,7 @@ public class BeverageSize {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "size_id", nullable = false)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -24,9 +25,26 @@ public class BeverageSize {
     @Column(nullable = false)
     private int volume;
 
-    public BeverageSize(Beverage beverage, String sizeType, int volume) {
-        this.beverage = beverage;
-        this.sizeType = sizeType;
-        this.volume = volume;
+    private double sugar;
+
+    private double calories;
+
+    private double caffeine;
+
+    public static BeverageSize fromBeverageAndVolume(Beverage beverage,
+                                                     String sizeType,
+                                                     int volume) {
+        double sugar = beverage.getSugar() * volume / 100;
+        double calories = beverage.getCalories() * volume / 100;
+        double caffeine = beverage.getCaffeine() * volume / 100;
+
+        return BeverageSize.builder()
+                .beverage(beverage)
+                .sizeType(sizeType)
+                .volume(volume)
+                .sugar(sugar)
+                .calories(calories)
+                .caffeine(caffeine)
+                .build();
     }
 }

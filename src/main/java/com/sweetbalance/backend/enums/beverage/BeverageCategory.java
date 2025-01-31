@@ -1,6 +1,7 @@
 package com.sweetbalance.backend.enums.beverage;
 
 public enum BeverageCategory {
+    커피,
     브루드커피,
     아메리카노, // 일반 드립 커피, 아메리카노
     콜드브루,   // 콜드브루 전용

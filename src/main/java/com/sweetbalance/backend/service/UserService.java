@@ -4,6 +4,8 @@ import com.sweetbalance.backend.dto.request.AddBeverageRecordRequestDTO;
 import com.sweetbalance.backend.dto.request.MetadataRequestDTO;
 import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
 import com.sweetbalance.backend.entity.Beverage;
+import com.sweetbalance.backend.entity.BeverageLog;
+import com.sweetbalance.backend.entity.BeverageSize;
 import com.sweetbalance.backend.entity.User;
 
 import java.util.List;
@@ -21,5 +23,9 @@ public interface UserService {
 
     public void updateMetaData(User user, MetadataRequestDTO metaDataRequestDTO);
 
-    public void addBeverageRecord(User user, Beverage beverage, AddBeverageRecordRequestDTO addBeverageRecordRequestDTO);
+    public void addBeverageRecord(User user, BeverageSize beverageSize, AddBeverageRecordRequestDTO addBeverageRecordRequestDTO);
+
+    public void addFavoriteRecord(User user, Beverage beverage);
+
+    public void deleteFavoriteRecord(User user, Beverage beverage);
 }

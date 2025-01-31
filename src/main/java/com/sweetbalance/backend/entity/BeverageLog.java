@@ -17,10 +17,14 @@ public class BeverageLog extends BaseEntity{
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "beverage_id", nullable = false)
-    private Beverage beverage;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "size_id", nullable = false)
+    private BeverageSize beverageSize;
 
-//    @Column(nullable = false)
-//    private int count;
+    @Column(name = "syrup_name", length = 50)
+    private String syrupName;
+
+    @Column(name = "syrup_count")
+    private int syrupCount;
+
 }
