@@ -1,19 +1,25 @@
 package com.sweetbalance.backend.service;
 
+import com.sweetbalance.backend.dto.request.AddBeverageRecordRequestDTO;
+import com.sweetbalance.backend.dto.request.MetadataRequestDTO;
 import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
 import com.sweetbalance.backend.dto.response.DailySugarDTO;
 import com.sweetbalance.backend.dto.response.ListBeverageDTO;
 import com.sweetbalance.backend.dto.response.WeeklyInfoDTO;
-import com.sweetbalance.backend.entity.Beverage;
-import com.sweetbalance.backend.entity.BeverageLog;
-import com.sweetbalance.backend.entity.Favorite;
-import com.sweetbalance.backend.entity.User;
+
+import com.sweetbalance.backend.entity.*;
+import com.sweetbalance.backend.enums.common.Status;
+
 import com.sweetbalance.backend.repository.BeverageLogRepository;
 import com.sweetbalance.backend.repository.FavoriteRepository;
 import com.sweetbalance.backend.repository.UserRepository;
+
 import com.sweetbalance.backend.util.TimeStringConverter;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.sweetbalance.backend.util.SyrupToSugarMapper;;
 import org.springframework.data.domain.Pageable;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -26,12 +32,15 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final FavoriteRepository favoriteRepository;
     private final BeverageLogRepository beverageLogRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final BeverageLogRepository beverageLogRepository;
+    private final FavoriteRepository favoriteRepository;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository,
@@ -44,6 +53,7 @@ public class UserServiceImpl implements UserService {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
+    @Override
     public void join(SignUpRequestDTO signUpRequestDTO){
         // 정규식 처리 등 가입 불가 문자에 대한 처리도 진행해주어야 한다.
         boolean userExists = userRepository.existsByUsername(signUpRequestDTO.getUsername());
@@ -52,21 +62,28 @@ public class UserServiceImpl implements UserService {
         User bCryptPasswordEncodedUser = makeBCryptPasswordEncodedUser(signUpRequestDTO);
         userRepository.save(bCryptPasswordEncodedUser);
     }
-
-    public Optional<User> findUserByUserId(Long userId) {
-        return userRepository.findById(userId);
-    }
-
-    public Optional<User> findUserByUsername(String username) {
-        return userRepository.findByUsername(username);
-    }
-
+  
     private User makeBCryptPasswordEncodedUser(SignUpRequestDTO signUpRequestDTO){
         User user = signUpRequestDTO.toActiveUser();
         String rawPassword = user.getPassword();
         String encodedPassword = bCryptPasswordEncoder.encode(rawPassword);
         user.setPassword(encodedPassword);
         return user;
+    }
+
+    @Override
+    public Optional<User> findUserByUserId(Long userId) {
+        return userRepository.findById(userId);
+    }
+
+    @Override
+    public Optional<User> findUserByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    @Override
+    public Optional<BeverageLog> findBeverageLogByBeverageLogId(Long beverageLogId) {
+        return beverageLogRepository.findById(beverageLogId);
     }
 
     @Override
@@ -127,5 +144,51 @@ public class UserServiceImpl implements UserService {
         }
 
         return new WeeklyInfoDTO(intake, totalSugar, averageSugar, totalCalories, dailySugarList);
+    }
+  
+    @Override
+    public void updateMetaData(User user, MetadataRequestDTO metaDataRequestDTO) {
+        user.setGender(metaDataRequestDTO.getGender());
+        user.setNickname(metaDataRequestDTO.getNickname());
+        // user에 one_liner 추가하면 주석 해제
+        // user.setOne_liner(metaDataRequestDTO.getOne_liner());
+        userRepository.save(user);
+    }
+
+    @Override
+    public void addBeverageRecord(User user, BeverageSize beverageSize, AddBeverageRecordRequestDTO dto) {
+        BeverageLog beverageLog = new BeverageLog();
+        beverageLog.setUser(user);
+        beverageLog.setBeverageSize(beverageSize);
+        beverageLog.setSyrupName(dto.getSyrupName());
+        beverageLog.setSyrupCount(dto.getSyrupCount());
+        beverageLog.setStatus(Status.ACTIVE);
+        double additionalSugar = (dto.getSyrupName() == null) ? 
+                0D : dto.getSyrupCount() * SyrupToSugarMapper.getAmountOfSugar(dto.getSyrupName());
+        beverageLog.setAdditionalSugar(additionalSugar);
+
+        beverageLogRepository.save(beverageLog);
+    }
+
+    @Override
+    public void deleteBeverageRecord(BeverageLog beverageLog) {
+        beverageLog.setStatus(Status.DELETED);
+        beverageLogRepository.save(beverageLog);
+    }
+
+    @Override
+    public void addFavoriteRecord(User user, Beverage beverage) {
+        Favorite favorite = new Favorite();
+        favorite.setUser(user);
+        favorite.setBeverage(beverage);
+
+        favoriteRepository.save(favorite);
+    }
+
+    @Override
+    public void deleteFavoriteRecord(User user, Beverage beverage) {
+        Optional<Favorite> favoriteOptional = favoriteRepository.findByUserAndBeverage(user, beverage);
+
+        favoriteOptional.ifPresent(favoriteRepository::delete);
     }
 }

@@ -17,4 +17,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // 사용자 이름으로 조회
     Optional<User> findByUsername(String username);
+
+    // 특정 사용자 ID로 Beverage 목록 조회
+    @Query("SELECT b FROM BeverageLog bl JOIN bl.beverageSize b WHERE bl.user.userId = :userId")
+    List<Beverage> findBeveragesByUserId(@Param("userId") Long userId);
 }
