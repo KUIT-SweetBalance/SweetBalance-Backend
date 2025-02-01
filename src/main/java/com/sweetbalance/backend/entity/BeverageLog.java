@@ -31,4 +31,7 @@ public class BeverageLog extends BaseEntity{
     @Enumerated(EnumType.STRING)
     @Column
     private Status status;
+
+    @Column(name = "additional_sugar")
+    private double additionalSugar;
 }

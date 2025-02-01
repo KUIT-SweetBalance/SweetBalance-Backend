@@ -6,15 +6,13 @@ import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
 import com.sweetbalance.backend.entity.*;
 import com.sweetbalance.backend.enums.common.Status;
 import com.sweetbalance.backend.repository.BeverageLogRepository;
-import com.sweetbalance.backend.repository.BeverageRepository;
 import com.sweetbalance.backend.repository.FavoriteRepository;
 import com.sweetbalance.backend.repository.UserRepository;
+import com.sweetbalance.backend.util.SyrupToSugarMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -75,13 +73,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void addBeverageRecord(User user, BeverageSize beverageSize, AddBeverageRecordRequestDTO addBeverageRecordRequestDTO) {
+    public void addBeverageRecord(User user, BeverageSize beverageSize, AddBeverageRecordRequestDTO dto) {
         BeverageLog beverageLog = new BeverageLog();
         beverageLog.setUser(user);
         beverageLog.setBeverageSize(beverageSize);
-        beverageLog.setSyrupName(addBeverageRecordRequestDTO.getSyrupName());
-        beverageLog.setSyrupCount(addBeverageRecordRequestDTO.getSyrupCount());
+        beverageLog.setSyrupName(dto.getSyrupName());
+        beverageLog.setSyrupCount(dto.getSyrupCount());
         beverageLog.setStatus(Status.ACTIVE);
+        double additionalSugar = (dto.getSyrupName() == null) ? 
+                0D : dto.getSyrupCount() * SyrupToSugarMapper.getAmountOfSugar(dto.getSyrupName());
+        beverageLog.setAdditionalSugar(additionalSugar);
 
         beverageLogRepository.save(beverageLog);
     }

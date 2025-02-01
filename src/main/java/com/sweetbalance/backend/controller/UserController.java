@@ -131,8 +131,13 @@ public class UserController {
             );
         }
 
-
-        userService.addBeverageRecord(userOptional.get(), beverageSizeOptional.get(), addBeverageRecordRequestDTO);
+        try {
+            userService.addBeverageRecord(userOptional.get(), beverageSizeOptional.get(), addBeverageRecordRequestDTO);
+        } catch (IllegalArgumentException e){
+            return ResponseEntity.status(404).body(
+                    DefaultResponseDTO.error(404, 999, "일치하는 시럽 정보를 찾을 수 없습니다.")
+            );
+        }
 
         return ResponseEntity.ok(
                 DefaultResponseDTO.success("음료 섭취 기록 추가 성공", null)
