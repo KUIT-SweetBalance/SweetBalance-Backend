@@ -12,6 +12,7 @@ public class BeverageSize {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "size_id", nullable = false)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
