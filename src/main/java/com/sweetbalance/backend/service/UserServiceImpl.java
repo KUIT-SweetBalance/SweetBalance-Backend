@@ -15,11 +15,10 @@ import com.sweetbalance.backend.repository.FavoriteRepository;
 import com.sweetbalance.backend.repository.UserRepository;
 
 import com.sweetbalance.backend.util.TimeStringConverter;
-import com.sweetbalance.backend.util.SyrupToSugarMapper;;
+import com.sweetbalance.backend.util.SyrupToSugarMapper;
 import org.springframework.data.domain.Pageable;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -32,15 +31,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final FavoriteRepository favoriteRepository;
     private final BeverageLogRepository beverageLogRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-    private final BeverageLogRepository beverageLogRepository;
-    private final FavoriteRepository favoriteRepository;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository,
