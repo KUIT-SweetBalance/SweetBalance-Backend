@@ -16,7 +16,7 @@ public class BeverageSizeServiceImpl implements BeverageSizeService {
 
 
     @Override
-    public Optional<BeverageSize> findBeverageSizeByBeverageAndVolume(Beverage beverage, int volume) {
-        return beverageSizeRepository.findByBeverageAndVolume(beverage, volume);
+    public Optional<BeverageSize> findBeverageSizeByBeverageSizeId(Long beverageSizeId) {
+        return beverageSizeRepository.findById(beverageSizeId);
     }
 }

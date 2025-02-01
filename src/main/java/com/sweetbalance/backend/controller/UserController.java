@@ -111,9 +111,8 @@ public class UserController {
 //    }
 //
 //
-    @PostMapping("/beverage-record/{beverageId}")
+    @PostMapping("/beverage-record")
     public ResponseEntity<?> addBeverageRecord(@AuthenticationPrincipal UserIdHolder userIdHolder,
-                                               @PathVariable("beverageId") Long beverageId,
                                                @RequestBody AddBeverageRecordRequestDTO addBeverageRecordRequestDTO){
 
         Long userId = userIdHolder.getUserId();
@@ -125,15 +124,7 @@ public class UserController {
             );
         }
 
-
-        Optional<Beverage> beverageOptional = beverageService.findBeverageByBeverageId(beverageId);
-        if (beverageOptional.isEmpty()) {
-            return ResponseEntity.status(404).body(
-                    DefaultResponseDTO.error(404, 999, "등록된 음료 정보를 찾을 수 없습니다.")
-            );
-        }
-
-        Optional<BeverageSize> beverageSizeOptional = beverageSizeService.findBeverageSizeByBeverageAndVolume(beverageOptional.get(),addBeverageRecordRequestDTO.getVolume());
+        Optional<BeverageSize> beverageSizeOptional = beverageSizeService.findBeverageSizeByBeverageSizeId(addBeverageRecordRequestDTO.getBeverageSizeId());
         if (beverageSizeOptional.isEmpty()) {
             return ResponseEntity.status(404).body(
                     DefaultResponseDTO.error(404, 999, "등록된 음료 사이즈 정보를 찾을 수 없습니다.")
