@@ -5,10 +5,8 @@ import com.sweetbalance.backend.dto.request.MetadataRequestDTO;
 import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
 import com.sweetbalance.backend.entity.*;
 import com.sweetbalance.backend.enums.common.Status;
-import com.sweetbalance.backend.repository.BeverageLogRepository;
-import com.sweetbalance.backend.repository.FavoriteRepository;
-import com.sweetbalance.backend.repository.UserRepository;
-import com.sweetbalance.backend.util.SyrupToSugarMapper;
+import com.sweetbalance.backend.repository.*;
+import com.sweetbalance.backend.util.syrup.SyrupManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,6 +22,8 @@ public class UserServiceImpl implements UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final BeverageLogRepository beverageLogRepository;
     private final FavoriteRepository favoriteRepository;
+    private final BeverageSizeRepository beverageSizeRepository;
+    private final BeverageRepository beverageRepository;
 
 
     public void join(SignUpRequestDTO signUpRequestDTO){
@@ -80,11 +80,19 @@ public class UserServiceImpl implements UserService {
         beverageLog.setSyrupName(dto.getSyrupName());
         beverageLog.setSyrupCount(dto.getSyrupCount());
         beverageLog.setStatus(Status.ACTIVE);
+
+        String brandName;
+        Optional<BeverageSize> optionalBeverageSize = beverageSizeRepository.findById(beverageSize.getId());
+        Beverage beverage = optionalBeverageSize.get().getBeverage();
+        brandName = beverage.getBrand();
+
         double additionalSugar = (dto.getSyrupName() == null) ? 
-                0D : dto.getSyrupCount() * SyrupToSugarMapper.getAmountOfSugar(dto.getSyrupName());
+                0D : dto.getSyrupCount() * SyrupManager.getAmountOfSugar(brandName, dto.getSyrupName());
         beverageLog.setAdditionalSugar(additionalSugar);
 
         beverageLogRepository.save(beverageLog);
+        beverage.setConsumeCount(beverage.getConsumeCount() + 1);
+        beverageRepository.save(beverage);
     }
 
     // 로그 Id로 음료 기록 찾고, 음료 사이즈 정보, 시럽 이름, 시럽 개수, 추가 당 함량 다시 설정.
@@ -92,13 +100,32 @@ public class UserServiceImpl implements UserService {
     public void editBeverageRecord(Long beverageLogId, BeverageSize beverageSize, AddBeverageRecordRequestDTO dto) {
         Optional<BeverageLog> log = beverageLogRepository.findById(beverageLogId);
         BeverageLog beverageLog = log.get();
+        boolean isBeverageChanged = false;
+        Beverage originalBeverage = beverageLog.getBeverageSize().getBeverage();
+        if(originalBeverage.getBeverageId() != beverageSize.getBeverage().getBeverageId()){
+            isBeverageChanged = true;
+        }
         beverageLog.setBeverageSize(beverageSize);
         beverageLog.setSyrupName(dto.getSyrupName());
         beverageLog.setSyrupCount(dto.getSyrupCount());
+
+        String brandName;
+        Optional<BeverageSize> optionalBeverageSize = beverageSizeRepository.findById(beverageSize.getId());
+        Beverage newBeverage = optionalBeverageSize.get().getBeverage();
+        brandName = newBeverage.getBrand();
+
         double additionalSugar = (dto.getSyrupName() == null) ?
-                0D : dto.getSyrupCount() * SyrupToSugarMapper.getAmountOfSugar(dto.getSyrupName());
+                0D : dto.getSyrupCount() * SyrupManager.getAmountOfSugar(brandName, dto.getSyrupName());
         beverageLog.setAdditionalSugar(additionalSugar);
         beverageLogRepository.save(beverageLog);
+
+        if(isBeverageChanged){
+            originalBeverage.setConsumeCount(originalBeverage.getConsumeCount() - 1);
+            newBeverage.setConsumeCount(newBeverage.getConsumeCount() + 1);
+            beverageRepository.save(originalBeverage);
+            beverageRepository.save(newBeverage);
+        }
+
     }
 
     @Override
