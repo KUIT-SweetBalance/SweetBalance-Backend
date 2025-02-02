@@ -23,6 +23,9 @@ public class BeverageSize {
     private String sizeType;
 
     @Column(nullable = false)
+    private String sizeTypeDetail;
+
+    @Column(nullable = false)
     private int volume;
 
     private double sugar;
