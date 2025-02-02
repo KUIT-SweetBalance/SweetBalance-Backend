@@ -9,7 +9,7 @@ import lombok.Setter;
 
 public class AddBeverageRecordRequestDTO {
 
-    private int volume;
+    private Long beverageSizeId;
     private String syrupName;
     private int syrupCount;
 

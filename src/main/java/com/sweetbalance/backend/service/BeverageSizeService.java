@@ -7,6 +7,6 @@ import java.util.Optional;
 
 public interface BeverageSizeService {
 
-    public Optional<BeverageSize> findBeverageSizeByBeverageAndVolume(Beverage beverage, int volume);
+    public Optional<BeverageSize> findBeverageSizeByBeverageSizeId(Long beverageSizeId);
 
 }

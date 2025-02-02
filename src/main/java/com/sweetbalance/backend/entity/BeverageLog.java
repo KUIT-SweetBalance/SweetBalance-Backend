@@ -1,5 +1,6 @@
 package com.sweetbalance.backend.entity;
 
+import com.sweetbalance.backend.enums.common.Status;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,4 +28,10 @@ public class BeverageLog extends BaseEntity{
     @Column(name = "syrup_count")
     private int syrupCount;
 
+    @Enumerated(EnumType.STRING)
+    @Column
+    private Status status;
+
+    @Column(name = "additional_sugar")
+    private double additionalSugar;
 }
