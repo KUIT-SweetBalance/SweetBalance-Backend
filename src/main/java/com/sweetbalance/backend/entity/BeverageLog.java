@@ -2,12 +2,13 @@ package com.sweetbalance.backend.entity;
 
 import com.sweetbalance.backend.enums.common.Status;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Table(name = "beverage_logs")
-@Getter @Setter
+@Getter @Setter @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class BeverageLog extends BaseEntity{
 
     @Id
@@ -34,4 +35,22 @@ public class BeverageLog extends BaseEntity{
 
     @Column(name = "additional_sugar")
     private double additionalSugar;
+
+    /**
+     * 음료 기록 수정
+     */
+    public void updateRecord(BeverageSize beverageSize, String syrupName, int syrupCount, double additionalSugar) {
+        this.beverageSize = beverageSize;
+        this.syrupName = syrupName;
+        this.syrupCount = syrupCount;
+        this.additionalSugar = additionalSugar;
+    }
+
+    /**
+     * 음료 기록을 삭제(논리적으로)
+     */
+    public void markDeleted() {
+        this.status = Status.DELETED;
+    }
+
 }

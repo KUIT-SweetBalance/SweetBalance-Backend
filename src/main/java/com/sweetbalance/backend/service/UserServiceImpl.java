@@ -6,7 +6,10 @@ import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
 import com.sweetbalance.backend.entity.*;
 import com.sweetbalance.backend.enums.common.Status;
 import com.sweetbalance.backend.repository.*;
+import com.sweetbalance.backend.util.syrup.SugarCalculator;
 import com.sweetbalance.backend.util.syrup.SyrupManager;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,6 +19,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -24,6 +28,7 @@ public class UserServiceImpl implements UserService {
     private final FavoriteRepository favoriteRepository;
     private final BeverageSizeRepository beverageSizeRepository;
     private final BeverageRepository beverageRepository;
+    private final SugarCalculator sugarCalculator;
 
 
     public void join(SignUpRequestDTO signUpRequestDTO){
@@ -74,66 +79,69 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void addBeverageRecord(User user, BeverageSize beverageSize, AddBeverageRecordRequestDTO dto) {
-        BeverageLog beverageLog = new BeverageLog();
-        beverageLog.setUser(user);
-        beverageLog.setBeverageSize(beverageSize);
-        beverageLog.setSyrupName(dto.getSyrupName());
-        beverageLog.setSyrupCount(dto.getSyrupCount());
-        beverageLog.setStatus(Status.ACTIVE);
 
-        String brandName;
-        Optional<BeverageSize> optionalBeverageSize = beverageSizeRepository.findById(beverageSize.getId());
-        Beverage beverage = optionalBeverageSize.get().getBeverage();
-        brandName = beverage.getBrand();
+        Beverage beverage = beverageSizeRepository.findById(beverageSize.getId())
+                .map(BeverageSize::getBeverage)
+                .orElseThrow(() -> new EntityNotFoundException("Beverage not found for id: " + beverageSize.getId()));
 
-        double additionalSugar = (dto.getSyrupName() == null) ? 
-                0D : dto.getSyrupCount() * SyrupManager.getAmountOfSugar(brandName, dto.getSyrupName());
-        beverageLog.setAdditionalSugar(additionalSugar);
+        double additionalSugar = sugarCalculator.calculate(beverage.getBrand(), dto.getSyrupName(), dto.getSyrupCount());
+
+        BeverageLog beverageLog = BeverageLog.builder()
+                .user(user)
+                .beverageSize(beverageSize)
+                .syrupName(dto.getSyrupName())
+                .syrupCount(dto.getSyrupCount())
+                .additionalSugar(additionalSugar)
+                .status(Status.ACTIVE)
+                .build();
 
         beverageLogRepository.save(beverageLog);
-        beverage.setConsumeCount(beverage.getConsumeCount() + 1);
-        beverageRepository.save(beverage);
+
+        addConsumeCount(beverage);
+
     }
 
     // 로그 Id로 음료 기록 찾고, 음료 사이즈 정보, 시럽 이름, 시럽 개수, 추가 당 함량 다시 설정.
     @Override
-    public void editBeverageRecord(Long beverageLogId, BeverageSize beverageSize, AddBeverageRecordRequestDTO dto) {
-        Optional<BeverageLog> log = beverageLogRepository.findById(beverageLogId);
-        BeverageLog beverageLog = log.get();
-        boolean isBeverageChanged = false;
+    public void editBeverageRecord(Long beverageLogId, BeverageSize newBeverageSize, AddBeverageRecordRequestDTO dto) {
+
+        BeverageLog beverageLog = beverageLogRepository.findById(beverageLogId)
+                .orElseThrow(() -> new EntityNotFoundException("BeverageLog not found for id: " + beverageLogId));
+
         Beverage originalBeverage = beverageLog.getBeverageSize().getBeverage();
-        if(originalBeverage.getBeverageId() != beverageSize.getBeverage().getBeverageId()){
-            isBeverageChanged = true;
-        }
-        beverageLog.setBeverageSize(beverageSize);
-        beverageLog.setSyrupName(dto.getSyrupName());
-        beverageLog.setSyrupCount(dto.getSyrupCount());
+        Beverage newBeverage = beverageSizeRepository.findById(newBeverageSize.getId())
+                .map(BeverageSize::getBeverage)
+                .orElseThrow(() -> new EntityNotFoundException("Beverage not found for id: " + newBeverageSize.getId()));
 
-        String brandName;
-        Optional<BeverageSize> optionalBeverageSize = beverageSizeRepository.findById(beverageSize.getId());
-        Beverage newBeverage = optionalBeverageSize.get().getBeverage();
-        brandName = newBeverage.getBrand();
+        boolean isBeverageChanged = !originalBeverage.getBeverageId().equals(newBeverage.getBeverageId());
 
-        double additionalSugar = (dto.getSyrupName() == null) ?
-                0D : dto.getSyrupCount() * SyrupManager.getAmountOfSugar(brandName, dto.getSyrupName());
-        beverageLog.setAdditionalSugar(additionalSugar);
+        double additionalSugar = sugarCalculator.calculate(newBeverage.getBrand(), dto.getSyrupName(), dto.getSyrupCount());
+
+        beverageLog.updateRecord(newBeverageSize, dto.getSyrupName(),dto.getSyrupCount(),additionalSugar);
         beverageLogRepository.save(beverageLog);
 
         if(isBeverageChanged){
-            originalBeverage.setConsumeCount(originalBeverage.getConsumeCount() - 1);
-            newBeverage.setConsumeCount(newBeverage.getConsumeCount() + 1);
-            beverageRepository.save(originalBeverage);
-            beverageRepository.save(newBeverage);
+            subConsumeCount(originalBeverage);
+            addConsumeCount(newBeverage);
         }
 
     }
 
     @Override
     public void deleteBeverageRecord(BeverageLog beverageLog) {
-        beverageLog.setStatus(Status.DELETED);
+        beverageLog.markDeleted();
         beverageLogRepository.save(beverageLog);
 
         Beverage beverage = beverageLog.getBeverageSize().getBeverage();
+        subConsumeCount(beverage);
+    }
+
+    private void addConsumeCount(Beverage beverage){
+        beverage.setConsumeCount(beverage.getConsumeCount() + 1);
+        beverageRepository.save(beverage);
+    }
+
+    private void subConsumeCount(Beverage beverage){
         beverage.setConsumeCount(beverage.getConsumeCount() - 1);
         beverageRepository.save(beverage);
     }
