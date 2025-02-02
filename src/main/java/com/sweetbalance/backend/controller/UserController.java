@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/user")
@@ -123,11 +122,10 @@ public class UserController {
 
         List<BeverageLog> dailyBrandLogs = userService.findTodayBeverageLogsByUserId(userId);
 
-        Set<String> brandSet = dailyBrandLogs.stream()
+        List<String> brandList = dailyBrandLogs.stream()
                 .map(log -> log.getBeverageSize().getBeverage().getBrand())
-                .collect(Collectors.toSet());
-
-        List<String> brandList = new ArrayList<>(brandSet);
+                .distinct()
+                .toList();
 
         return ResponseEntity.status(200).body(
                 DefaultResponseDTO.success("오늘 섭취한 브랜드 리스트 조회 성공", brandList)
