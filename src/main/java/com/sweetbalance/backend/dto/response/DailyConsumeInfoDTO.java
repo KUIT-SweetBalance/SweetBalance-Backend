@@ -6,6 +6,6 @@ import lombok.*;
 @AllArgsConstructor
 @Getter @Setter @Builder
 public class DailyConsumeInfoDTO {
-    private int beverageCount;
     private int totalSugar;
+    private int beverageCount;
 }

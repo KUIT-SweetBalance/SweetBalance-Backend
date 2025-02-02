@@ -168,8 +168,6 @@ public class UserController {
 
         List<BeverageLog> dailyBeverageLogs = userService.findTodayBeverageLogsByUserId(userId);
 
-        int beverageCount = dailyBeverageLogs.size();
-
         double rawSugarSum = 0.0;
         for (BeverageLog log : dailyBeverageLogs) {
             rawSugarSum += log.getBeverageSize().getSugar();
@@ -177,9 +175,11 @@ public class UserController {
 
         int totalSugar = (int) Math.round(rawSugarSum);
 
+        int beverageCount = dailyBeverageLogs.size();
+
         DailyConsumeInfoDTO infoDTO = DailyConsumeInfoDTO.builder()
-                .beverageCount(beverageCount)
                 .totalSugar(totalSugar)
+                .beverageCount(beverageCount)
                 .build();
 
         return ResponseEntity.ok(
