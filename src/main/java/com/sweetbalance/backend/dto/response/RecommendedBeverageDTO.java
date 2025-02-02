@@ -18,6 +18,7 @@ public class RecommendedBeverageDTO {
     private Long beverageSizeId;
 
     private String sizeType;
+    private String sizeTypeDetail;
     private int volume;
     private int sugar;
     private int calories;
