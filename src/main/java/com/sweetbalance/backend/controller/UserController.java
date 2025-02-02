@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/user")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -89,11 +89,24 @@ public class UserController {
 //    public ResponseEntity<?> getDailyBrandListOfClient(@AuthenticationPrincipal UserIdHolder userIdHolder){
 //
 //    }
-//
-//    @GetMapping("/api/user/daily-beverage-list")
-//    public ResponseEntity<?> getDailyBeverageListOfClient(@AuthenticationPrincipal UserIdHolder userIdHolder){
-//
-//    }
+
+    @GetMapping("/daily-beverage-list")
+    public ResponseEntity<?> getDailyBeverageListOfClient(@AuthenticationPrincipal UserIdHolder userIdHolder){
+        Long userId = userIdHolder.getUserId();
+
+        Optional<User> userOptional = userService.findUserByUserId(userId);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    DefaultResponseDTO.error(404, 999, "등록된 User 정보를 찾을 수 없습니다.")
+            );
+        }
+
+        List<BeverageLog> dailyBeverageLogs = userService.findTodayBeverageLogsByUserId(userId);
+
+        return ResponseEntity.ok(
+                DefaultResponseDTO.success("오늘 섭취한 음료 리스트 반환 성공", dailyBeverageLogs)
+        );
+    }
 //
 //    @GetMapping("/api/user/daily-consume-info")
 //    public ResponseEntity<?> getDailyConsumeInfoOfClient(@AuthenticationPrincipal UserIdHolder userIdHolder){

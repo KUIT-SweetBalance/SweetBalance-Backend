@@ -14,7 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -109,5 +111,19 @@ public class UserServiceImpl implements UserService {
         favoriteOptional.ifPresent(favoriteRepository::delete);
     }
 
+    @Override
+    public List<BeverageLog> findTodayBeverageLogsByUserId(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            return Collections.emptyList();
+        }
+
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfToday = today.atStartOfDay();
+        LocalDateTime endOfToday = today.plusDays(1).atStartOfDay().minusNanos(1);
+
+        return beverageLogRepository.findAllByUserUserIdAndCreatedAtBetween(
+                userId, startOfToday, endOfToday
+        );
+    }
 
 }

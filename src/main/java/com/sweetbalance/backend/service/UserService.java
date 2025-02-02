@@ -32,4 +32,6 @@ public interface UserService {
     public void addFavoriteRecord(User user, Beverage beverage);
 
     public void deleteFavoriteRecord(User user, Beverage beverage);
+
+    public List<BeverageLog> findTodayBeverageLogsByUserId(Long userId);
 }
