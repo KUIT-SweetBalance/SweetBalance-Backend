@@ -25,11 +25,11 @@ public class DailyConsumeBeverageListDTO {
         BeverageSize beverageSize = log.getBeverageSize();
         Beverage beverage = beverageSize.getBeverage();
 
-        DateTimeFormatter dtf = DateTimeFormatter
+        DateTimeFormatter dateTimeFormat = DateTimeFormatter
                 .ofPattern("yyyy.MM.dd (E) HH:mm")
                 .withLocale(Locale.KOREAN);
 
-        String formattedDateTime = log.getCreatedAt().format(dtf);
+        String formattedDateTime = log.getCreatedAt().format(dateTimeFormat);
 
         double rawSugar = beverageSize.getSugar();
         int roundedSugar = (int) Math.round(rawSugar);
