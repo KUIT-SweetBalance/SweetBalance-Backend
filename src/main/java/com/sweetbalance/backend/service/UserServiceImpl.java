@@ -132,6 +132,10 @@ public class UserServiceImpl implements UserService {
     public void deleteBeverageRecord(BeverageLog beverageLog) {
         beverageLog.setStatus(Status.DELETED);
         beverageLogRepository.save(beverageLog);
+
+        Beverage beverage = beverageLog.getBeverageSize().getBeverage();
+        beverage.setConsumeCount(beverage.getConsumeCount() - 1);
+        beverageRepository.save(beverage);
     }
 
     @Override
