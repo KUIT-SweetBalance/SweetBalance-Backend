@@ -71,10 +71,7 @@ public class UserServiceImpl implements UserService {
     public void updateMetaData(User user, MetadataRequestDTO metaDataRequestDTO) {
         user.setGender(metaDataRequestDTO.getGender());
         user.setNickname(metaDataRequestDTO.getNickname());
-        // user에 one_liner 추가하면 주석 해제
-        // user.setOne_liner(metaDataRequestDTO.getOne_liner());
         userRepository.save(user);
-
     }
 
     @Override
