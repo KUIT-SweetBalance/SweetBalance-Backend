@@ -3,6 +3,7 @@ package com.sweetbalance.backend.controller;
 import com.sweetbalance.backend.dto.DefaultResponseDTO;
 import com.sweetbalance.backend.dto.identity.UserIdHolder;
 import com.sweetbalance.backend.dto.response.ListBeverageDTO;
+import com.sweetbalance.backend.dto.response.DailyConsumeBeverageListDTO;
 import com.sweetbalance.backend.dto.response.WeeklyInfoDTO;
 import com.sweetbalance.backend.dto.request.AddBeverageRecordRequestDTO;
 import com.sweetbalance.backend.dto.request.MetadataRequestDTO;
@@ -13,7 +14,6 @@ import com.sweetbalance.backend.entity.User;
 import com.sweetbalance.backend.service.BeverageService;
 import com.sweetbalance.backend.service.BeverageSizeService;
 import com.sweetbalance.backend.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -23,8 +23,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/user")
@@ -110,13 +110,32 @@ public class UserController {
 //
 //    }
 //
-//    @GetMapping("/api/user/daily-brand-list")
-//    public ResponseEntity<?> getDailyBrandListOfClient(@AuthenticationPrincipal UserIdHolder userIdHolder){
-//
-//    }
+    @GetMapping("/daily-brand-list")
+    public ResponseEntity<?> getDailyConsumeBrandList(@AuthenticationPrincipal UserIdHolder userIdHolder){
+        Long userId = userIdHolder.getUserId();
+
+        Optional<User> userOptional = userService.findUserByUserId(userId);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    DefaultResponseDTO.error(404, 999, "등록된 User 정보를 찾을 수 없습니다.")
+            );
+        }
+
+        List<BeverageLog> dailyBrandLogs = userService.findTodayBeverageLogsByUserId(userId);
+
+        Set<String> brandSet = dailyBrandLogs.stream()
+                .map(log -> log.getBeverageSize().getBeverage().getBrand())
+                .collect(Collectors.toSet());
+
+        List<String> brandList = new ArrayList<>(brandSet);
+
+        return ResponseEntity.status(200).body(
+                DefaultResponseDTO.success("오늘 섭취한 브랜드 리스트 조회 성공", brandList)
+        );
+    }
 
     @GetMapping("/daily-beverage-list")
-    public ResponseEntity<?> getDailyBeverageListOfClient(@AuthenticationPrincipal UserIdHolder userIdHolder){
+    public ResponseEntity<?> getDailyConsumeBeverageList(@AuthenticationPrincipal UserIdHolder userIdHolder){
         Long userId = userIdHolder.getUserId();
 
         Optional<User> userOptional = userService.findUserByUserId(userId);
@@ -128,8 +147,12 @@ public class UserController {
 
         List<BeverageLog> dailyBeverageLogs = userService.findTodayBeverageLogsByUserId(userId);
 
-        return ResponseEntity.ok(
-                DefaultResponseDTO.success("오늘 섭취한 음료 리스트 반환 성공", dailyBeverageLogs)
+        List<DailyConsumeBeverageListDTO> todayConsumeBeverageList = dailyBeverageLogs.stream()
+                .map(DailyConsumeBeverageListDTO::fromEntity)
+                .toList();
+
+        return ResponseEntity.status(200).body(
+                DefaultResponseDTO.success("오늘 섭취한 음료 리스트 조회 성공", todayConsumeBeverageList)
         );
     }
 //
