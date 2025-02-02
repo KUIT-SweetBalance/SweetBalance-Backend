@@ -2,6 +2,7 @@ package com.sweetbalance.backend.controller;
 
 import com.sweetbalance.backend.dto.DefaultResponseDTO;
 import com.sweetbalance.backend.dto.identity.UserIdHolder;
+import com.sweetbalance.backend.dto.response.DailyConsumeInfoDTO;
 import com.sweetbalance.backend.dto.response.ListBeverageDTO;
 import com.sweetbalance.backend.dto.response.DailyConsumeBeverageListDTO;
 import com.sweetbalance.backend.dto.response.WeeklyInfoDTO;
@@ -110,7 +111,7 @@ public class UserController {
 //    }
 //
     @GetMapping("/daily-brand-list")
-    public ResponseEntity<?> getDailyConsumeBrandList(@AuthenticationPrincipal UserIdHolder userIdHolder){
+    public ResponseEntity<?> getDailyConsumeBrandListOfClient(@AuthenticationPrincipal UserIdHolder userIdHolder){
         Long userId = userIdHolder.getUserId();
 
         Optional<User> userOptional = userService.findUserByUserId(userId);
@@ -133,7 +134,7 @@ public class UserController {
     }
 
     @GetMapping("/daily-beverage-list")
-    public ResponseEntity<?> getDailyConsumeBeverageList(@AuthenticationPrincipal UserIdHolder userIdHolder){
+    public ResponseEntity<?> getDailyConsumeBeverageListOfClient(@AuthenticationPrincipal UserIdHolder userIdHolder){
         Long userId = userIdHolder.getUserId();
 
         Optional<User> userOptional = userService.findUserByUserId(userId);
@@ -153,11 +154,38 @@ public class UserController {
                 DefaultResponseDTO.success("오늘 섭취한 음료 리스트 조회 성공", todayConsumeBeverageList)
         );
     }
-//
-//    @GetMapping("/api/user/daily-consume-info")
-//    public ResponseEntity<?> getDailyConsumeInfoOfClient(@AuthenticationPrincipal UserIdHolder userIdHolder){
-//
-//    }
+
+    @GetMapping("/daily-consume-info")
+    public ResponseEntity<?> getDailyConsumeInfoOfClient(@AuthenticationPrincipal UserIdHolder userIdHolder){
+        Long userId = userIdHolder.getUserId();
+
+        Optional<User> userOptional = userService.findUserByUserId(userId);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    DefaultResponseDTO.error(404, 999, "등록된 User 정보를 찾을 수 없습니다.")
+            );
+        }
+
+        List<BeverageLog> dailyBeverageLogs = userService.findTodayBeverageLogsByUserId(userId);
+
+        int beverageCount = dailyBeverageLogs.size();
+
+        double rawSugarSum = 0.0;
+        for (BeverageLog log : dailyBeverageLogs) {
+            rawSugarSum += log.getBeverageSize().getSugar();
+        }
+
+        int totalSugar = (int) Math.round(rawSugarSum);
+
+        DailyConsumeInfoDTO infoDTO = DailyConsumeInfoDTO.builder()
+                .beverageCount(beverageCount)
+                .totalSugar(totalSugar)
+                .build();
+
+        return ResponseEntity.ok(
+                DefaultResponseDTO.success("오늘 영양섭취 정보 조회 성공", infoDTO)
+        );
+    }
 //
 //    @GetMapping("/api/user/weekly-consume-info")
 //    public ResponseEntity<?> getWeeklyConsumeInfoOfClient(@AuthenticationPrincipal UserIdHolder userIdHolder){
