@@ -166,6 +166,20 @@ public class UserServiceImpl implements UserService {
         beverageLogRepository.save(beverageLog);
     }
 
+    // 로그 Id로 음료 기록 찾고, 음료 사이즈 정보, 시럽 이름, 시럽 개수, 추가 당 함량 다시 설정.
+    @Override
+    public void editBeverageRecord(Long beverageLogId, BeverageSize beverageSize, AddBeverageRecordRequestDTO dto) {
+        Optional<BeverageLog> log = beverageLogRepository.findById(beverageLogId);
+        BeverageLog beverageLog = log.get();
+        beverageLog.setBeverageSize(beverageSize);
+        beverageLog.setSyrupName(dto.getSyrupName());
+        beverageLog.setSyrupCount(dto.getSyrupCount());
+        double additionalSugar = (dto.getSyrupName() == null) ?
+                0D : dto.getSyrupCount() * SyrupToSugarMapper.getAmountOfSugar(dto.getSyrupName());
+        beverageLog.setAdditionalSugar(additionalSugar);
+        beverageLogRepository.save(beverageLog);
+    }
+
     @Override
     public void deleteBeverageRecord(BeverageLog beverageLog) {
         beverageLog.setStatus(Status.DELETED);

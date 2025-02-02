@@ -107,7 +107,7 @@ public class UserController {
 
     @PostMapping("/beverage-record")
     public ResponseEntity<?> addBeverageRecord(@AuthenticationPrincipal UserIdHolder userIdHolder,
-                                               @RequestBody AddBeverageRecordRequestDTO addBeverageRecordRequestDTO){
+                                               @RequestBody AddBeverageRecordRequestDTO dto){
 
         Long userId = userIdHolder.getUserId();
 
@@ -118,7 +118,7 @@ public class UserController {
             );
         }
 
-        Optional<BeverageSize> beverageSizeOptional = beverageSizeService.findBeverageSizeByBeverageSizeId(addBeverageRecordRequestDTO.getBeverageSizeId());
+        Optional<BeverageSize> beverageSizeOptional = beverageSizeService.findBeverageSizeByBeverageSizeId(dto.getBeverageSizeId());
         if (beverageSizeOptional.isEmpty()) {
             return ResponseEntity.status(404).body(
                     DefaultResponseDTO.error(404, 999, "등록된 음료 사이즈 정보를 찾을 수 없습니다.")
@@ -126,7 +126,7 @@ public class UserController {
         }
 
         try {
-            userService.addBeverageRecord(userOptional.get(), beverageSizeOptional.get(), addBeverageRecordRequestDTO);
+            userService.addBeverageRecord(userOptional.get(), beverageSizeOptional.get(), dto);
         } catch (IllegalArgumentException e){
             return ResponseEntity.status(404).body(
                     DefaultResponseDTO.error(404, 999, "일치하는 시럽 정보를 찾을 수 없습니다.")
@@ -135,6 +135,45 @@ public class UserController {
 
         return ResponseEntity.ok(
                 DefaultResponseDTO.success("음료 섭취 기록 추가 성공", null)
+        );
+    }
+
+    @PostMapping("/beverage-record/{beverageLogId}")
+    public ResponseEntity<?> editBeverageRecord(@AuthenticationPrincipal UserIdHolder userIdHolder, @PathVariable("beverageLogId") Long beverageLogId, @RequestBody AddBeverageRecordRequestDTO dto){
+
+        Long userId = userIdHolder.getUserId();
+
+        Optional<User> userOptional = userService.findUserByUserId(userId);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    DefaultResponseDTO.error(404, 999, "등록된 User 정보를 찾을 수 없습니다.")
+            );
+        }
+
+        Optional<BeverageLog> beverageLogOptional = userService.findBeverageLogByBeverageLogId(beverageLogId);
+        if(beverageLogOptional.isEmpty()){
+            return ResponseEntity.status(404).body(
+                    DefaultResponseDTO.error(404, 999, "일치하는 음료 기록을 찾을 수 없습니다.")
+            );
+        }
+
+        Optional<BeverageSize> beverageSizeOptional = beverageSizeService.findBeverageSizeByBeverageSizeId(dto.getBeverageSizeId());
+        if (beverageSizeOptional.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    DefaultResponseDTO.error(404, 999, "등록된 음료 사이즈 정보를 찾을 수 없습니다.")
+            );
+        }
+
+        try {
+            userService.editBeverageRecord(beverageLogId, beverageSizeOptional.get(), dto);
+        } catch (IllegalArgumentException e){
+            return ResponseEntity.status(404).body(
+                    DefaultResponseDTO.error(404, 999, "일치하는 시럽 정보를 찾을 수 없습니다.")
+            );
+        }
+
+        return ResponseEntity.ok(
+                DefaultResponseDTO.success("음료 섭취 기록 수정 성공", null)
         );
     }
 
