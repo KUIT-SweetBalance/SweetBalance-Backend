@@ -9,8 +9,8 @@ import java.util.List;
 @Getter @Setter @Builder
 public class WeeklyInfoDTO {
     private int intake;
-    private double totalSugar;
+    private int totalSugar;
     private double averageSugar;
-    private double totalCalories;
+    private int totalCalories;
     private List<DailySugarDTO> dailySugar;
 }

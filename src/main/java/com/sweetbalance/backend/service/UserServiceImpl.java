@@ -131,10 +131,16 @@ public class UserServiceImpl implements UserService {
 
         List<DailySugarDTO> dailySugarList = new ArrayList<>();
         for (LocalDate date = startDate; !date.isAfter(effectiveEndDate); date = date.plusDays(1)) {
-            dailySugarList.add(new DailySugarDTO(date, dailySugar.getOrDefault(date, 0.0)));
+            dailySugarList.add(new DailySugarDTO(date, Math.round(dailySugar.getOrDefault(date, 0.0) * 10.0) / 10.0));
         }
 
-        return new WeeklyInfoDTO(intake, totalSugar, averageSugar, totalCalories, dailySugarList);
+        return WeeklyInfoDTO.builder()
+                .intake(intake)
+                .totalSugar((int) Math.round(totalSugar))
+                .averageSugar(Math.round(averageSugar * 10.0) / 10.0)
+                .totalCalories((int) Math.round(totalCalories))
+                .dailySugar(dailySugarList)
+                .build();
     }
 
     @Override
