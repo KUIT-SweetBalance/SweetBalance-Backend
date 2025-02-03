@@ -82,4 +82,8 @@ public final class SyrupManager {
                 .map(Syrup::getSugarPerPump)
                 .orElseThrow(() -> new IllegalArgumentException("해당 브랜드의 시럽 목록에 일치하는 시럽 정보가 없습니다: " + syrupName));
     }
+
+    public static List<Syrup> getSyrupListOfBrand(String brandName){
+        return syrupRepository.get(brandName);
+    }
 }

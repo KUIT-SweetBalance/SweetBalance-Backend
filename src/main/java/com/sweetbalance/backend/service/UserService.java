@@ -3,13 +3,12 @@ package com.sweetbalance.backend.service;
 import com.sweetbalance.backend.dto.request.AddBeverageRecordRequestDTO;
 import com.sweetbalance.backend.dto.request.MetadataRequestDTO;
 import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
-import com.sweetbalance.backend.dto.response.ListBeverageDTO;
+import com.sweetbalance.backend.dto.response.FavoriteBeverageDTO;
 import com.sweetbalance.backend.dto.response.WeeklyInfoDTO;
 import com.sweetbalance.backend.entity.Beverage;
 import com.sweetbalance.backend.entity.BeverageLog;
 import com.sweetbalance.backend.entity.BeverageSize;
 import com.sweetbalance.backend.entity.User;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
@@ -24,7 +23,7 @@ public interface UserService {
 
     public Optional<User> findUserByUsername(String username);
 
-    List<ListBeverageDTO> getFavoriteListByUserId(Long userId, Pageable pageable);
+    List<FavoriteBeverageDTO> getFavoriteListByUserId(Long userId, Pageable pageable);
 
     WeeklyInfoDTO getWeeklyConsumeInfo(Long userId, LocalDate startDate, LocalDate endDate);
 

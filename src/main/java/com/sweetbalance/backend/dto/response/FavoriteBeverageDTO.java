@@ -6,18 +6,14 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter @Setter @Builder
-public class ListBeverageDTO {
+public class FavoriteBeverageDTO {
     private Long favoriteId;
     private Long beverageId;
 
     private String name;
     private String brand;
     private String imgUrl;
-    private BeverageCategory category;
 
-    private double sugar;
-    private double calories;
-    private double caffeine;
-
+    private int sugar;
     private String timeString;
 }
