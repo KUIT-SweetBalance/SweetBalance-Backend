@@ -18,10 +18,8 @@ import lombok.RequiredArgsConstructor;
 import com.sweetbalance.backend.util.TimeStringConverter;
 import com.sweetbalance.backend.util.syrup.SugarCalculator;
 import com.sweetbalance.backend.util.syrup.SyrupManager;
-import com.sweetbalance.backend.util.SyrupToSugarMapper;
 import org.springframework.data.domain.Pageable;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
