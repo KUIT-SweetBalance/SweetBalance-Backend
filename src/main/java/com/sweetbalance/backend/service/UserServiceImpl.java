@@ -16,13 +16,19 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import com.sweetbalance.backend.util.TimeStringConverter;
+import org.springframework.data.domain.Page;
+
 import com.sweetbalance.backend.util.syrup.SugarCalculator;
 import com.sweetbalance.backend.util.syrup.SyrupManager;
+
 import org.springframework.data.domain.Pageable;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -53,7 +59,7 @@ public class UserServiceImpl implements UserService {
         User bCryptPasswordEncodedUser = makeBCryptPasswordEncodedUser(signUpRequestDTO);
         userRepository.save(bCryptPasswordEncodedUser);
     }
-  
+
     private User makeBCryptPasswordEncodedUser(SignUpRequestDTO signUpRequestDTO){
         User user = signUpRequestDTO.toActiveUser();
         String rawPassword = user.getPassword();
@@ -136,7 +142,7 @@ public class UserServiceImpl implements UserService {
 
         return new WeeklyInfoDTO(intake, totalSugar, averageSugar, totalCalories, dailySugarList);
     }
-  
+
     @Override
     public void updateMetaData(User user, MetadataRequestDTO metaDataRequestDTO) {
         user.setGender(metaDataRequestDTO.getGender());
@@ -227,5 +233,25 @@ public class UserServiceImpl implements UserService {
         Optional<Favorite> favoriteOptional = favoriteRepository.findByUserAndBeverage(user, beverage);
 
         favoriteOptional.ifPresent(favoriteRepository::delete);
+    }
+
+    @Override
+    public List<BeverageLog> findTodayBeverageLogsByUserId(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            return Collections.emptyList();
+        }
+
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfToday = today.atStartOfDay();
+        LocalDateTime endOfToday = today.plusDays(1).atStartOfDay().minusNanos(1);
+
+        return beverageLogRepository.findAllByUserUserIdAndCreatedAtBetween(
+                userId, startOfToday, endOfToday
+        );
+    }
+
+    @Override
+    public List<BeverageLog> findTotalBeverageLogsByUserId(Long userId, Pageable pageable) {
+        return beverageLogRepository.findTotalByUserUserId(userId, pageable);
     }
 }
