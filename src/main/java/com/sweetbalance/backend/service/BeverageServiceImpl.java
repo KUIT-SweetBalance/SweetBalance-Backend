@@ -76,15 +76,12 @@ public class BeverageServiceImpl implements BeverageService {
                 .name(beverage.getName())
                 .brand(beverage.getBrand())
                 .imgUrl(beverage.getImgUrl())
-                .category(beverage.getCategory())
-                .consumeCount(beverage.getConsumeCount())
-                .syrups(syrupNames) // syrup 리스트의 syrupName 만 String 리스트로 반환하도록 하고 싶어요
+                .syrups(syrupNames)
                 .sizeDetails(sizeDetails)
                 .build();
     }
 
     private BeverageSizeDetailsWithRecommendDTO createBeverageSizeDetailsWithRecommend(BeverageSize size) {
-
         List<BeverageSize> similarSizes = beverageSizeRepository.findTopSimilarSizesByBrandAndSugar(
                 size.getBeverage().getBeverageId(),
                 size.getBeverage().getBrand(),
@@ -92,7 +89,7 @@ public class BeverageServiceImpl implements BeverageService {
                 5);
 
         List<RecommendedBeverageDTO> recommends = similarSizes.stream()
-                .map(this::convertToRecommendedBeverageDTO)
+                .map(similarSize -> convertToRecommendedBeverageDTO(similarSize, size.getSugar()))
                 .collect(Collectors.toList());
 
         return BeverageSizeDetailsWithRecommendDTO.builder()
@@ -107,22 +104,20 @@ public class BeverageServiceImpl implements BeverageService {
                 .build();
     }
 
-    private RecommendedBeverageDTO convertToRecommendedBeverageDTO(BeverageSize size) {
+    private RecommendedBeverageDTO convertToRecommendedBeverageDTO(BeverageSize size, double baseSugar) {
         Beverage beverage = size.getBeverage();
+        double sugarGap = size.getSugar() - baseSugar;
+        double roundedSugarGap = Math.round(sugarGap * 10.0) / 10.0;
+
         return RecommendedBeverageDTO.builder()
                 .beverageId(beverage.getBeverageId())
                 .name(beverage.getName())
                 .brand(beverage.getBrand())
                 .imgUrl(beverage.getImgUrl())
-                .category(beverage.getCategory())
-                .consumeCount(beverage.getConsumeCount())
-                .beverageSizeId(size.getId())
                 .sizeType(size.getSizeType())
                 .sizeTypeDetail(size.getSizeTypeDetail())
                 .volume(size.getVolume())
-                .sugar((int) size.getSugar())
-                .calories((int) size.getCalories())
-                .caffeine((int) size.getCaffeine())
+                .sugarGap(roundedSugarGap)
                 .build();
     }
 

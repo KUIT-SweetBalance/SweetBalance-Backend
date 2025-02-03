@@ -14,8 +14,6 @@ public class BeverageDetailsDTO {
     private String name;
     private String brand;
     private String imgUrl;
-    private BeverageCategory category;
-    private Integer consumeCount;
 
     private List<String> syrups;
     private List<BeverageSizeDetailsWithRecommendDTO> sizeDetails;
