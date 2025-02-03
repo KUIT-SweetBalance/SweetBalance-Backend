@@ -4,7 +4,7 @@ import com.sweetbalance.backend.dto.request.AddBeverageRecordRequestDTO;
 import com.sweetbalance.backend.dto.request.MetadataRequestDTO;
 import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
 import com.sweetbalance.backend.dto.response.DailySugarDTO;
-import com.sweetbalance.backend.dto.response.ListBeverageDTO;
+import com.sweetbalance.backend.dto.response.FavoriteBeverageDTO;
 import com.sweetbalance.backend.dto.response.WeeklyInfoDTO;
 
 import com.sweetbalance.backend.entity.*;
@@ -16,10 +16,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import com.sweetbalance.backend.util.TimeStringConverter;
-import org.springframework.data.domain.Page;
 
 import com.sweetbalance.backend.util.syrup.SugarCalculator;
-import com.sweetbalance.backend.util.syrup.SyrupManager;
 
 import org.springframework.data.domain.Pageable;
 
@@ -29,7 +27,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -84,16 +81,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<ListBeverageDTO> getFavoriteListByUserId(Long userId, Pageable pageable) {
+    public List<FavoriteBeverageDTO> getFavoriteListByUserId(Long userId, Pageable pageable) {
         List<Favorite> favorites = favoriteRepository.findByUser_UserIdOrderByCreatedAtDesc(userId, pageable);
         return favorites.stream()
-                .map(this::convertToListBeverageDTO)
+                .map(this::convertToFavoriteBeverageDTO)
                 .collect(Collectors.toList());
     }
 
-    private ListBeverageDTO convertToListBeverageDTO(Favorite favorite) {
+    private FavoriteBeverageDTO convertToFavoriteBeverageDTO(Favorite favorite) {
         Beverage beverage = favorite.getBeverage();
-        return ListBeverageDTO.builder()
+        return FavoriteBeverageDTO.builder()
                 .favoriteId(favorite.getFavoriteId())
                 .beverageId(beverage.getBeverageId())
                 .name(beverage.getName())

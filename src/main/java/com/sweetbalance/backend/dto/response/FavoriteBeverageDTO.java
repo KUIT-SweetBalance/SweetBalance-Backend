@@ -6,7 +6,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter @Setter @Builder
-public class ListBeverageDTO {
+public class FavoriteBeverageDTO {
     private Long favoriteId;
     private Long beverageId;
 

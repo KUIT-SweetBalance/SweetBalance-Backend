@@ -3,7 +3,7 @@ package com.sweetbalance.backend.controller;
 import com.sweetbalance.backend.dto.DefaultResponseDTO;
 import com.sweetbalance.backend.dto.identity.UserIdHolder;
 import com.sweetbalance.backend.dto.response.DailyConsumeInfoDTO;
-import com.sweetbalance.backend.dto.response.ListBeverageDTO;
+import com.sweetbalance.backend.dto.response.FavoriteBeverageDTO;
 import com.sweetbalance.backend.dto.response.DailyConsumeBeverageListDTO;
 import com.sweetbalance.backend.dto.response.WeeklyInfoDTO;
 import com.sweetbalance.backend.dto.request.AddBeverageRecordRequestDTO;
@@ -15,7 +15,6 @@ import com.sweetbalance.backend.entity.User;
 import com.sweetbalance.backend.service.BeverageService;
 import com.sweetbalance.backend.service.BeverageSizeService;
 import com.sweetbalance.backend.service.UserService;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -64,7 +63,7 @@ public class UserController {
         Long userId = userIdHolder.getUserId();
         Pageable pageable = PageRequest.of(page, size);
 
-        List<ListBeverageDTO> listBeverages = userService.getFavoriteListByUserId(userId, pageable);
+        List<FavoriteBeverageDTO> listBeverages = userService.getFavoriteListByUserId(userId, pageable);
 
         return ResponseEntity.status(200).body(
                 DefaultResponseDTO.success("즐겨찾기 음료 리스트 반환 성공", listBeverages)
