@@ -15,6 +15,7 @@ import com.sweetbalance.backend.entity.User;
 import com.sweetbalance.backend.service.BeverageService;
 import com.sweetbalance.backend.service.BeverageSizeService;
 import com.sweetbalance.backend.service.UserService;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -105,11 +106,41 @@ public class UserController {
 
     }
 
-//    @GetMapping("/api/user/favorite")
-//    public ResponseEntity<?> getFavoriteOfClient(@AuthenticationPrincipal UserIdHolder userIdHolder){
-//
-//    }
-//
+    @GetMapping("/beverage-record")
+    public ResponseEntity<?> getAllBeverageListOfClient(@AuthenticationPrincipal UserIdHolder userIdHolder,
+                                                        @RequestParam("page") int page,
+                                                        @RequestParam("size") int size) {
+        Long userId = userIdHolder.getUserId();
+
+        Optional<User> userOptional = userService.findUserByUserId(userId);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    DefaultResponseDTO.error(404, 999, "등록된 User 정보를 찾을 수 없습니다.")
+            );
+        }
+
+        // 1) Pageable 객체 생성
+        Pageable pageable = PageRequest.of(page, size);
+
+        // 2) 페이징 조회 - Page 객체
+        Page<BeverageLog> beverageLogPage = userService.findAllBeverageLogsByUserId(userId, pageable);
+
+        // 3) 필요한 건 현재 페이지 데이터만 -> beverageLogPage.getContent()
+        List<BeverageLog> beverageLogs = beverageLogPage.getContent();
+
+        // 4) 엔티티 → DTO 변환 (for문 혹은 stream)
+        List<DailyConsumeBeverageListDTO> dtoList = new ArrayList<>();
+        for (BeverageLog log : beverageLogs) {
+            DailyConsumeBeverageListDTO dto = DailyConsumeBeverageListDTO.fromEntity(log);
+            dtoList.add(dto);
+        }
+
+        return ResponseEntity.status(200).body(
+                DefaultResponseDTO.success("전체 섭취 음료 리스트 조회 성공", dtoList)
+        );
+    }
+
+
     @GetMapping("/daily-brand-list")
     public ResponseEntity<?> getDailyConsumeBrandListOfClient(@AuthenticationPrincipal UserIdHolder userIdHolder){
         Long userId = userIdHolder.getUserId();
@@ -186,18 +217,12 @@ public class UserController {
                 DefaultResponseDTO.success("오늘 영양섭취 정보 조회 성공", infoDTO)
         );
     }
-//
-//    @GetMapping("/api/user/weekly-consume-info")
-//    public ResponseEntity<?> getWeeklyConsumeInfoOfClient(@AuthenticationPrincipal UserIdHolder userIdHolder){
-//
-//    }
-//
+
 //    @GetMapping("/api/user/notice-list")
 //    public ResponseEntity<?> getNoticeListOfClient(@AuthenticationPrincipal UserIdHolder userIdHolder){
 //
 //    }
-//
-//
+
     @PostMapping("/beverage-record")
     public ResponseEntity<?> addBeverageRecord(@AuthenticationPrincipal UserIdHolder userIdHolder,
                                                @RequestBody AddBeverageRecordRequestDTO dto){

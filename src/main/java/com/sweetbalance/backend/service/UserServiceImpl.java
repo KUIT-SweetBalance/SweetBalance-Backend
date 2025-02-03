@@ -16,6 +16,7 @@ import com.sweetbalance.backend.repository.UserRepository;
 
 import com.sweetbalance.backend.util.TimeStringConverter;
 import com.sweetbalance.backend.util.SyrupToSugarMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -220,4 +221,8 @@ public class UserServiceImpl implements UserService {
         );
     }
 
+    @Override
+    public Page<BeverageLog> findAllBeverageLogsByUserId(Long userId, Pageable pageable) {
+        return beverageLogRepository.findAllByUserUserId(userId, pageable);
+    }
 }

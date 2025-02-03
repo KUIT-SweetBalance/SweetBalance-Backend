@@ -9,6 +9,7 @@ import com.sweetbalance.backend.entity.Beverage;
 import com.sweetbalance.backend.entity.BeverageLog;
 import com.sweetbalance.backend.entity.BeverageSize;
 import com.sweetbalance.backend.entity.User;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
@@ -42,4 +43,6 @@ public interface UserService {
     public void editBeverageRecord(Long beverageLogId, BeverageSize beverageSize, AddBeverageRecordRequestDTO dto);
 
     public List<BeverageLog> findTodayBeverageLogsByUserId(Long userId);
+
+    Page<BeverageLog> findAllBeverageLogsByUserId(Long userId, Pageable pageable);
 }
