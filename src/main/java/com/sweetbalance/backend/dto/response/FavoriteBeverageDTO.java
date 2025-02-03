@@ -13,11 +13,7 @@ public class FavoriteBeverageDTO {
     private String name;
     private String brand;
     private String imgUrl;
-    private BeverageCategory category;
 
-    private double sugar;
-    private double calories;
-    private double caffeine;
-
+    private int sugar;
     private String timeString;
 }
