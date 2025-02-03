@@ -107,7 +107,7 @@ public class UserController {
     }
 
     @GetMapping("/beverage-record")
-    public ResponseEntity<?> getAllBeverageListOfClient(@AuthenticationPrincipal UserIdHolder userIdHolder,
+    public ResponseEntity<?> getTotalBeverageListOfClient(@AuthenticationPrincipal UserIdHolder userIdHolder,
                                                         @RequestParam("page") int page,
                                                         @RequestParam("size") int size) {
         Long userId = userIdHolder.getUserId();
@@ -119,24 +119,20 @@ public class UserController {
             );
         }
 
-        // 1) Pageable 객체 생성
         Pageable pageable = PageRequest.of(page, size);
 
-        // 2) 페이징 조회 - Page 객체
         Page<BeverageLog> beverageLogPage = userService.findAllBeverageLogsByUserId(userId, pageable);
 
-        // 3) 필요한 건 현재 페이지 데이터만 -> beverageLogPage.getContent()
         List<BeverageLog> beverageLogs = beverageLogPage.getContent();
 
-        // 4) 엔티티 → DTO 변환 (for문 혹은 stream)
-        List<DailyConsumeBeverageListDTO> dtoList = new ArrayList<>();
+        List<DailyConsumeBeverageListDTO> dailyConsumeBeverageList = new ArrayList<>();
         for (BeverageLog log : beverageLogs) {
-            DailyConsumeBeverageListDTO dto = DailyConsumeBeverageListDTO.fromEntity(log);
-            dtoList.add(dto);
+            DailyConsumeBeverageListDTO dailyConsumeBeverage = DailyConsumeBeverageListDTO.fromEntity(log);
+            dailyConsumeBeverageList.add(dailyConsumeBeverage);
         }
 
         return ResponseEntity.status(200).body(
-                DefaultResponseDTO.success("전체 섭취 음료 리스트 조회 성공", dtoList)
+                DefaultResponseDTO.success("전체 섭취 음료 리스트 조회 성공", dailyConsumeBeverageList)
         );
     }
 
@@ -199,22 +195,22 @@ public class UserController {
 
         List<BeverageLog> dailyBeverageLogs = userService.findTodayBeverageLogsByUserId(userId);
 
-        double rawSugarSum = 0.0;
+        double initSugarSum = 0.0;
         for (BeverageLog log : dailyBeverageLogs) {
-            rawSugarSum += log.getBeverageSize().getSugar();
+            initSugarSum += log.getBeverageSize().getSugar();
         }
 
-        int totalSugar = (int) Math.round(rawSugarSum);
+        int totalSugar = (int) Math.round(initSugarSum);
 
         int beverageCount = dailyBeverageLogs.size();
 
-        DailyConsumeInfoDTO infoDTO = DailyConsumeInfoDTO.builder()
+        DailyConsumeInfoDTO dailyConsumeInfo = DailyConsumeInfoDTO.builder()
                 .totalSugar(totalSugar)
                 .beverageCount(beverageCount)
                 .build();
 
-        return ResponseEntity.ok(
-                DefaultResponseDTO.success("오늘 영양섭취 정보 조회 성공", infoDTO)
+        return ResponseEntity.status(200).body(
+                DefaultResponseDTO.success("오늘 영양섭취 정보 조회 성공", dailyConsumeInfo)
         );
     }
 
