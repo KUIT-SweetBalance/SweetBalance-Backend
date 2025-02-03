@@ -52,7 +52,6 @@ public class BeverageServiceImpl implements BeverageService {
                 .name(beverage.getName())
                 .brand(beverage.getBrand())
                 .imgUrl(beverage.getImgUrl())
-                .category(beverage.getCategory())
                 .consumeCount(beverage.getConsumeCount())
                 .build();
     }
