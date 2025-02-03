@@ -1,6 +1,5 @@
 package com.sweetbalance.backend.service;
 
-import com.sweetbalance.backend.entity.Beverage;
 import com.sweetbalance.backend.entity.BeverageSize;
 import com.sweetbalance.backend.repository.BeverageSizeRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +12,6 @@ import java.util.Optional;
 public class BeverageSizeServiceImpl implements BeverageSizeService {
 
     private final BeverageSizeRepository beverageSizeRepository;
-
 
     @Override
     public Optional<BeverageSize> findBeverageSizeByBeverageSizeId(Long beverageSizeId) {
