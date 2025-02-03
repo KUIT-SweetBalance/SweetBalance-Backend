@@ -17,5 +17,6 @@ public class BeverageDetailsDTO {
     private BeverageCategory category;
     private Integer consumeCount;
 
+    private List<String> syrups;
     private List<BeverageSizeDetailsWithRecommendDTO> sizeDetails;
 }

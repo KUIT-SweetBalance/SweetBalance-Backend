@@ -9,6 +9,8 @@ import com.sweetbalance.backend.entity.BeverageSize;
 import com.sweetbalance.backend.entity.User;
 import com.sweetbalance.backend.repository.BeverageRepository;
 import com.sweetbalance.backend.repository.BeverageSizeRepository;
+import com.sweetbalance.backend.util.syrup.Syrup;
+import com.sweetbalance.backend.util.syrup.SyrupManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -54,16 +56,19 @@ public class BeverageServiceImpl implements BeverageService {
 
     @Override
     public BeverageDetailsDTO getBeverageDetails(Long beverageId) {
-        // Fetch the main Beverage entity
+
         Beverage beverage = beverageRepository.findById(beverageId)
                 .orElseThrow(() -> new RuntimeException("Beverage not found"));
 
-        // Map each size to a DTO with recommendations
+        List<Syrup> syrups = SyrupManager.getSyrupListOfBrand(beverage.getBrand());
+        List<String> syrupNames = syrups.stream()
+                .map(Syrup::getSyrupName)
+                .collect(Collectors.toList());
+
         List<BeverageSizeDetailsWithRecommendDTO> sizeDetails = beverage.getSizes().stream()
                 .map(this::createBeverageSizeDetailsWithRecommend)
                 .collect(Collectors.toList());
 
-        // Build and return the response DTO
         return BeverageDetailsDTO.builder()
                 .beverageId(beverage.getBeverageId())
                 .name(beverage.getName())
@@ -71,24 +76,23 @@ public class BeverageServiceImpl implements BeverageService {
                 .imgUrl(beverage.getImgUrl())
                 .category(beverage.getCategory())
                 .consumeCount(beverage.getConsumeCount())
+                .syrups(syrupNames) // syrup 리스트의 syrupName 만 String 리스트로 반환하도록 하고 싶어요
                 .sizeDetails(sizeDetails)
                 .build();
     }
 
     private BeverageSizeDetailsWithRecommendDTO createBeverageSizeDetailsWithRecommend(BeverageSize size) {
-        // Fetch similar sizes for recommendations within the same brand
+
         List<BeverageSize> similarSizes = beverageSizeRepository.findTopSimilarSizesByBrandAndSugar(
                 size.getBeverage().getBeverageId(),
                 size.getBeverage().getBrand(),
                 size.getSugar(),
                 5);
 
-        // Convert similar sizes to RecommendedBeverageDTOs
         List<RecommendedBeverageDTO> recommends = similarSizes.stream()
                 .map(this::convertToRecommendedBeverageDTO)
                 .collect(Collectors.toList());
 
-        // Build and return the size details DTO
         return BeverageSizeDetailsWithRecommendDTO.builder()
                 .id(size.getId())
                 .sizeType(size.getSizeType())
