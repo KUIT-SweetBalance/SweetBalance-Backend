@@ -44,5 +44,5 @@ public interface UserService {
 
     public List<BeverageLog> findTodayBeverageLogsByUserId(Long userId);
 
-    Page<BeverageLog> findAllBeverageLogsByUserId(Long userId, Pageable pageable);
+    List<BeverageLog> findTotalBeverageLogsByUserId(Long userId, Pageable pageable);
 }

@@ -13,5 +13,5 @@ import java.util.List;
 public interface BeverageLogRepository extends JpaRepository<BeverageLog,Long> {
     List<BeverageLog> findAllByUserUserIdAndCreatedAtBetween(Long userId, LocalDateTime start, LocalDateTime end);
     List<BeverageLog> findByUser_UserIdAndCreatedAtBetween(Long userId, LocalDateTime startDateTime, LocalDateTime endDateTime);
-    Page<BeverageLog> findAllByUserUserId(Long userId, Pageable pageable);
+    List<BeverageLog> findTotalByUserUserId(Long userId, Pageable pageable);
 }

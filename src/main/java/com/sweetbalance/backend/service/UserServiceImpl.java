@@ -222,7 +222,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<BeverageLog> findAllBeverageLogsByUserId(Long userId, Pageable pageable) {
-        return beverageLogRepository.findAllByUserUserId(userId, pageable);
+    public List<BeverageLog> findTotalBeverageLogsByUserId(Long userId, Pageable pageable) {
+        return beverageLogRepository.findTotalByUserUserId(userId, pageable);
     }
 }

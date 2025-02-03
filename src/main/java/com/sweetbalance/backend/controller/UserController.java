@@ -121,14 +121,11 @@ public class UserController {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<BeverageLog> beverageLogPage = userService.findAllBeverageLogsByUserId(userId, pageable);
-
-        List<BeverageLog> beverageLogs = beverageLogPage.getContent();
+        List<BeverageLog> beverageLogs = userService.findTotalBeverageLogsByUserId(userId, pageable);
 
         List<DailyConsumeBeverageListDTO> dailyConsumeBeverageList = new ArrayList<>();
         for (BeverageLog log : beverageLogs) {
-            DailyConsumeBeverageListDTO dailyConsumeBeverage = DailyConsumeBeverageListDTO.fromEntity(log);
-            dailyConsumeBeverageList.add(dailyConsumeBeverage);
+            dailyConsumeBeverageList.add(DailyConsumeBeverageListDTO.fromEntity(log));
         }
 
         return ResponseEntity.status(200).body(
