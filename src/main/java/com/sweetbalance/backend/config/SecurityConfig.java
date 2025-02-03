@@ -116,8 +116,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/reissue").permitAll()
                         .requestMatchers("/api/auth/id-duplicate").permitAll()
                         .requestMatchers("/api/auth/sign-out").hasAnyAuthority(ADMIN.getValue(), USER.getValue())
-                        .requestMatchers("/api/users/**").hasAnyAuthority(ADMIN.getValue(), USER.getValue())
-                        .anyRequest().authenticated())
+                        .requestMatchers("/api/user/**").hasAnyAuthority(ADMIN.getValue(), USER.getValue())
+                        .requestMatchers("/api/beverages/**").hasAnyAuthority(ADMIN.getValue(), USER.getValue())
+                        .anyRequest().permitAll())
 
                 .exceptionHandling(customizer -> customizer
                         .authenticationEntryPoint((request, response, authException) -> {
