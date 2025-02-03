@@ -10,5 +10,5 @@ import lombok.Setter;
 public class MetadataRequestDTO {
         private String nickname;
         private Gender gender;
-        private String one_liner;
+//        private String one_liner;
 }
