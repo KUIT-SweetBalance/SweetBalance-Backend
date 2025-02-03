@@ -57,8 +57,7 @@ public class BeverageServiceImpl implements BeverageService {
     }
 
     @Override
-    public BeverageDetailsDTO getBeverageDetails(Long beverageId) {
-
+    public BeverageDetailsDTO getBeverageDetails(Long beverageId, int limit) {
         Beverage beverage = beverageRepository.findById(beverageId)
                 .orElseThrow(() -> new RuntimeException("Beverage not found"));
 
@@ -68,7 +67,7 @@ public class BeverageServiceImpl implements BeverageService {
                 .collect(Collectors.toList());
 
         List<BeverageSizeDetailsWithRecommendDTO> sizeDetails = beverage.getSizes().stream()
-                .map(this::createBeverageSizeDetailsWithRecommend)
+                .map(size -> createBeverageSizeDetailsWithRecommend(size, limit))
                 .collect(Collectors.toList());
 
         return BeverageDetailsDTO.builder()
@@ -81,12 +80,12 @@ public class BeverageServiceImpl implements BeverageService {
                 .build();
     }
 
-    private BeverageSizeDetailsWithRecommendDTO createBeverageSizeDetailsWithRecommend(BeverageSize size) {
+    private BeverageSizeDetailsWithRecommendDTO createBeverageSizeDetailsWithRecommend(BeverageSize size, int limit) {
         List<BeverageSize> similarSizes = beverageSizeRepository.findTopSimilarSizesByBrandAndSugar(
                 size.getBeverage().getBeverageId(),
                 size.getBeverage().getBrand(),
                 size.getSugar(),
-                5);
+                limit);
 
         List<RecommendedBeverageDTO> recommends = similarSizes.stream()
                 .map(similarSize -> convertToRecommendedBeverageDTO(similarSize, size.getSugar()))

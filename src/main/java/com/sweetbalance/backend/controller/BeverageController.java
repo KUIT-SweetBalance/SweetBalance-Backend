@@ -57,9 +57,10 @@ public class BeverageController {
     }
 
     @GetMapping("/{beverage-id}")
-    public ResponseEntity<?> getBeverageDetail(@PathVariable("beverage-id") Long beverageId) {
+    public ResponseEntity<?> getBeverageDetail(@PathVariable("beverage-id") Long beverageId,
+                                               @RequestParam(value = "limit", defaultValue = "5") int limit) {
         try {
-            BeverageDetailsDTO beverageDetails = beverageService.getBeverageDetails(beverageId);
+            BeverageDetailsDTO beverageDetails = beverageService.getBeverageDetails(beverageId, limit);
             return ResponseEntity.ok(
                     DefaultResponseDTO.success("음료 상세 정보 조회 성공", beverageDetails)
             );
