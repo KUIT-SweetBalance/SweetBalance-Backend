@@ -11,4 +11,5 @@ import java.util.List;
 @Repository
 public interface BeverageLogRepository extends JpaRepository<BeverageLog,Long> {
     List<BeverageLog> findAllByUserUserIdAndStatusAndUpdatedAtBetween(Long userId, Status status, LocalDateTime start, LocalDateTime end);
+    List<BeverageLog> findByUser_UserIdAndCreatedAtBetween(Long userId, LocalDateTime startDateTime, LocalDateTime endDateTime);
 }

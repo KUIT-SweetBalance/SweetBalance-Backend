@@ -92,6 +92,7 @@ public class BeverageServiceImpl implements BeverageService {
         return BeverageSizeDetailsWithRecommendDTO.builder()
                 .id(size.getId())
                 .sizeType(size.getSizeType())
+                .sizeTypeDetail(size.getSizeTypeDetail())
                 .volume(size.getVolume())
                 .sugar((int) size.getSugar())
                 .calories((int) size.getCalories())
@@ -111,8 +112,9 @@ public class BeverageServiceImpl implements BeverageService {
                 .consumeCount(beverage.getConsumeCount())
                 .beverageSizeId(size.getId())
                 .sizeType(size.getSizeType())
+                .sizeTypeDetail(size.getSizeTypeDetail())
                 .volume(size.getVolume())
-                .sugar((int) size.getSugar()) // Cast to int for DTO compatibility
+                .sugar((int) size.getSugar())
                 .calories((int) size.getCalories())
                 .caffeine((int) size.getCaffeine())
                 .build();
