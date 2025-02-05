@@ -25,20 +25,14 @@ public class Alarm extends BaseEntity {
     @Column(name = "content", nullable = false)
     private String content;
 
-    @Column(name = "read_by_user")
-    private Boolean readByUser;
 
-    public Alarm(BeverageLog log, String content, boolean b) {
+    public Alarm(BeverageLog log, String content) {
         this.log = log;
         this.content = content;
-        this.readByUser = b;
     }
 
     public static Alarm of(BeverageLog log, String content) {
-        return new Alarm(log,content,false);
+        return new Alarm(log,content);
     }
 
-    public void readAlarm(){
-        this.readByUser = true;
-    }
 }

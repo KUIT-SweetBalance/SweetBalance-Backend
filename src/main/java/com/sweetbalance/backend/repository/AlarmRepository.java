@@ -16,4 +16,11 @@ public interface AlarmRepository extends JpaRepository<Alarm,Long> {
             LocalDateTime startDateTime,
             LocalDateTime endDateTime
     );
+
+    List<Alarm> findAllByLogUserUserIdAndCreatedAtBetween(
+            Long userId,
+            LocalDateTime startDateTime,
+            LocalDateTime endDateTime
+    );
+
 }

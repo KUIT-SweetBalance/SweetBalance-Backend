@@ -151,6 +151,20 @@ public class UserController {
         }
     }
 
+    @GetMapping("/notice-list")
+    public ResponseEntity<?> getNoticeList(@AuthenticationPrincipal UserIdHolder userIdHolder,
+                                           @RequestParam("page") int page,
+                                           @RequestParam("size") int size) {
+        Long userId = userIdHolder.getUserId();
+        Pageable pageable = PageRequest.of(page, size);
+
+        List<ListBeverageDTO> listBeverages = userService.getFavoriteListByUserId(userId, pageable);
+
+        return ResponseEntity.status(200).body(
+                DefaultResponseDTO.success("알림 리스트 반환 성공", listBeverages)
+        );
+    }
+
     @PostMapping("/favorite/{beverageId}")
     public ResponseEntity<?> addFavorite(@AuthenticationPrincipal UserIdHolder userIdHolder, @PathVariable("beverageId") Long beverageId){
         Long userId = userIdHolder.getUserId();

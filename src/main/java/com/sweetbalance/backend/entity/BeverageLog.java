@@ -36,6 +36,10 @@ public class BeverageLog extends BaseEntity{
     @Column(name = "additional_sugar")
     private double additionalSugar;
 
+
+    @Column(name = "read_by_user")
+    private Boolean readByUser;
+
     /**
      * 음료 기록 수정
      */
@@ -44,6 +48,11 @@ public class BeverageLog extends BaseEntity{
         this.syrupName = syrupName;
         this.syrupCount = syrupCount;
         this.additionalSugar = additionalSugar;
+        this.readByUser = false;
+    }
+
+    public void readedByUser(){
+        this.readByUser = true;
     }
 
     /**

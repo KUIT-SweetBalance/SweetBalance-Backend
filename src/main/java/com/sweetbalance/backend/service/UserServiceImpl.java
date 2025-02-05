@@ -6,6 +6,7 @@ import com.sweetbalance.backend.dto.request.MetadataRequestDTO;
 import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
 import com.sweetbalance.backend.dto.response.DailySugarDTO;
 import com.sweetbalance.backend.dto.response.ListBeverageDTO;
+import com.sweetbalance.backend.dto.response.ListNoticeDTO;
 import com.sweetbalance.backend.dto.response.WeeklyInfoDTO;
 
 import com.sweetbalance.backend.entity.*;
@@ -26,11 +27,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -198,7 +198,6 @@ public class UserServiceImpl implements UserService {
                     // val1의 로그 id를 val2로 변경
                     Alarm alarm = alarmRepository.findById(alarmsOnSameDay.get(i).getId()).orElseThrow();
                     alarm.setLog(beverageLogRepository.findById(val2).get());
-                    alarm.setReadByUser(false);
                     alarmRepository.save(alarm);
                 }
             }
@@ -302,6 +301,69 @@ public class UserServiceImpl implements UserService {
 
         User user = beverageLog.getUser();
         updateAlarm(user, beverageLog);
+    }
+
+    @Override
+    public List<ListNoticeDTO> getNoticeListByUserId(Long userId, Pageable pageable) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1);
+
+        List<Alarm> allAlarms = alarmRepository
+                .findAllByLogUserUserIdAndCreatedAtBetween(userId, now, oneMonthAgo);
+
+        Map<Long, Alarm> alarmByLogId = allAlarms.stream().collect(Collectors.toMap(alarm -> alarm.getLog().getLogId(), Function.identity()));
+
+        List<BeverageLog> sortedLogs = beverageLogRepository
+                .findAllByUserUserIdAndStatusAndCreatedAtBetween(userId,Status.ACTIVE,now,oneMonthAgo)
+                .stream()
+                .sorted(Comparator.comparing(BeverageLog::getCreatedAt))
+                .collect(Collectors.toList());
+
+
+
+        List<BaseEntity> integratedLogs = new ArrayList<>();
+
+        for(BeverageLog log: sortedLogs){
+            integratedLogs.add(log);
+
+            Alarm alarm = alarmByLogId.get(log.getLogId());
+            if(alarm != null){
+                integratedLogs.add(alarm);
+            }
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        List<ListNoticeDTO> result = integratedLogs
+                .stream()
+                .map(entity -> {
+            String timeString = entity.getCreatedAt().format(formatter);
+
+            String message;
+
+
+            if(entity instanceof BeverageLog log){
+                Beverage beverage =  log.getBeverageSize().getBeverage();
+                message = beverage.getBrand() + " " +  beverage.getName();
+
+                Map<String, Object> beverageLogInfo = new LinkedHashMap<>();
+                beverageLogInfo.put("image",beverage.getImgUrl());
+                beverageLogInfo.put("sugar",beverage.getSugar());
+                beverageLogInfo.put("syrupName",log.getSyrupName());
+                beverageLogInfo.put("syrupCount",log.getSyrupCount());
+                beverageLogInfo.put("size",log.getBeverageSize().getSizeType());
+
+                return new ListNoticeDTO(timeString,message,beverageLogInfo);
+            } else if (entity instanceof Alarm alarm){
+                message = alarm.getContent();
+                return  new ListNoticeDTO(timeString,message,null);
+            } else {
+                throw new IllegalStateException("알 수 없는 타입: " + entity.getClass());
+            }
+
+        }).toList();
+
+        return result;
     }
 
     private void addConsumeCount(Beverage beverage){

@@ -4,6 +4,7 @@ import com.sweetbalance.backend.dto.request.AddBeverageRecordRequestDTO;
 import com.sweetbalance.backend.dto.request.MetadataRequestDTO;
 import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
 import com.sweetbalance.backend.dto.response.ListBeverageDTO;
+import com.sweetbalance.backend.dto.response.ListNoticeDTO;
 import com.sweetbalance.backend.dto.response.WeeklyInfoDTO;
 import com.sweetbalance.backend.entity.Beverage;
 import com.sweetbalance.backend.entity.BeverageLog;
@@ -34,6 +35,8 @@ public interface UserService {
     public void addBeverageRecord(User user, BeverageSize beverageSize, AddBeverageRecordRequestDTO addBeverageRecordRequestDTO);
 
     public void deleteBeverageRecord(BeverageLog beverageLog);
+
+    List<ListNoticeDTO> getNoticeListByUserId(Long userId, Pageable pageable);
 
     public void addFavoriteRecord(User user, Beverage beverage);
 
