@@ -56,18 +56,17 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             return null;
         }
 
-        //리소스 서버에서 발급 받은 정보로 사용자를 특정할 아이디값을 만듬
-        String username = oAuth2Response.getProvider()+" "+oAuth2Response.getProviderId();
-
-        Optional<User> existData = userRepository.findByUsername(username);
+        //리소스 서버에서 발급 받은 정보로 사용자를 특정할 아이디값을 만들어 존재하는 유저인지 확인
+        String providerID = oAuth2Response.getProvider()+" "+oAuth2Response.getProviderId();
+        Optional<User> existData = userRepository.findByProviderIdAndStatus(providerID, ACTIVE);
 
         // DB에 존재하지 않는 신규 유저일 때
         if (existData.isEmpty()) {
             User newUser = new User();
             newUser.setRole(USER);
-            newUser.setUsername(username);
-            newUser.setNickname(oAuth2Response.getName());
             newUser.setEmail(oAuth2Response.getEmail());
+            newUser.setNickname(oAuth2Response.getName());
+            newUser.setProviderId(providerID);
             newUser.setLoginType(currentLoginType);
             newUser.setStatus(ACTIVE);
 
@@ -75,8 +74,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
             AuthUserDTO authUserDTO = new AuthUserDTO();
             authUserDTO.setUserId(createdUser.getUserId());
-            authUserDTO.setUsername(username);
-            authUserDTO.setRole(USER.getValue());
+            authUserDTO.setEmail(createdUser.getEmail());
+            authUserDTO.setRole(createdUser.getRole().getValue());
 
             return new CustomOAuth2User(authUserDTO);
         }
@@ -84,14 +83,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         // DB에 이미 존재하는 유저일 때
         else {
             User existUser = existData.get();
-            existUser.setEmail(oAuth2Response.getEmail());
-            existUser.setNickname(oAuth2Response.getName()); //닉네임을 로그인 마다 업데이트 하는 건 아마 삭제될 듯
+            existUser.setEmail(oAuth2Response.getEmail()); // 계정에 연동된 이메일 변동시에만 업데이트
 
             userRepository.save(existUser);
 
             AuthUserDTO authUserDTO = new AuthUserDTO();
             authUserDTO.setUserId(existUser.getUserId());
-            authUserDTO.setUsername(existUser.getUsername());
+            authUserDTO.setEmail(existUser.getEmail());
             authUserDTO.setRole(existUser.getRole().getValue());
 
             return new CustomOAuth2User(authUserDTO);

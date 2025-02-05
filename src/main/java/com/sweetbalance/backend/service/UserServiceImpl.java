@@ -10,6 +10,7 @@ import com.sweetbalance.backend.dto.response.WeeklyInfoDTO;
 import com.sweetbalance.backend.entity.*;
 import com.sweetbalance.backend.enums.common.Status;
 
+import com.sweetbalance.backend.enums.user.LoginType;
 import com.sweetbalance.backend.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -50,8 +51,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public void join(SignUpRequestDTO signUpRequestDTO){
         // 정규식 처리 등 가입 불가 문자에 대한 처리도 진행해주어야 한다.
-        boolean userExists = userRepository.existsByUsername(signUpRequestDTO.getUsername());
-        if(userExists) throw new RuntimeException("The username '" + signUpRequestDTO.getUsername() + "' is already taken.");
+        boolean userExists = userRepository.existsByEmailAndLoginType(signUpRequestDTO.getEmail(), LoginType.BASIC);
+        if(userExists) throw new RuntimeException("The email '" + signUpRequestDTO.getEmail() + "' is already taken.");
 
         User bCryptPasswordEncodedUser = makeBCryptPasswordEncodedUser(signUpRequestDTO);
         userRepository.save(bCryptPasswordEncodedUser);
@@ -71,8 +72,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> findUserByUsername(String username) {
-        return userRepository.findByUsername(username);
+    public Optional<User> findUserByEmailAndLoginType(String email, LoginType loginType) {
+        return userRepository.findByEmailAndLoginType(email, loginType);
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.sweetbalance.backend.controller;
 import com.sweetbalance.backend.dto.DefaultResponseDTO;
 import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
 import com.sweetbalance.backend.entity.User;
+import com.sweetbalance.backend.enums.user.LoginType;
 import com.sweetbalance.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -34,24 +35,24 @@ public class AuthController {
         } catch (RuntimeException e) {
 
             return ResponseEntity.status(400).body(
-                    DefaultResponseDTO.error(400, 999, "중복된 username 또는 email")
+                    DefaultResponseDTO.error(400, 999, "중복된 email")
             );
         }
     }
 
-    @PostMapping("/id-duplicate")
-    public ResponseEntity<?> idDuplicateCheck(@RequestBody Map<String, String> requestBody){
-        String username = requestBody.get("username");
+    @PostMapping("/email-duplicate")
+    public ResponseEntity<?> emailDuplicateCheck(@RequestBody Map<String, String> requestBody){
+        String email = requestBody.get("email");
 
-        Optional<User> user = userService.findUserByUsername(username);
+        Optional<User> user = userService.findUserByEmailAndLoginType(email, LoginType.BASIC);
         if(user.isPresent()) {
             return ResponseEntity.status(200).body(
-                    DefaultResponseDTO.of(200, 1, "이미 사용중인 username 입니다.", null)
+                    DefaultResponseDTO.of(200, 1, "이미 사용중인 email 입니다.", null)
             );
         }
         else{
             return ResponseEntity.status(200).body(
-                    DefaultResponseDTO.of(200, 0, "사용 가능한 username 입니다.", null)
+                    DefaultResponseDTO.of(200, 0, "사용 가능한 email 입니다.", null)
             );
         }
     }

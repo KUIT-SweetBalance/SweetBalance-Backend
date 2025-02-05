@@ -10,17 +10,15 @@ import static com.sweetbalance.backend.enums.user.Role.USER;
 
 @Getter
 public class SignUpRequestDTO {
-    private String username;
-    private String password;
     private String email;
+    private String password;
     private String nickname;
     private Gender gender;
 
     public User toActiveUser(){
         return User.builder()
-                .username(username)
-                .password(password)
                 .email(email)
+                .password(password)
                 .nickname(nickname)
                 .gender(gender)
                 .role(USER)

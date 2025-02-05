@@ -9,6 +9,7 @@ import com.sweetbalance.backend.entity.Beverage;
 import com.sweetbalance.backend.entity.BeverageLog;
 import com.sweetbalance.backend.entity.BeverageSize;
 import com.sweetbalance.backend.entity.User;
+import com.sweetbalance.backend.enums.user.LoginType;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
@@ -21,7 +22,7 @@ public interface UserService {
 
     public Optional<User> findUserByUserId(Long userId);
 
-    public Optional<User> findUserByUsername(String username);
+    public Optional<User> findUserByEmailAndLoginType(String email, LoginType loginType);
 
     List<FavoriteBeverageDTO> getFavoriteListByUserId(Long userId, Pageable pageable);
 

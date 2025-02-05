@@ -3,7 +3,6 @@ package com.sweetbalance.backend.util.handler;
 import com.sweetbalance.backend.dto.identity.CustomOAuth2User;
 import com.sweetbalance.backend.util.JWTUtil;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,26 +38,28 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         CustomOAuth2User customUserDetails = (CustomOAuth2User) authentication.getPrincipal();
 
         Long userId = customUserDetails.getUserId();
-        String username = customUserDetails.getUsername();
+        String email = customUserDetails.getEmail();
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority auth = iterator.next();
         String role = auth.getAuthority();
 
-        String refreshToken = jwtUtil.generateSocialRefreshToken(userId, username, role);
+        String refreshToken = jwtUtil.generateSocialRefreshToken(userId, email, role);
 
-        addSecureCookie(response, "refresh", refreshToken);
+        // addSecureCookie(response, "refresh", refreshToken);
         response.sendRedirect(frontOriginHttps+"/?refresh="+refreshToken);
     }
 
+    // 프론트 측 배포이후 공통된 서브 도메인으로 cookie domain 설정해야만 서드파티 쿠키 사용 가능
     private void addSecureCookie(HttpServletResponse response, String name, String value) {
         ResponseCookie cookie = ResponseCookie.from(name, value)
                 .httpOnly(false)
                 .secure(true)
                 .path("/")
-                .maxAge(24 * 60 * 60) // 24시간
                 .sameSite("None")
+                .maxAge(24 * 60 * 60)
+                //.domain(".nip.io")
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());

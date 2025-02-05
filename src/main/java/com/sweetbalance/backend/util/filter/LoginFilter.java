@@ -39,7 +39,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
-        String username;
+        String email;
         String password;
 
         // JSON 형식 요청 받아오기
@@ -47,14 +47,14 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             String body = StreamUtils.copyToString(request.getInputStream(), StandardCharsets.UTF_8);
             Map<String, String> jsonRequest = objectMapper.readValue(body, Map.class);
 
-            username = jsonRequest.get("username");
+            email = jsonRequest.get("email");
             password = jsonRequest.get("password");
         } catch (IOException e) {
             throw new AuthenticationException("Failed to parse authentication request body") {};
         }
 
         //스프링 시큐리티에서 username과 password를 검증하기 위해서는 token에 담아야 함
-        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password, null);
+        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(email, password, null);
 
         //token에 담은 검증을 위한 AuthenticationManager로 전달
         return authenticationManager.authenticate(authToken);
