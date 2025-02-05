@@ -15,7 +15,7 @@ public class RefreshEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String username;
+    private String email;
 
     @Column(nullable = false, length = 511)
     private String refresh;

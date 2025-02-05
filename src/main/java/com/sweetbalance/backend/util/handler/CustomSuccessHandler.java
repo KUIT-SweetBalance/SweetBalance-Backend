@@ -3,10 +3,12 @@ package com.sweetbalance.backend.util.handler;
 import com.sweetbalance.backend.dto.identity.CustomOAuth2User;
 import com.sweetbalance.backend.util.JWTUtil;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -18,6 +20,9 @@ import java.util.Iterator;
 
 @Component
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+
+    @Value("${spring.front.origin-https}")
+    private String frontOriginHttps;
 
     private final JWTUtil jwtUtil;
 
@@ -33,29 +38,31 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         CustomOAuth2User customUserDetails = (CustomOAuth2User) authentication.getPrincipal();
 
         Long userId = customUserDetails.getUserId();
-        String username = customUserDetails.getUsername();
+        String email = customUserDetails.getEmail();
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority auth = iterator.next();
         String role = auth.getAuthority();
 
-        String refreshToken = jwtUtil.generateSocialRefreshToken(userId, username, role);
+        String refreshToken = jwtUtil.generateSocialRefreshToken(userId, email, role);
+        boolean isNew = customUserDetails.isNewUser();
 
-        // refresh 토큰 발급을 통해 클라이언트가 reissue 할 수 있도록 함
-        // 프론트 HTTPS 배포 이전 까지는 쿠키 방식 응답 미사용
-//        response.addCookie(createCookie("refresh", refreshToken));
-        response.sendRedirect("http://localhost:5173/?refresh="+refreshToken);    // 프론트 측 특정 URL
+        // addSecureCookie(response, "refresh", refreshToken);
+        response.sendRedirect(frontOriginHttps+"?new="+isNew+"&refresh="+refreshToken);
     }
 
-    private Cookie createCookie(String key, String value) {
+    // 프론트 측 배포이후 공통된 서브 도메인으로 cookie domain 설정해야만 서드파티 쿠키 사용 가능
+    private void addSecureCookie(HttpServletResponse response, String name, String value) {
+        ResponseCookie cookie = ResponseCookie.from(name, value)
+                .httpOnly(false)
+                .secure(true)
+                .path("/")
+                .sameSite("None")
+                .maxAge(24 * 60 * 60)
+                //.domain(".nip.io")
+                .build();
 
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(24*60*60);
-        cookie.setPath("/");        // 쿠키가 보일 위치 설정
-        //cookie.setSecure(true);   // HTTPS 에서만 쿠키를 사용할 수 있도록 설정
-        //cookie.setHttpOnly(true);   // JavaScript 쿠키 조작 불가능
-
-        return cookie;
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 }

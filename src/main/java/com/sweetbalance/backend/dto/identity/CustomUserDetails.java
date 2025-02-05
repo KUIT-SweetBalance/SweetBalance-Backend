@@ -10,20 +10,20 @@ import java.util.Collection;
 public class CustomUserDetails implements UserDetails, UserIdHolder {
 
     private Long userId;
-    private String username;
+    private String email;
     private String password;
     private String role;
 
     public CustomUserDetails(AuthUserDTO authUserDTO) {
         this.userId = authUserDTO.getUserId();
-        this.username = authUserDTO.getUsername();
+        this.email = authUserDTO.getEmail();
         this.password = "TMP_PASSWORD";
         this.role = authUserDTO.getRole();
     }
 
     public CustomUserDetails(User user) {
         this.userId = user.getUserId();
-        this.username = user.getUsername();
+        this.email = user.getEmail();
         this.password = user.getPassword();
         this.role = user.getRole().getValue();
     }
@@ -50,8 +50,12 @@ public class CustomUserDetails implements UserDetails, UserIdHolder {
     }
 
     @Override
-    public String getUsername() {
-        return username;
+    public String getUsername() { // 이메일이 UserDetails 에서 username 역할로 변경
+        return email;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     @Override

@@ -5,14 +5,15 @@ import com.sweetbalance.backend.dto.request.AddBeverageRecordRequestDTO;
 import com.sweetbalance.backend.dto.request.MetadataRequestDTO;
 import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
 import com.sweetbalance.backend.dto.response.DailySugarDTO;
-import com.sweetbalance.backend.dto.response.ListBeverageDTO;
 import com.sweetbalance.backend.dto.response.ListNoticeDTO;
+import com.sweetbalance.backend.dto.response.FavoriteBeverageDTO;
 import com.sweetbalance.backend.dto.response.WeeklyInfoDTO;
 
 import com.sweetbalance.backend.entity.*;
 import com.sweetbalance.backend.enums.alarm.SugarWarningMessage;
 import com.sweetbalance.backend.enums.common.Status;
 
+import com.sweetbalance.backend.enums.user.LoginType;
 import com.sweetbalance.backend.repository.*;
 import com.sweetbalance.backend.util.syrup.SugarCalculator;
 import jakarta.persistence.EntityNotFoundException;
@@ -20,6 +21,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import com.sweetbalance.backend.util.TimeStringConverter;
+
+import com.sweetbalance.backend.util.syrup.SugarCalculator;
+
 import org.springframework.data.domain.Pageable;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -28,6 +32,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Function;
@@ -50,8 +55,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public void join(SignUpRequestDTO signUpRequestDTO){
         // 정규식 처리 등 가입 불가 문자에 대한 처리도 진행해주어야 한다.
-        boolean userExists = userRepository.existsByUsername(signUpRequestDTO.getUsername());
-        if(userExists) throw new RuntimeException("The username '" + signUpRequestDTO.getUsername() + "' is already taken.");
+        boolean userExists = userRepository.existsByEmailAndLoginType(signUpRequestDTO.getEmail(), LoginType.BASIC);
+        if(userExists) throw new RuntimeException("The email '" + signUpRequestDTO.getEmail() + "' is already taken.");
 
         User bCryptPasswordEncodedUser = makeBCryptPasswordEncodedUser(signUpRequestDTO);
         userRepository.save(bCryptPasswordEncodedUser);
@@ -71,8 +76,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> findUserByUsername(String username) {
-        return userRepository.findByUsername(username);
+    public Optional<User> findUserByEmailAndLoginType(String email, LoginType loginType) {
+        return userRepository.findByEmailAndLoginType(email, loginType);
     }
 
     @Override
@@ -81,25 +86,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<ListBeverageDTO> getFavoriteListByUserId(Long userId, Pageable pageable) {
+    public List<FavoriteBeverageDTO> getFavoriteListByUserId(Long userId, Pageable pageable) {
         List<Favorite> favorites = favoriteRepository.findByUser_UserIdOrderByCreatedAtDesc(userId, pageable);
         return favorites.stream()
-                .map(this::convertToListBeverageDTO)
+                .map(this::convertToFavoriteBeverageDTO)
                 .collect(Collectors.toList());
     }
 
-    private ListBeverageDTO convertToListBeverageDTO(Favorite favorite) {
+    private FavoriteBeverageDTO convertToFavoriteBeverageDTO(Favorite favorite) {
         Beverage beverage = favorite.getBeverage();
-        return ListBeverageDTO.builder()
+        return FavoriteBeverageDTO.builder()
                 .favoriteId(favorite.getFavoriteId())
                 .beverageId(beverage.getBeverageId())
                 .name(beverage.getName())
                 .brand(beverage.getBrand())
                 .imgUrl(beverage.getImgUrl())
-                .category(beverage.getCategory())
-                .sugar(beverage.getSugar())
-                .calories(beverage.getCalories())
-                .caffeine(beverage.getCaffeine())
+                .sugar((int) Math.round(beverage.getSugar()))
                 .timeString(TimeStringConverter.convertLocalDateTimeToKoreanTimeString(favorite.getCreatedAt()))
                 .build();
     }
@@ -109,10 +111,11 @@ public class UserServiceImpl implements UserService {
         LocalDate today = LocalDate.now();
         LocalDate effectiveEndDate = endDate.isAfter(today) ? today : endDate;
 
-        List<BeverageLog> logs = beverageLogRepository.findByUser_UserIdAndCreatedAtBetween(
+        List<BeverageLog> logs = beverageLogRepository.findByUser_UserIdAndCreatedAtBetweenAndStatus(
                 userId,
                 startDate.atStartOfDay(),
-                effectiveEndDate.atTime(23, 59, 59)
+                effectiveEndDate.atTime(23, 59, 59),
+                Status.ACTIVE
         );
 
         int intake = logs.size();
@@ -134,10 +137,16 @@ public class UserServiceImpl implements UserService {
 
         List<DailySugarDTO> dailySugarList = new ArrayList<>();
         for (LocalDate date = startDate; !date.isAfter(effectiveEndDate); date = date.plusDays(1)) {
-            dailySugarList.add(new DailySugarDTO(date, dailySugar.getOrDefault(date, 0.0)));
+            dailySugarList.add(new DailySugarDTO(date, Math.round(dailySugar.getOrDefault(date, 0.0) * 10.0) / 10.0));
         }
 
-        return new WeeklyInfoDTO(intake, totalSugar, averageSugar, totalCalories, dailySugarList);
+        return WeeklyInfoDTO.builder()
+                .intake(intake)
+                .totalSugar((int) Math.round(totalSugar))
+                .averageSugar(Math.round(averageSugar * 10.0) / 10.0)
+                .totalCalories((int) Math.round(totalCalories))
+                .dailySugar(dailySugarList)
+                .build();
     }
 
     @Override
@@ -390,5 +399,26 @@ public class UserServiceImpl implements UserService {
         Optional<Favorite> favoriteOptional = favoriteRepository.findByUserAndBeverage(user, beverage);
 
         favoriteOptional.ifPresent(favoriteRepository::delete);
+    }
+
+    @Override
+    public List<BeverageLog> findTodayBeverageLogsByUserId(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            return Collections.emptyList();
+        }
+
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfToday = today.atStartOfDay();
+        LocalDateTime endOfToday = today.plusDays(1).atStartOfDay().minusNanos(1);
+
+        //findAllByUserUserIdAndCreatedAtBetween
+        return beverageLogRepository.findByUser_UserIdAndCreatedAtBetween(
+                userId, startOfToday, endOfToday
+        );
+    }
+
+    @Override
+    public List<BeverageLog> findTotalBeverageLogsByUserId(Long userId, Pageable pageable) {
+        return beverageLogRepository.findTotalByUserUserId(userId, pageable);
     }
 }
