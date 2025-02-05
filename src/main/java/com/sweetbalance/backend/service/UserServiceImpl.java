@@ -106,10 +106,11 @@ public class UserServiceImpl implements UserService {
         LocalDate today = LocalDate.now();
         LocalDate effectiveEndDate = endDate.isAfter(today) ? today : endDate;
 
-        List<BeverageLog> logs = beverageLogRepository.findByUser_UserIdAndCreatedAtBetween(
+        List<BeverageLog> logs = beverageLogRepository.findByUser_UserIdAndCreatedAtBetweenAndStatus(
                 userId,
                 startDate.atStartOfDay(),
-                effectiveEndDate.atTime(23, 59, 59)
+                effectiveEndDate.atTime(23, 59, 59),
+                Status.ACTIVE
         );
 
         int intake = logs.size();
