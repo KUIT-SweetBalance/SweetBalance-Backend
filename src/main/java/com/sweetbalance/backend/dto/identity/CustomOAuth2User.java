@@ -10,9 +10,16 @@ import java.util.Map;
 public class CustomOAuth2User implements OAuth2User, UserIdHolder {
 
     private final AuthUserDTO authUserDTO;
+    private boolean isNew;
 
     public CustomOAuth2User(AuthUserDTO authUserDTO) {
         this.authUserDTO = authUserDTO;
+        this.isNew = false;
+    }
+
+    public CustomOAuth2User(AuthUserDTO authUserDTO, boolean isNew) {
+        this.authUserDTO = authUserDTO;
+        this.isNew = isNew;
     }
 
     // 서드파티별로 Response 구조가 달라 사용 X
@@ -37,10 +44,9 @@ public class CustomOAuth2User implements OAuth2User, UserIdHolder {
         return collection;
     }
 
-    // SecurityContextHolder의 name 값은 username을 뜻함
     @Override
     public String getName() {
-        return authUserDTO.getUsername();
+        return authUserDTO.getEmail();
     }
 
     @Override
@@ -48,7 +54,11 @@ public class CustomOAuth2User implements OAuth2User, UserIdHolder {
         return authUserDTO.getUserId();
     }
 
-    public String getUsername() {
-        return authUserDTO.getUsername();
+    public String getEmail() {
+        return authUserDTO.getEmail();
+    }
+
+    public boolean isNewUser(){
+        return isNew;
     }
 }

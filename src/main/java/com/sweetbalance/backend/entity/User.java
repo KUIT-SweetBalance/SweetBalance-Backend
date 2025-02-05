@@ -8,24 +8,25 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"email", "login_type"})
+})
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder @Getter @Setter
-public class User extends BaseEntity{
+public class User extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
-    // String 타입으로 바꿀지 고민
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
 
-    // BASIC USER 라면 로그인 ID, OAuth2 USER 라면 Provider ID 에 대응되는 값
-    @Column(unique = true, nullable = false, length = 255)
-    private String username;
+    // 기존 username을 email에 저장하게 해야함, 기존로직의 모든 username이 email을 대체하는 느낌
+    @Column(nullable = false, length = 255)
+    private String email;
 
     @Column(length = 50)
     private String nickname;
@@ -33,11 +34,12 @@ public class User extends BaseEntity{
     @Column(length = 255)
     private String password;
 
-    @Column(nullable = false, length = 255)
-    private String email;
+    // 소셜 로그인 사용자의 서드파티이름_providerID 저장, 중복검사 시 ID가 아닌 providerId 기준 존재 여부 검사
+    @Column(name = "provider_id", length = 255)
+    private String providerId;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "login_type", nullable = false)
     private LoginType loginType;
 
     @Enumerated(EnumType.STRING)

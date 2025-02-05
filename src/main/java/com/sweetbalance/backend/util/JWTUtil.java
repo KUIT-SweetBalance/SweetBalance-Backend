@@ -33,8 +33,8 @@ public class JWTUtil {
         return Long.valueOf(rawUserId);
     }
 
-    public String getUsername(String token) {
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("username", String.class);
+    public String getEmail(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("email", String.class);
     }
 
     public String getRole(String token) {
@@ -53,12 +53,12 @@ public class JWTUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
 
-    public String generateBasicAccessToken(Long userId, String username, String role) {
+    public String generateBasicAccessToken(Long userId, String email, String role) {
         return Jwts.builder()
                 .claim("sub", userId.toString())
                 .claim("userType", "basic")
                 .claim("tokenType", "access")
-                .claim("username", username)
+                .claim("email", email)
                 .claim("role", role)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + accessTokenExpirationMs))
@@ -66,12 +66,12 @@ public class JWTUtil {
                 .compact();
     }
 
-    public String generateSocialAccessToken(Long userId, String username, String role) {
+    public String generateSocialAccessToken(Long userId, String email, String role) {
         return Jwts.builder()
                 .claim("sub", userId.toString())
                 .claim("userType", "social")
                 .claim("tokenType", "access")
-                .claim("username", username)
+                .claim("email", email)
                 .claim("role", role)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + accessTokenExpirationMs))
@@ -79,33 +79,33 @@ public class JWTUtil {
                 .compact();
     }
 
-    public String generateBasicRefreshToken(Long userId, String username, String role) {
+    public String generateBasicRefreshToken(Long userId, String email, String role) {
         String refreshToken = Jwts.builder()
                 .claim("sub", userId.toString())
                 .claim("userType", "basic")
                 .claim("tokenType", "refresh")
-                .claim("username", username)
+                .claim("email", email)
                 .claim("role", role)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + refreshTokenExpirationMs))
                 .signWith(secretKey)
                 .compact();
-        addRefreshEntity(username, refreshToken);
+        addRefreshEntity(email, refreshToken);
         return refreshToken;
     }
 
-    public String generateSocialRefreshToken(Long userId, String username, String role) {
+    public String generateSocialRefreshToken(Long userId, String email, String role) {
         String refreshToken = Jwts.builder()
                 .claim("sub", userId.toString())
                 .claim("userType", "basic")
                 .claim("tokenType", "refresh")
-                .claim("username", username)
+                .claim("email", email)
                 .claim("role", role)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + refreshTokenExpirationMs))
                 .signWith(secretKey)
                 .compact();
-        addRefreshEntity(username, refreshToken);
+        addRefreshEntity(email, refreshToken);
         return refreshToken;
     }
 
@@ -117,12 +117,12 @@ public class JWTUtil {
         refreshRepository.deleteByRefresh(refresh);
     }
 
-    private void addRefreshEntity(String username, String refresh) {
+    private void addRefreshEntity(String email, String refresh) {
 
         Date date = new Date(System.currentTimeMillis() + refreshTokenExpirationMs);
 
         RefreshEntity refreshEntity = new RefreshEntity();
-        refreshEntity.setUsername(username);
+        refreshEntity.setEmail(email);
         refreshEntity.setRefresh(refresh);
         refreshEntity.setExpiration(date.toString());
 
