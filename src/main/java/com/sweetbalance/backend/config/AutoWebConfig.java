@@ -10,13 +10,16 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @ComponentScan
 public class AutoWebConfig implements WebMvcConfigurer {
 
-    @Value("${spring.front.origin}")
-    private String frontOrigin;
+    @Value("${spring.front.origin-http}")
+    private String frontOriginHttp;
+
+    @Value("${spring.front.origin-https}")
+    private String frontOriginHttps;
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**") // cors를 적용할 spring서버의 url 패턴.
-                .allowedOrigins(frontOrigin, "http://localhost:3000")
+                .allowedOrigins(frontOriginHttp, frontOriginHttps, "http://localhost:3000")
                 .allowedHeaders("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowCredentials(true)
