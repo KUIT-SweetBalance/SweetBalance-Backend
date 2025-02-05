@@ -46,9 +46,10 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String role = auth.getAuthority();
 
         String refreshToken = jwtUtil.generateSocialRefreshToken(userId, email, role);
+        boolean isNew = customUserDetails.isNewUser();
 
         // addSecureCookie(response, "refresh", refreshToken);
-        response.sendRedirect(frontOriginHttps+"/?refresh="+refreshToken);
+        response.sendRedirect(frontOriginHttps+"?new="+isNew+"&refresh="+refreshToken);
     }
 
     // 프론트 측 배포이후 공통된 서브 도메인으로 cookie domain 설정해야만 서드파티 쿠키 사용 가능

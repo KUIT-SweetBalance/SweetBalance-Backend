@@ -77,7 +77,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             authUserDTO.setEmail(createdUser.getEmail());
             authUserDTO.setRole(createdUser.getRole().getValue());
 
-            return new CustomOAuth2User(authUserDTO);
+            return new CustomOAuth2User(authUserDTO, true);
         }
 
         // DB에 이미 존재하는 유저일 때
@@ -92,7 +92,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             authUserDTO.setEmail(existUser.getEmail());
             authUserDTO.setRole(existUser.getRole().getValue());
 
-            return new CustomOAuth2User(authUserDTO);
+            return new CustomOAuth2User(authUserDTO, false);
         }
     }
 }
