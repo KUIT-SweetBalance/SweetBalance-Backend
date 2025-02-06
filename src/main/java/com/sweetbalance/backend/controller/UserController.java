@@ -9,6 +9,7 @@ import com.sweetbalance.backend.entity.Beverage;
 import com.sweetbalance.backend.entity.BeverageLog;
 import com.sweetbalance.backend.entity.BeverageSize;
 import com.sweetbalance.backend.entity.User;
+import com.sweetbalance.backend.enums.user.Gender;
 import com.sweetbalance.backend.service.BeverageService;
 import com.sweetbalance.backend.service.BeverageSizeService;
 import com.sweetbalance.backend.service.UserService;
@@ -202,6 +203,8 @@ public class UserController {
             );
         }
 
+        User user = userOptional.get();
+
         List<BeverageLog> dailyBeverageLogs = userService.findTodayBeverageLogsByUserId(userId);
 
         double initSugarSum = 0.0;
@@ -215,8 +218,16 @@ public class UserController {
 
         int unreadAlarmCount = userService.getNumberOfUnreadLogWithinAWeek();
 
+        int additionalSugar = 0;
+        if (user.getGender() == Gender.MALE) {
+            additionalSugar = 25 - totalSugar;
+        } else if (user.getGender() == Gender.FEMALE) {
+            additionalSugar = 20 - totalSugar;
+        }
+
         DailyConsumeInfoDTO dailyConsumeInfo = DailyConsumeInfoDTO.builder()
                 .totalSugar(totalSugar)
+                .additionalSugar(additionalSugar)
                 .beverageCount(beverageCount)
                 .unreadAlarmCount(unreadAlarmCount)
                 .build();

@@ -432,14 +432,14 @@ public class UserServiceImpl implements UserService {
         LocalDateTime endOfToday = today.plusDays(1).atStartOfDay().minusNanos(1);
 
         //findAllByUserUserIdAndCreatedAtBetween
-        return beverageLogRepository.findByUser_UserIdAndCreatedAtBetween(
-                userId, startOfToday, endOfToday
+        return beverageLogRepository.findByUser_UserIdAndCreatedAtBetweenAndStatus(
+                userId, startOfToday, endOfToday, Status.ACTIVE
         );
     }
 
     @Override
     public List<BeverageLog> findTotalBeverageLogsByUserId(Long userId, Pageable pageable) {
-        return beverageLogRepository.findTotalByUserUserId(userId, pageable);
+        return beverageLogRepository.findTotalByUserUserIdAndStatus(userId, pageable, Status.ACTIVE);
     }
 
     @Override
