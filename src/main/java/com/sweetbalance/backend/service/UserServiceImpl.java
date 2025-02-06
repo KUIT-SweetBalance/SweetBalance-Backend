@@ -439,7 +439,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<BeverageLog> findTotalBeverageLogsByUserId(Long userId, Pageable pageable) {
-        return beverageLogRepository.findTotalByUserUserId(userId, pageable);
+        return beverageLogRepository.findTotalByUserUserIdAndStatus(userId, pageable, Status.ACTIVE);
     }
 
     @Override
