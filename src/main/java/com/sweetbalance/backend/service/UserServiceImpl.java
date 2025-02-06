@@ -313,20 +313,26 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<ListNoticeDTO> getNoticeListByUserId(Long userId, Pageable pageable) {
+    public List<ListNoticeDTO> getNoticeListByUserId(Long userId/*, Pageable pageable*/) {
+        Long start, end;
+        double ms;
+        start = System.nanoTime();
+
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1);
+        LocalDateTime oneWeekAgo = LocalDateTime.now().minusWeeks(1);
 
         List<Alarm> allAlarms = alarmRepository
-                .findAllByLogUserUserIdAndCreatedAtBetween(userId, now, oneMonthAgo);
+                .findAllByLogUserUserIdAndCreatedAtBetween(userId, oneWeekAgo, now);
 
         Map<Long, Alarm> alarmByLogId = allAlarms.stream().collect(Collectors.toMap(alarm -> alarm.getLog().getLogId(), Function.identity()));
 
         List<BeverageLog> sortedLogs = beverageLogRepository
-                .findAllByUserUserIdAndStatusAndCreatedAtBetween(userId,Status.ACTIVE,now,oneMonthAgo)
+                .findAllByUserUserIdAndStatusAndCreatedAtBetween(userId,Status.ACTIVE,oneWeekAgo,now)
                 .stream()
                 .sorted(Comparator.comparing(BeverageLog::getCreatedAt))
                 .collect(Collectors.toList());
+
+
 
 
 
@@ -343,6 +349,7 @@ public class UserServiceImpl implements UserService {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+        start = System.nanoTime();
         List<ListNoticeDTO> result = integratedLogs
                 .stream()
                 .map(entity -> {
@@ -371,6 +378,10 @@ public class UserServiceImpl implements UserService {
             }
 
         }).toList();
+
+        end = System.nanoTime();
+        ms = (end - start) / (1000 * 1000D);
+        System.out.println(ms + " ms");
 
         return result;
     }

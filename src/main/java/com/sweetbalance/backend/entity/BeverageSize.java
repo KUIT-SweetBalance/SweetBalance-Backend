@@ -15,7 +15,7 @@ public class BeverageSize {
     @Column(name = "size_id", nullable = false)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "beverage_id", nullable = false)
     private Beverage beverage;
 

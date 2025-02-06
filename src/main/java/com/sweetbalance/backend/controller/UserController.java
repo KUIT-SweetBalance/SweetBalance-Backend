@@ -259,13 +259,13 @@ public class UserController {
     }
 
     @GetMapping("/notice-list")
-    public ResponseEntity<?> getNoticeList(@AuthenticationPrincipal UserIdHolder userIdHolder,
+    public ResponseEntity<?> getNoticeList(@AuthenticationPrincipal UserIdHolder userIdHolder /*,
                                            @RequestParam("page") int page,
-                                           @RequestParam("size") int size) {
+                                           @RequestParam("size") int size */) {
         Long userId = userIdHolder.getUserId();
-        Pageable pageable = PageRequest.of(page, size);
+//        Pageable pageable = PageRequest.of(page, size);
 
-        List<ListNoticeDTO> listBeverages = userService.getNoticeListByUserId(userId,pageable);
+        List<ListNoticeDTO> listBeverages = userService.getNoticeListByUserId(userId/*,pageable*/);
 
         return ResponseEntity.status(200).body(
                 DefaultResponseDTO.success("알림 리스트 반환 성공", listBeverages)
