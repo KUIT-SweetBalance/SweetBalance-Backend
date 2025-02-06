@@ -172,6 +172,7 @@ public class UserServiceImpl implements UserService {
                 .syrupCount(dto.getSyrupCount())
                 .additionalSugar(additionalSugar)
                 .status(Status.ACTIVE)
+                .readByUser(false)
                 .build();
 
         beverageLogRepository.save(beverageLog);
@@ -313,7 +314,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<ListNoticeDTO> getNoticeListByUserId(Long userId/*, Pageable pageable*/) {
+    public List<ListNoticeDTO> getNoticeListByUserId(Long userId) {
         Long start, end;
         double ms;
         start = System.nanoTime();
@@ -331,9 +332,6 @@ public class UserServiceImpl implements UserService {
                 .stream()
                 .sorted(Comparator.comparing(BeverageLog::getCreatedAt))
                 .collect(Collectors.toList());
-
-
-
 
 
         List<BaseEntity> integratedLogs = new ArrayList<>();
@@ -368,6 +366,8 @@ public class UserServiceImpl implements UserService {
                 beverageLogInfo.put("syrupName",log.getSyrupName());
                 beverageLogInfo.put("syrupCount",log.getSyrupCount());
                 beverageLogInfo.put("size",log.getBeverageSize().getSizeType());
+                beverageLogInfo.put("beverageLogId",log.getLogId());
+                beverageLogInfo.put("isReaded",log.getReadByUser());
 
                 return new ListNoticeDTO(timeString,message,beverageLogInfo);
             } else if (entity instanceof Alarm alarm){
@@ -384,6 +384,16 @@ public class UserServiceImpl implements UserService {
         System.out.println(ms + " ms");
 
         return result;
+    }
+
+    @Override
+    public void checkNoticeReaded(Long beverageLogId) {
+        BeverageLog beverageLog = beverageLogRepository
+                .findById(beverageLogId)
+                .orElseThrow(() -> new EntityNotFoundException("일치하는 음료기록을 찾을 수 없습니다."));
+
+        beverageLog.setReadByUser(true);
+        beverageLogRepository.save(beverageLog);
     }
 
     private void addConsumeCount(Beverage beverage){

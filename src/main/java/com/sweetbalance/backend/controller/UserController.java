@@ -259,18 +259,23 @@ public class UserController {
     }
 
     @GetMapping("/notice-list")
-    public ResponseEntity<?> getNoticeList(@AuthenticationPrincipal UserIdHolder userIdHolder /*,
-                                           @RequestParam("page") int page,
-                                           @RequestParam("size") int size */) {
+    public ResponseEntity<?> getNoticeList(@AuthenticationPrincipal UserIdHolder userIdHolder) {
         Long userId = userIdHolder.getUserId();
-//        Pageable pageable = PageRequest.of(page, size);
 
-        List<ListNoticeDTO> listBeverages = userService.getNoticeListByUserId(userId/*,pageable*/);
+        List<ListNoticeDTO> listBeverages = userService.getNoticeListByUserId(userId);
 
         return ResponseEntity.status(200).body(
                 DefaultResponseDTO.success("알림 리스트 반환 성공", listBeverages)
         );
     }
+
+    @PostMapping("/notice/{beverageLogId}")
+    public ResponseEntity<?> checkAlarmReaded(@AuthenticationPrincipal UserIdHolder userIdHolder, @PathVariable("beverageLogId") Long beverageLogId){
+
+        userService.checkNoticeReaded(beverageLogId);
+        return ResponseEntity.ok(DefaultResponseDTO.success("알람 읽음 기록 추가 성공", null));
+    }
+
 
     @PostMapping("/favorite/{beverageId}")
     public ResponseEntity<?> addFavorite(@AuthenticationPrincipal UserIdHolder userIdHolder, @PathVariable("beverageId") Long beverageId){

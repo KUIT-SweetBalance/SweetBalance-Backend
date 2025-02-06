@@ -37,7 +37,9 @@ public interface UserService {
 
     public void deleteBeverageRecord(BeverageLog beverageLog);
 
-    List<ListNoticeDTO> getNoticeListByUserId(Long userId/*, Pageable pageable*/);
+    public List<ListNoticeDTO> getNoticeListByUserId(Long userId);
+
+    public void checkNoticeReaded(Long beverageLogId);
 
     public void addFavoriteRecord(User user, Beverage beverage);
 
