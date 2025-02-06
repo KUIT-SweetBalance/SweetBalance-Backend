@@ -18,4 +18,5 @@ public interface BeverageLogRepository extends JpaRepository<BeverageLog,Long> {
     List<BeverageLog> findByUser_UserIdAndCreatedAtBetween(Long userId, LocalDateTime startDateTime, LocalDateTime endDateTime);
     List<BeverageLog> findByUser_UserIdAndCreatedAtBetweenAndStatus(Long userId, LocalDateTime startDateTime, LocalDateTime endDateTime, Status status);
     List<BeverageLog> findTotalByUserUserId(Long userId, Pageable pageable);
+    List<BeverageLog> findByCreatedAtAfterAndReadByUserFalse(LocalDateTime dateTime);
 }

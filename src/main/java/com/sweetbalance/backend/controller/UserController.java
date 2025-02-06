@@ -76,10 +76,10 @@ public class UserController {
         LocalDate endDate = (startDate != null) ? startDate.plusDays(6) : LocalDate.now();
         startDate = (startDate != null) ? startDate : endDate.minusDays(6);
 
-        WeeklyInfoDTO weeklyInfoDTO = userService.getWeeklyConsumeInfo(userId, startDate, endDate);
+        WeeklyConsumeInfoDTO weeklyConsumeInfoDTO = userService.getWeeklyConsumeInfo(userId, startDate, endDate);
 
         return ResponseEntity.status(200).body(
-                DefaultResponseDTO.success("주간 영양정보 반환 성공", weeklyInfoDTO)
+                DefaultResponseDTO.success("주간 영양정보 반환 성공", weeklyConsumeInfoDTO)
         );
     }
 
@@ -197,9 +197,12 @@ public class UserController {
 
         int beverageCount = dailyBeverageLogs.size();
 
+        int unreadAlarmCount = userService.getNumberOfUnreadLogWithinAWeek();
+
         DailyConsumeInfoDTO dailyConsumeInfo = DailyConsumeInfoDTO.builder()
                 .totalSugar(totalSugar)
                 .beverageCount(beverageCount)
+                .unreadAlarmCount(unreadAlarmCount)
                 .build();
 
         return ResponseEntity.status(200).body(
