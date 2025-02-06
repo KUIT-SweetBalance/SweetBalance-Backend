@@ -9,7 +9,6 @@ import com.sweetbalance.backend.entity.Beverage;
 import com.sweetbalance.backend.entity.BeverageLog;
 import com.sweetbalance.backend.entity.BeverageSize;
 import com.sweetbalance.backend.entity.User;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
@@ -45,4 +44,6 @@ public interface UserService {
     public List<BeverageLog> findTodayBeverageLogsByUserId(Long userId);
 
     List<BeverageLog> findTotalBeverageLogsByUserId(Long userId, Pageable pageable);
+
+    public boolean sendTemporaryPassword(String email);
 }

@@ -56,6 +56,34 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/re-password")
+    public ResponseEntity<?> rePassword(@RequestBody Map<String, String> requestBody) {
+        String email = requestBody.get("email");
+        if (email == null || email.isEmpty()) {
+            return ResponseEntity.status(400).body(
+                    DefaultResponseDTO.error(400, 1000, "이메일이 입력되지 않았습니다.")
+            );
+        }
+
+        try {
+            boolean result = userService.sendTemporaryPassword(email);
+
+            if(result) {
+                return ResponseEntity.status(200).body(
+                        DefaultResponseDTO.success("임시 비밀번호가 발송되었습니다.", null)
+                );
+            } else {
+                return ResponseEntity.status(400).body(
+                        DefaultResponseDTO.error(400, 1001, "해당 이메일을 가진 사용자를 찾을 수 없습니다.")
+                );
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(
+                    DefaultResponseDTO.error(500, 1002, "임시 비밀번호 발급 중 오류가 발생했습니다.")
+            );
+        }
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<?> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
         String errorMessage = "잘못된 입력 형식입니다.";

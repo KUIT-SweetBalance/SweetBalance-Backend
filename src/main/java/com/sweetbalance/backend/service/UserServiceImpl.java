@@ -6,35 +6,22 @@ import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
 import com.sweetbalance.backend.dto.response.DailySugarDTO;
 import com.sweetbalance.backend.dto.response.ListBeverageDTO;
 import com.sweetbalance.backend.dto.response.WeeklyInfoDTO;
-
 import com.sweetbalance.backend.entity.*;
 import com.sweetbalance.backend.enums.common.Status;
-
 import com.sweetbalance.backend.repository.*;
+import com.sweetbalance.backend.util.TimeStringConverter;
+import com.sweetbalance.backend.util.syrup.SugarCalculator;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-
-import com.sweetbalance.backend.util.TimeStringConverter;
-import org.springframework.data.domain.Page;
-
-import com.sweetbalance.backend.util.syrup.SugarCalculator;
-import com.sweetbalance.backend.util.syrup.SyrupManager;
-
 import org.springframework.data.domain.Pageable;
-
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,6 +36,7 @@ public class UserServiceImpl implements UserService {
     private final SugarCalculator sugarCalculator;
     private final BeverageLogRepository beverageLogRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final EmailService emailService;
 
     @Override
     public void join(SignUpRequestDTO signUpRequestDTO){
@@ -253,5 +241,35 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<BeverageLog> findTotalBeverageLogsByUserId(Long userId, Pageable pageable) {
         return beverageLogRepository.findTotalByUserUserId(userId, pageable);
+    }
+
+    @Override
+    public boolean sendTemporaryPassword(String email) {
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        if (userOptional.isEmpty()) {
+            return false;
+        }
+        User user = userOptional.get();
+
+        String tempPassword = generateRandomPassword(8);
+        user.setPassword(bCryptPasswordEncoder.encode(tempPassword));
+        userRepository.save(user);
+
+        emailService.sendTemporaryPasswordMail(email, tempPassword);
+
+        return true;
+    }
+
+    private String generateRandomPassword(int length) {
+        String charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$";
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder();
+
+        for(int i=0; i<length; i++){
+            int randIndex = random.nextInt(charSet.length());
+            sb.append(charSet.charAt(randIndex));
+        }
+
+        return sb.toString();
     }
 }
