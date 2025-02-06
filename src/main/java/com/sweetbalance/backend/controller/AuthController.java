@@ -26,18 +26,27 @@ public class AuthController {
 
     @PostMapping("/sign-up")
     public ResponseEntity<?> signUp(@RequestBody SignUpRequestDTO signUpRequestDTO){
-        try {
+        try{
+            String email = signUpRequestDTO.getEmail();
+            Optional<User> user = userService.findUserByEmailAndLoginType(email, LoginType.BASIC);
+
+            if(user.isPresent()) {
+                return ResponseEntity.status(400).body(
+                        DefaultResponseDTO.error(400, 101, "중복된 email")
+                );
+            }
 
             userService.join(signUpRequestDTO);
             return ResponseEntity.status(200).body(
                     DefaultResponseDTO.success("회원가입 성공", null)
             );
-        } catch (RuntimeException e) {
 
-            return ResponseEntity.status(400).body(
-                    DefaultResponseDTO.error(400, 999, "중복된 email")
+        } catch (Exception e){
+            return ResponseEntity.status(500).body(
+                    DefaultResponseDTO.error(500, 999, "회원가입 실패")
             );
         }
+
     }
 
     @PostMapping("/email-duplicate")
