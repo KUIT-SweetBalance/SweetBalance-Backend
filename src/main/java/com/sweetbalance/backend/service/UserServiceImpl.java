@@ -377,7 +377,7 @@ public class UserServiceImpl implements UserService {
                 throw new IllegalStateException("알 수 없는 타입: " + entity.getClass());
             }
 
-        }).toList();
+        }).toList().reversed();
 
         end = System.nanoTime();
         ms = (end - start) / (1000 * 1000D);
