@@ -1,17 +1,21 @@
 package com.sweetbalance.backend.service;
 
+import com.nimbusds.jose.util.Pair;
 import com.sweetbalance.backend.dto.request.AddBeverageRecordRequestDTO;
 import com.sweetbalance.backend.dto.request.MetadataRequestDTO;
 import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
 import com.sweetbalance.backend.dto.response.DailySugarDTO;
+import com.sweetbalance.backend.dto.response.ListNoticeDTO;
 import com.sweetbalance.backend.dto.response.FavoriteBeverageDTO;
 import com.sweetbalance.backend.dto.response.WeeklyInfoDTO;
 
 import com.sweetbalance.backend.entity.*;
+import com.sweetbalance.backend.enums.alarm.SugarWarningMessage;
 import com.sweetbalance.backend.enums.common.Status;
 
 import com.sweetbalance.backend.enums.user.LoginType;
 import com.sweetbalance.backend.repository.*;
+import com.sweetbalance.backend.util.syrup.SugarCalculator;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -27,12 +31,11 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,6 +47,7 @@ public class UserServiceImpl implements UserService {
     private final FavoriteRepository favoriteRepository;
     private final BeverageSizeRepository beverageSizeRepository;
     private final BeverageRepository beverageRepository;
+    private final AlarmRepository alarmRepository;
     private final SugarCalculator sugarCalculator;
     private final BeverageLogRepository beverageLogRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -168,13 +172,105 @@ public class UserServiceImpl implements UserService {
                 .syrupCount(dto.getSyrupCount())
                 .additionalSugar(additionalSugar)
                 .status(Status.ACTIVE)
+                .readByUser(false)
                 .build();
 
         beverageLogRepository.save(beverageLog);
 
         addConsumeCount(beverage);
 
+        updateAlarm(user, beverageLog);
+
     }
+
+    public void updateAlarm(User user, BeverageLog beverageLog){
+        List<BeverageLog> logsOnSameDay = getLogsOnSameDay(user.getUserId(), beverageLog);
+        List<Alarm> alarmsOnSameDay = getAlarmsOnSameDay(user.getUserId(), beverageLog);
+        System.out.println("logsOnSameDay = " + logsOnSameDay);
+        System.out.println("alarmsOnSameDay = " + alarmsOnSameDay);
+
+        // 알람의 위치는 어디가 적절한가?
+        List<Pair<Long,SugarWarningMessage>> properAlarm = getproperAlarm(logsOnSameDay);
+        System.out.println("properAlarm = " + properAlarm);
+
+        int size1 = alarmsOnSameDay.size();
+        int size2 = properAlarm.size();
+        int max_size = Math.max(size1, size2);
+
+        for (int i = 0; i < max_size; i++) {
+            Long val1 = (i < size1) ? alarmsOnSameDay.get(i).getId() : null;
+            Long val2 = (i < size2) ? properAlarm.get(i).getLeft() : null;
+
+            // case 1) 둘 다 존재할 때
+            if (val1 != null && val2 != null) {
+                if (!val1.equals(val2)) {
+                    // 인덱스가 같지만 값이 다름
+                    // val1의 로그 id를 val2로 변경
+                    Alarm alarm = alarmRepository.findById(alarmsOnSameDay.get(i).getId()).orElseThrow();
+                    alarm.setLog(beverageLogRepository.findById(val2).get());
+                    alarmRepository.save(alarm);
+                }
+            }
+            // case 2) 한쪽은 이미 끝까지 간 경우 (null)
+            else {
+                // 한쪽 리스트에만 남은 원소가 존재
+                if (val1 != null) {
+                    // alarmsOnSameDay에만 값이 남아 있을 때
+                    Alarm alarm = alarmRepository.findById(alarmsOnSameDay.get(i).getId()).orElseThrow();
+                    alarmRepository.delete(alarm);
+                }
+                if (val2 != null) {
+                    // appropriatePositions에만 값이 남아 있을 때
+                    String warningMessage;
+                    if(i == 1){
+                        warningMessage = "당 25g 이상 섭취, 일일 권장량 초과";
+                    } else {
+                        warningMessage = "당 20g 섭취, 주의 필요";
+                    }
+                    Alarm alarm = Alarm.of(beverageLogRepository.findById(val2).get(), properAlarm.get(i).getRight().getMessage());
+                    System.out.println("alarm = " + alarm);
+                    alarmRepository.save(alarm);
+                }
+            }
+        }
+
+
+    }
+
+    private List<Pair<Long,SugarWarningMessage>> getproperAlarm(List<BeverageLog> logsOnSameDay) {
+        final double cautionAmountOfSugar = 20.0D;
+        final double exceedAmountOfSugar = 25.0D;
+
+        List<Pair<Long,SugarWarningMessage>> properAlarm = new ArrayList<>();
+        double accumulatedSugar = 0.0D;
+        double creteria = cautionAmountOfSugar;
+        for (BeverageLog bl : logsOnSameDay) {
+            accumulatedSugar += bl.getBeverageSize().getSugar() + bl.getAdditionalSugar();
+            if(accumulatedSugar >= exceedAmountOfSugar){
+                properAlarm.add(Pair.of(bl.getLogId(), SugarWarningMessage.EXCEED));
+                break;
+            } else if (accumulatedSugar >= creteria){
+                properAlarm.add(Pair.of(bl.getLogId(), SugarWarningMessage.CAUTION));
+                creteria = exceedAmountOfSugar;
+            }
+        }
+        return properAlarm;
+    }
+
+    public List<BeverageLog> getLogsOnSameDay(Long userId, BeverageLog beverageLog) {
+        LocalDate updatedDate = beverageLog.getUpdatedAt().toLocalDate();
+        LocalDateTime startOfDay = updatedDate.atStartOfDay();
+        LocalDateTime endOfDay = updatedDate.plusDays(1).atStartOfDay().minusNanos(1);
+        return beverageLogRepository.findAllByUserUserIdAndStatusAndUpdatedAtBetween(userId, Status.ACTIVE, startOfDay,endOfDay);
+    }
+
+    public List<Alarm> getAlarmsOnSameDay(Long userId, BeverageLog beverageLog) {
+        LocalDate updatedDate = beverageLog.getUpdatedAt().toLocalDate();
+        LocalDateTime startOfDay = updatedDate.atStartOfDay();
+        LocalDateTime endOfDay = updatedDate.plusDays(1).atStartOfDay().minusNanos(1);
+        return alarmRepository.findAllByLogUserUserIdAndUpdatedAtBetween(userId,startOfDay,endOfDay);
+    }
+
 
     // 로그 Id로 음료 기록 찾고, 음료 사이즈 정보, 시럽 이름, 시럽 개수, 추가 당 함량 다시 설정.
     @Override
@@ -200,6 +296,9 @@ public class UserServiceImpl implements UserService {
             addConsumeCount(newBeverage);
         }
 
+        User user = beverageLog.getUser();
+        updateAlarm(user, beverageLog);
+
     }
 
     @Override
@@ -209,6 +308,92 @@ public class UserServiceImpl implements UserService {
 
         Beverage beverage = beverageLog.getBeverageSize().getBeverage();
         subConsumeCount(beverage);
+
+        User user = beverageLog.getUser();
+        updateAlarm(user, beverageLog);
+    }
+
+    @Override
+    public List<ListNoticeDTO> getNoticeListByUserId(Long userId) {
+        Long start, end;
+        double ms;
+        start = System.nanoTime();
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime oneWeekAgo = LocalDateTime.now().minusWeeks(1);
+
+        List<Alarm> allAlarms = alarmRepository
+                .findAllByLogUserUserIdAndCreatedAtBetween(userId, oneWeekAgo, now);
+
+        Map<Long, Alarm> alarmByLogId = allAlarms.stream().collect(Collectors.toMap(alarm -> alarm.getLog().getLogId(), Function.identity()));
+
+        List<BeverageLog> sortedLogs = beverageLogRepository
+                .findAllByUserUserIdAndStatusAndCreatedAtBetween(userId,Status.ACTIVE,oneWeekAgo,now)
+                .stream()
+                .sorted(Comparator.comparing(BeverageLog::getCreatedAt))
+                .collect(Collectors.toList());
+
+
+        List<BaseEntity> integratedLogs = new ArrayList<>();
+
+        for(BeverageLog log: sortedLogs){
+            integratedLogs.add(log);
+
+            Alarm alarm = alarmByLogId.get(log.getLogId());
+            if(alarm != null){
+                integratedLogs.add(alarm);
+            }
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        start = System.nanoTime();
+        List<ListNoticeDTO> result = integratedLogs
+                .stream()
+                .map(entity -> {
+            String timeString = entity.getCreatedAt().format(formatter);
+
+            String message;
+
+
+            if(entity instanceof BeverageLog log){
+                Beverage beverage =  log.getBeverageSize().getBeverage();
+                message = beverage.getBrand() + " " +  beverage.getName();
+
+                Map<String, Object> beverageLogInfo = new LinkedHashMap<>();
+                beverageLogInfo.put("image",beverage.getImgUrl());
+                beverageLogInfo.put("sugar",beverage.getSugar());
+                beverageLogInfo.put("syrupName",log.getSyrupName());
+                beverageLogInfo.put("syrupCount",log.getSyrupCount());
+                beverageLogInfo.put("size",log.getBeverageSize().getSizeType());
+                beverageLogInfo.put("beverageLogId",log.getLogId());
+                beverageLogInfo.put("isReaded",log.getReadByUser());
+
+                return new ListNoticeDTO(timeString,message,beverageLogInfo);
+            } else if (entity instanceof Alarm alarm){
+                message = alarm.getContent();
+                return  new ListNoticeDTO(timeString,message,null);
+            } else {
+                throw new IllegalStateException("알 수 없는 타입: " + entity.getClass());
+            }
+
+        }).toList().reversed();
+
+        end = System.nanoTime();
+        ms = (end - start) / (1000 * 1000D);
+        System.out.println(ms + " ms");
+
+        return result;
+    }
+
+    @Override
+    public void checkNoticeReaded(Long beverageLogId) {
+        BeverageLog beverageLog = beverageLogRepository
+                .findById(beverageLogId)
+                .orElseThrow(() -> new EntityNotFoundException("일치하는 음료기록을 찾을 수 없습니다."));
+
+        beverageLog.setReadByUser(true);
+        beverageLogRepository.save(beverageLog);
     }
 
     private void addConsumeCount(Beverage beverage){
@@ -247,7 +432,8 @@ public class UserServiceImpl implements UserService {
         LocalDateTime startOfToday = today.atStartOfDay();
         LocalDateTime endOfToday = today.plusDays(1).atStartOfDay().minusNanos(1);
 
-        return beverageLogRepository.findAllByUserUserIdAndCreatedAtBetween(
+        //findAllByUserUserIdAndCreatedAtBetween
+        return beverageLogRepository.findByUser_UserIdAndCreatedAtBetween(
                 userId, startOfToday, endOfToday
         );
     }
