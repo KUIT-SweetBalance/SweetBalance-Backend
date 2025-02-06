@@ -88,7 +88,7 @@ public class BeverageController {
             );
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(
-                    DefaultResponseDTO.error(400, 1001, "잘못된 정렬 기준입니다")
+                    DefaultResponseDTO.error(400, 101, "잘못된 파라미터 값입니다.")
             );
         } catch (Exception e) {
             return ResponseEntity.status(500).body(

@@ -57,14 +57,22 @@ public class UserController {
     public ResponseEntity<?> getFavoriteList(@AuthenticationPrincipal UserIdHolder userIdHolder,
                                              @RequestParam("page") int page,
                                              @RequestParam("size") int size) {
-        Long userId = userIdHolder.getUserId();
-        Pageable pageable = PageRequest.of(page, size);
+        try{
 
-        List<FavoriteBeverageDTO> listBeverages = userService.getFavoriteListByUserId(userId, pageable);
+            Long userId = userIdHolder.getUserId();
+            Pageable pageable = PageRequest.of(page, size);
 
-        return ResponseEntity.status(200).body(
-                DefaultResponseDTO.success("즐겨찾기 음료 리스트 반환 성공", listBeverages)
-        );
+            List<FavoriteBeverageDTO> listBeverages = userService.getFavoriteListByUserId(userId, pageable);
+
+            return ResponseEntity.status(200).body(
+                    DefaultResponseDTO.success("즐겨찾기 음료 리스트 반환 성공", listBeverages)
+            );
+        } catch(Exception e){
+            
+            return ResponseEntity.status(500).body(
+                    DefaultResponseDTO.error(500, 999, "즐겨찾기 음료 리스트 반환 실패")
+            );
+        }
     }
 
     @GetMapping("/weekly-consume-info")
@@ -72,15 +80,23 @@ public class UserController {
             @AuthenticationPrincipal UserIdHolder userIdHolder,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate) {
 
-        Long userId = userIdHolder.getUserId();
-        LocalDate endDate = (startDate != null) ? startDate.plusDays(6) : LocalDate.now();
-        startDate = (startDate != null) ? startDate : endDate.minusDays(6);
+        try{
 
-        WeeklyConsumeInfoDTO weeklyConsumeInfoDTO = userService.getWeeklyConsumeInfo(userId, startDate, endDate);
+            Long userId = userIdHolder.getUserId();
+            LocalDate endDate = (startDate != null) ? startDate.plusDays(6) : LocalDate.now();
+            startDate = (startDate != null) ? startDate : endDate.minusDays(6);
 
-        return ResponseEntity.status(200).body(
-                DefaultResponseDTO.success("주간 영양정보 반환 성공", weeklyConsumeInfoDTO)
-        );
+            WeeklyConsumeInfoDTO weeklyConsumeInfoDTO = userService.getWeeklyConsumeInfo(userId, startDate, endDate);
+
+            return ResponseEntity.status(200).body(
+                    DefaultResponseDTO.success("주간 영양정보 반환 성공", weeklyConsumeInfoDTO)
+            );
+        } catch (Exception e){
+
+            return ResponseEntity.status(500).body(
+                    DefaultResponseDTO.error(500, 999, "주간 영양정보 반환 실패")
+            );
+        }
     }
 
     @PostMapping("/meta-data")

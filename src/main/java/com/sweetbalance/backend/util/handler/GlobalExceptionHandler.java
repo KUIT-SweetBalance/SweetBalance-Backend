@@ -12,7 +12,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NoHandlerFoundException.class)
     public ResponseEntity<?> handle404(NoHandlerFoundException ex) {
         return ResponseEntity.status(404).body(
-                DefaultResponseDTO.of(404, 0, "존재하지 않는 엔드포인트입니다.", null)
+                DefaultResponseDTO.of(404, 999, "존재하지 않는 엔드포인트입니다.", null)
         );
     }
 }
