@@ -8,4 +8,5 @@ import lombok.*;
 public class DailyConsumeInfoDTO {
     private int totalSugar;
     private int beverageCount;
+    private int unreadAlarmCount;
 }

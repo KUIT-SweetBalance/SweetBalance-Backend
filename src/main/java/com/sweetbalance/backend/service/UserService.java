@@ -5,7 +5,7 @@ import com.sweetbalance.backend.dto.request.MetadataRequestDTO;
 import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
 import com.sweetbalance.backend.dto.response.FavoriteBeverageDTO;
 import com.sweetbalance.backend.dto.response.ListNoticeDTO;
-import com.sweetbalance.backend.dto.response.WeeklyInfoDTO;
+import com.sweetbalance.backend.dto.response.WeeklyConsumeInfoDTO;
 import com.sweetbalance.backend.entity.Beverage;
 import com.sweetbalance.backend.entity.BeverageLog;
 import com.sweetbalance.backend.entity.BeverageSize;
@@ -27,7 +27,7 @@ public interface UserService {
 
     List<FavoriteBeverageDTO> getFavoriteListByUserId(Long userId, Pageable pageable);
 
-    WeeklyInfoDTO getWeeklyConsumeInfo(Long userId, LocalDate startDate, LocalDate endDate);
+    WeeklyConsumeInfoDTO getWeeklyConsumeInfo(Long userId, LocalDate startDate, LocalDate endDate);
 
     public Optional<BeverageLog> findBeverageLogByBeverageLogId(Long beverageLogId);
 
@@ -50,4 +50,6 @@ public interface UserService {
     public List<BeverageLog> findTodayBeverageLogsByUserId(Long userId);
 
     List<BeverageLog> findTotalBeverageLogsByUserId(Long userId, Pageable pageable);
+
+    int getNumberOfUnreadLogWithinAWeek();
 }

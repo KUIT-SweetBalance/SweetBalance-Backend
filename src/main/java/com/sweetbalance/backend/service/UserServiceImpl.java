@@ -7,7 +7,7 @@ import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
 import com.sweetbalance.backend.dto.response.DailySugarDTO;
 import com.sweetbalance.backend.dto.response.ListNoticeDTO;
 import com.sweetbalance.backend.dto.response.FavoriteBeverageDTO;
-import com.sweetbalance.backend.dto.response.WeeklyInfoDTO;
+import com.sweetbalance.backend.dto.response.WeeklyConsumeInfoDTO;
 
 import com.sweetbalance.backend.entity.*;
 import com.sweetbalance.backend.enums.alarm.SugarWarningMessage;
@@ -21,8 +21,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import com.sweetbalance.backend.util.TimeStringConverter;
-
-import com.sweetbalance.backend.util.syrup.SugarCalculator;
 
 import org.springframework.data.domain.Pageable;
 
@@ -107,7 +105,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public WeeklyInfoDTO getWeeklyConsumeInfo(Long userId, LocalDate startDate, LocalDate endDate) {
+    public WeeklyConsumeInfoDTO getWeeklyConsumeInfo(Long userId, LocalDate startDate, LocalDate endDate) {
         LocalDate today = LocalDate.now();
         LocalDate effectiveEndDate = endDate.isAfter(today) ? today : endDate;
 
@@ -140,11 +138,12 @@ public class UserServiceImpl implements UserService {
             dailySugarList.add(new DailySugarDTO(date, Math.round(dailySugar.getOrDefault(date, 0.0) * 10.0) / 10.0));
         }
 
-        return WeeklyInfoDTO.builder()
+        return WeeklyConsumeInfoDTO.builder()
                 .intake(intake)
                 .totalSugar((int) Math.round(totalSugar))
                 .averageSugar(Math.round(averageSugar * 10.0) / 10.0)
                 .totalCalories((int) Math.round(totalCalories))
+                .unreadAlarmCount(getNumberOfUnreadLogWithinAWeek())
                 .dailySugar(dailySugarList)
                 .build();
     }
@@ -441,5 +440,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<BeverageLog> findTotalBeverageLogsByUserId(Long userId, Pageable pageable) {
         return beverageLogRepository.findTotalByUserUserId(userId, pageable);
+    }
+
+    @Override
+    public int getNumberOfUnreadLogWithinAWeek() {
+        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+        return beverageLogRepository
+                .findByCreatedAtAfterAndReadByUserFalse(sevenDaysAgo)
+                .size();
     }
 }
