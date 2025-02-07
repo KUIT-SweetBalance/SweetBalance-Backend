@@ -11,6 +11,8 @@ import com.sweetbalance.backend.util.syrup.Syrup;
 import com.sweetbalance.backend.util.syrup.SyrupManager;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -124,16 +126,26 @@ public class BeverageServiceImpl implements BeverageService {
         return beverageRepository.findById(beverageId);
     }
 
+    @Override
     public List<InnerListBeverageDTO> findBeveragesByFilters(
-            String brand, String category, String keyword, String sort
+            String brand, String category, String keyword, String sort, Integer page, Integer size
     ) {
         Specification<Beverage> spec = buildSpecification(brand, category, keyword);
         Sort sortOrder = resolveSort(sort);
 
-        return beverageRepository.findAll(spec, sortOrder)
-                .stream()
-                .map(this::convertToInnerListBeverageDTO)
-                .collect(Collectors.toList());
+        if (page != null && size != null) {
+            Pageable pageable = PageRequest.of(page, size, sortOrder);
+            return beverageRepository.findAll(spec, pageable)
+                    .getContent()
+                    .stream()
+                    .map(this::convertToInnerListBeverageDTO)
+                    .collect(Collectors.toList());
+        } else {
+            return beverageRepository.findAll(spec, sortOrder)
+                    .stream()
+                    .map(this::convertToInnerListBeverageDTO)
+                    .collect(Collectors.toList());
+        }
     }
 
     private Specification<Beverage> buildSpecification(String brand, String category, String keyword) {
