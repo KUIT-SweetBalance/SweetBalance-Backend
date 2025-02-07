@@ -52,10 +52,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void join(SignUpRequestDTO signUpRequestDTO){
-        // 정규식 처리 등 가입 불가 문자에 대한 처리도 진행해주어야 한다.
-        boolean userExists = userRepository.existsByEmailAndLoginType(signUpRequestDTO.getEmail(), LoginType.BASIC);
-        if(userExists) throw new RuntimeException("The email '" + signUpRequestDTO.getEmail() + "' is already taken.");
-
         User bCryptPasswordEncodedUser = makeBCryptPasswordEncodedUser(signUpRequestDTO);
         userRepository.save(bCryptPasswordEncodedUser);
     }
@@ -74,8 +70,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> findUserByEmailAndLoginType(String email, LoginType loginType) {
-        return userRepository.findByEmailAndLoginType(email, loginType);
+    public Optional<User> findUserByEmailAndLoginTypeAndDeletedAtIsNull(String email, LoginType loginType) {
+        return userRepository.findByEmailAndLoginTypeAndDeletedAtIsNull(email, loginType);
     }
 
     @Override

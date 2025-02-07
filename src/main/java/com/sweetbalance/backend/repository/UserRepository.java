@@ -19,9 +19,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmailAndLoginType(String email, LoginType loginType);
 
-    Optional<User> findByProviderIdAndStatus(String providerId, Status status);
+    Optional<User> findByEmailAndLoginTypeAndDeletedAtIsNull(String email, LoginType loginType);
 
-    // 특정 사용자 ID로 Beverage 목록 조회
-    @Query("SELECT b FROM BeverageLog bl JOIN bl.beverageSize b WHERE bl.user.userId = :userId")
-    List<Beverage> findBeveragesByUserId(@Param("userId") Long userId);
+    Optional<User> findByProviderIdAndStatus(String providerId, Status status);
 }

@@ -30,7 +30,7 @@ public class AuthController {
     public ResponseEntity<?> signUp(@RequestBody SignUpRequestDTO signUpRequestDTO){
         try{
             String email = signUpRequestDTO.getEmail();
-            Optional<User> user = userService.findUserByEmailAndLoginType(email, LoginType.BASIC);
+            Optional<User> user = userService.findUserByEmailAndLoginTypeAndDeletedAtIsNull(email, LoginType.BASIC);
 
             if(user.isPresent()) {
                 return ResponseEntity.status(400).body(
@@ -44,18 +44,18 @@ public class AuthController {
             );
 
         } catch (Exception e){
+            e.printStackTrace();
             return ResponseEntity.status(500).body(
                     DefaultResponseDTO.error(500, 999, "회원가입 실패")
             );
         }
-
     }
 
     @PostMapping("/email-duplicate")
     public ResponseEntity<?> emailDuplicateCheck(@RequestBody Map<String, String> requestBody){
         String email = requestBody.get("email");
 
-        Optional<User> user = userService.findUserByEmailAndLoginType(email, LoginType.BASIC);
+        Optional<User> user = userService.findUserByEmailAndLoginTypeAndDeletedAtIsNull(email, LoginType.BASIC);
         if(user.isPresent()) {
             return ResponseEntity.status(200).body(
                     DefaultResponseDTO.of(200, 1, "이미 사용중인 email 입니다.", null)
