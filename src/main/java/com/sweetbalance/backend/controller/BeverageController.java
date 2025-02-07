@@ -77,11 +77,13 @@ public class BeverageController {
             @RequestParam(value = "brand", required = false) String brand,
             @RequestParam(value = "category", required = false) String category,
             @RequestParam(value = "keyword", required = false) String keyword,
-            @RequestParam(value = "sort", defaultValue = "lexOrder") String sort
+            @RequestParam(value = "sort", defaultValue = "lexOrder") String sort,
+            @RequestParam(value = "page", required = false) Integer page,
+            @RequestParam(value = "size", required = false) Integer size
     ) {
         try {
             List<InnerListBeverageDTO> beverages = beverageService.findBeveragesByFilters(
-                    brand, category, keyword, sort
+                    brand, category, keyword, sort, page, size
             );
             return ResponseEntity.ok(
                     DefaultResponseDTO.success("조건부 음료 리스트 조회 성공", beverages)
@@ -96,5 +98,4 @@ public class BeverageController {
             );
         }
     }
-
 }
