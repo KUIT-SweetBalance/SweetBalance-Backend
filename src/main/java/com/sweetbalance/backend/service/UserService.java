@@ -23,7 +23,9 @@ public interface UserService {
 
     public Optional<User> findUserByUserId(Long userId);
 
-    public Optional<User> findUserByEmailAndLoginType(String email, LoginType loginType);
+    Optional<User> findUserByEmailAndLoginTypeAndDeletedAtIsNull(String email, LoginType loginType);
+
+    void softDeleteUser(User user);
 
     List<FavoriteBeverageDTO> getFavoriteListByUserId(Long userId, Pageable pageable);
 

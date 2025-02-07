@@ -1,6 +1,7 @@
 package com.sweetbalance.backend.controller;
 
 import com.sweetbalance.backend.dto.DefaultResponseDTO;
+import com.sweetbalance.backend.dto.identity.UserIdHolder;
 import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
 import com.sweetbalance.backend.entity.User;
 import com.sweetbalance.backend.enums.user.LoginType;
@@ -8,6 +9,7 @@ import com.sweetbalance.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -28,7 +30,7 @@ public class AuthController {
     public ResponseEntity<?> signUp(@RequestBody SignUpRequestDTO signUpRequestDTO){
         try{
             String email = signUpRequestDTO.getEmail();
-            Optional<User> user = userService.findUserByEmailAndLoginType(email, LoginType.BASIC);
+            Optional<User> user = userService.findUserByEmailAndLoginTypeAndDeletedAtIsNull(email, LoginType.BASIC);
 
             if(user.isPresent()) {
                 return ResponseEntity.status(400).body(
@@ -42,18 +44,18 @@ public class AuthController {
             );
 
         } catch (Exception e){
+            e.printStackTrace();
             return ResponseEntity.status(500).body(
                     DefaultResponseDTO.error(500, 999, "회원가입 실패")
             );
         }
-
     }
 
     @PostMapping("/email-duplicate")
     public ResponseEntity<?> emailDuplicateCheck(@RequestBody Map<String, String> requestBody){
         String email = requestBody.get("email");
 
-        Optional<User> user = userService.findUserByEmailAndLoginType(email, LoginType.BASIC);
+        Optional<User> user = userService.findUserByEmailAndLoginTypeAndDeletedAtIsNull(email, LoginType.BASIC);
         if(user.isPresent()) {
             return ResponseEntity.status(200).body(
                     DefaultResponseDTO.of(200, 1, "이미 사용중인 email 입니다.", null)
@@ -62,6 +64,24 @@ public class AuthController {
         else{
             return ResponseEntity.status(200).body(
                     DefaultResponseDTO.of(200, 0, "사용 가능한 email 입니다.", null)
+            );
+        }
+    }
+
+    @DeleteMapping("/withdraw")
+    public ResponseEntity<?> withdrawUser(@AuthenticationPrincipal UserIdHolder userIdHolder){
+
+        Long userId = userIdHolder.getUserId();
+        Optional<User> userOptional = userService.findUserByUserId(userId);
+
+        if (userOptional.isPresent()) {
+            userService.softDeleteUser(userOptional.get());
+            return ResponseEntity.status(200).body(
+                    DefaultResponseDTO.success("회원 탈퇴 완료", null)
+            );
+        } else {
+            return ResponseEntity.status(404).body(
+                    DefaultResponseDTO.error(404, 999, "등록된 User 정보를 찾을 수 없습니다.")
             );
         }
     }
