@@ -79,6 +79,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void softDeleteUser(User user) {
+        user.setStatus(Status.DELETED);
+        user.setDeletedAt(LocalDateTime.now());
+        userRepository.save(user);
+    }
+
+    @Override
     public Optional<BeverageLog> findBeverageLogByBeverageLogId(Long beverageLogId) {
         return beverageLogRepository.findById(beverageLogId);
     }

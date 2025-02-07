@@ -7,9 +7,11 @@ import com.sweetbalance.backend.enums.user.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "users", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"email", "login_type"})
+        @UniqueConstraint(columnNames = {"email", "login_type", "deleted_at"})
 })
 @NoArgsConstructor
 @AllArgsConstructor
@@ -49,4 +51,7 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column
     private Status status;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 }

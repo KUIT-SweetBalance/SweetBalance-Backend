@@ -117,8 +117,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/api/auth/sign-up", "/api/auth/sign-in").permitAll()
                         .requestMatchers("/api/auth/reissue").permitAll()
-                        .requestMatchers("/api/auth/id-duplicate").permitAll()
+                        .requestMatchers("/api/auth/email-duplicate").permitAll()
                         .requestMatchers("/api/auth/sign-out").hasAnyAuthority(ADMIN.getValue(), USER.getValue())
+                        .requestMatchers("/api/auth/withdraw").hasAnyAuthority(ADMIN.getValue(), USER.getValue())
                         .requestMatchers("/api/user/**").hasAnyAuthority(ADMIN.getValue(), USER.getValue())
                         .requestMatchers("/api/beverages/**").hasAnyAuthority(ADMIN.getValue(), USER.getValue())
                         .anyRequest().permitAll())
