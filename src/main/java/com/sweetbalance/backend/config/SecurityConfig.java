@@ -35,8 +35,11 @@ import static com.sweetbalance.backend.enums.user.Role.*;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Value("${spring.front.origin}")
-    private String frontOrigin;
+    @Value("${spring.front.origin-http}")
+    private String frontOriginHttp;
+
+    @Value("${spring.front.origin-https}")
+    private String frontOriginHttps;
 
     private final AuthenticationConfiguration authenticationConfiguration;
     private final CustomOAuth2UserService customOAuth2UserService;
@@ -77,7 +80,7 @@ public class SecurityConfig {
 
                         CorsConfiguration configuration = new CorsConfiguration();
 
-                        configuration.setAllowedOrigins(List.of(frontOrigin, "http://localhost:3000"));
+                        configuration.setAllowedOrigins(List.of(frontOriginHttp, frontOriginHttps, "http://localhost:3000"));
                         configuration.setAllowedHeaders(Collections.singletonList("*"));
                         configuration.setAllowedMethods(Collections.singletonList("*"));
                         configuration.setAllowCredentials(true);
@@ -114,11 +117,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/api/auth/sign-up", "/api/auth/sign-in").permitAll()
                         .requestMatchers("/api/auth/reissue").permitAll()
-                        .requestMatchers("/api/auth/id-duplicate").permitAll()
                         .requestMatchers("/api/auth/re-password").permitAll()
+                        .requestMatchers("/api/auth/email-duplicate").permitAll()
                         .requestMatchers("/api/auth/sign-out").hasAnyAuthority(ADMIN.getValue(), USER.getValue())
-                        .requestMatchers("/api/users/**").hasAnyAuthority(ADMIN.getValue(), USER.getValue())
-                        .anyRequest().authenticated())
+                        .requestMatchers("/api/auth/withdraw").hasAnyAuthority(ADMIN.getValue(), USER.getValue())
+                        .requestMatchers("/api/user/**").hasAnyAuthority(ADMIN.getValue(), USER.getValue())
+                        .requestMatchers("/api/beverages/**").hasAnyAuthority(ADMIN.getValue(), USER.getValue())
+                        .anyRequest().permitAll())
 
                 .exceptionHandling(customizer -> customizer
                         .authenticationEntryPoint((request, response, authException) -> {

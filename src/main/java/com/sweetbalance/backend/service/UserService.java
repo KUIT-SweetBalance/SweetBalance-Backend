@@ -3,12 +3,14 @@ package com.sweetbalance.backend.service;
 import com.sweetbalance.backend.dto.request.AddBeverageRecordRequestDTO;
 import com.sweetbalance.backend.dto.request.MetadataRequestDTO;
 import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
-import com.sweetbalance.backend.dto.response.ListBeverageDTO;
-import com.sweetbalance.backend.dto.response.WeeklyInfoDTO;
+import com.sweetbalance.backend.dto.response.FavoriteBeverageDTO;
+import com.sweetbalance.backend.dto.response.ListNoticeDTO;
+import com.sweetbalance.backend.dto.response.WeeklyConsumeInfoDTO;
 import com.sweetbalance.backend.entity.Beverage;
 import com.sweetbalance.backend.entity.BeverageLog;
 import com.sweetbalance.backend.entity.BeverageSize;
 import com.sweetbalance.backend.entity.User;
+import com.sweetbalance.backend.enums.user.LoginType;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
@@ -21,11 +23,13 @@ public interface UserService {
 
     public Optional<User> findUserByUserId(Long userId);
 
-    public Optional<User> findUserByUsername(String username);
+    Optional<User> findUserByEmailAndLoginTypeAndDeletedAtIsNull(String email, LoginType loginType);
 
-    List<ListBeverageDTO> getFavoriteListByUserId(Long userId, Pageable pageable);
+    void softDeleteUser(User user);
 
-    WeeklyInfoDTO getWeeklyConsumeInfo(Long userId, LocalDate startDate, LocalDate endDate);
+    List<FavoriteBeverageDTO> getFavoriteListByUserId(Long userId, Pageable pageable);
+
+    WeeklyConsumeInfoDTO getWeeklyConsumeInfo(Long userId, LocalDate startDate, LocalDate endDate);
 
     public Optional<BeverageLog> findBeverageLogByBeverageLogId(Long beverageLogId);
 
@@ -34,6 +38,10 @@ public interface UserService {
     public void addBeverageRecord(User user, BeverageSize beverageSize, AddBeverageRecordRequestDTO addBeverageRecordRequestDTO);
 
     public void deleteBeverageRecord(BeverageLog beverageLog);
+
+    public List<ListNoticeDTO> getNoticeListByUserId(Long userId);
+
+    public void checkNoticeReaded(Long beverageLogId);
 
     public void addFavoriteRecord(User user, Beverage beverage);
 
@@ -46,4 +54,6 @@ public interface UserService {
     List<BeverageLog> findTotalBeverageLogsByUserId(Long userId, Pageable pageable);
 
     public boolean sendTemporaryPassword(String email);
+  
+    int getNumberOfUnreadLogWithinAWeek();
 }

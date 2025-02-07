@@ -84,7 +84,7 @@ public class ReissueController {
         }
 
         Long userId = jwtUtil.getUserId(refresh);
-        String username = jwtUtil.getUsername(refresh);
+        String email = jwtUtil.getEmail(refresh);
         String role = jwtUtil.getRole(refresh);
 
         String userType = jwtUtil.getUserType(refresh);
@@ -92,33 +92,18 @@ public class ReissueController {
         String newRefreshToken = null;
 
         if(userType.equals("basic")){
-            newAccessToken = jwtUtil.generateBasicAccessToken(userId, username, role);
-            newRefreshToken = jwtUtil.generateBasicRefreshToken(userId, username, role);
+            newAccessToken = jwtUtil.generateBasicAccessToken(userId, email, role);
+            newRefreshToken = jwtUtil.generateBasicRefreshToken(userId, email, role);
         }
         if(userType.equals("social")){
-            newAccessToken = jwtUtil.generateSocialAccessToken(userId, username, role);
-            newRefreshToken = jwtUtil.generateSocialRefreshToken(userId, username, role);
+            newAccessToken = jwtUtil.generateSocialAccessToken(userId, email, role);
+            newRefreshToken = jwtUtil.generateSocialRefreshToken(userId, email, role);
         }
         jwtUtil.deleteRefreshEntity(refresh);
-
-        // 프론트 HTTPS 배포 이전 까지는 쿠키 방식 응답 미사용
-//        response.setHeader("Authorization", "Bearer " + newAccessToken);
-//        response.addCookie(createCookie("refresh", newRefreshToken));
 
         TokenPairDTO tokens = new TokenPairDTO(newAccessToken, newRefreshToken);
         return ResponseEntity.status(200).body(
                 DefaultResponseDTO.success("토큰 재발급 성공", tokens)
         );
-    }
-
-    private Cookie createCookie(String key, String value) {
-
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(24*60*60);
-        cookie.setPath("/");        // 쿠키가 보일 위치 설정
-        //cookie.setSecure(true);   // HTTPS 에서만 쿠키를 사용할 수 있도록 설정
-        //cookie.setHttpOnly(true);   // JavaScript 쿠키 조작 불가능
-
-        return cookie;
     }
 }

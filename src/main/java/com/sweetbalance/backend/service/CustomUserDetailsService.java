@@ -2,6 +2,7 @@ package com.sweetbalance.backend.service;
 
 import com.sweetbalance.backend.dto.identity.CustomUserDetails;
 import com.sweetbalance.backend.entity.User;
+import com.sweetbalance.backend.enums.user.LoginType;
 import com.sweetbalance.backend.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -21,16 +22,14 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
-        //DB에서 조회
-        Optional<User> userData = userRepository.findByUsername(username);
+        Optional<User> userData = userRepository.findByEmailAndLoginTypeAndDeletedAtIsNull(email, LoginType.BASIC);
 
-        if (userData.isPresent()) {
-            //UserDetails에 담아서 return하면 AutneticationManager가 검증 함
-            return new CustomUserDetails(userData.get());
+        if (userData.isEmpty()) {
+            throw new UsernameNotFoundException("User not found with email: " + email);
         }
 
-        return null;
+        return new CustomUserDetails(userData.get());
     }
 }
