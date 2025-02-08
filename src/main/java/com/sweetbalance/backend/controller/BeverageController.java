@@ -1,11 +1,14 @@
 package com.sweetbalance.backend.controller;
 
 import com.sweetbalance.backend.dto.DefaultResponseDTO;
+import com.sweetbalance.backend.dto.identity.UserIdHolder;
 import com.sweetbalance.backend.dto.response.BeverageDetailsDTO;
 import com.sweetbalance.backend.dto.response.BrandPopularBeverageDTO;
+import com.sweetbalance.backend.dto.response.InnerListBeverageDTO;
 import com.sweetbalance.backend.service.BeverageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -56,9 +59,15 @@ public class BeverageController {
     }
 
     @GetMapping("/{beverage-id}")
-    public ResponseEntity<?> getBeverageDetail(@PathVariable("beverage-id") Long beverageId) {
+    public ResponseEntity<?> getBeverageDetail(
+            @AuthenticationPrincipal UserIdHolder userIdHolder,
+            @PathVariable("beverage-id") Long beverageId,
+            @RequestParam(value = "limit", defaultValue = "5") int limit)
+    {
+        Long userId = userIdHolder.getUserId();
+
         try {
-            BeverageDetailsDTO beverageDetails = beverageService.getBeverageDetails(beverageId);
+            BeverageDetailsDTO beverageDetails = beverageService.getBeverageDetails(userId, beverageId, limit);
             return ResponseEntity.ok(
                     DefaultResponseDTO.success("음료 상세 정보 조회 성공", beverageDetails)
             );
@@ -66,6 +75,36 @@ public class BeverageController {
             e.printStackTrace();
             return ResponseEntity.status(500).body(
                     DefaultResponseDTO.error(500, 999, "음료 상세 정보 조회 실패")
+            );
+        }
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<?> getBeverageListFilteredByParameters(
+            @AuthenticationPrincipal UserIdHolder userIdHolder,
+            @RequestParam(value = "brand", required = false) String brand,
+            @RequestParam(value = "category", required = false) String category,
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "sort", defaultValue = "lexOrder") String sort,
+            @RequestParam(value = "page", required = false) Integer page,
+            @RequestParam(value = "size", required = false) Integer size
+    ) {
+        Long userId = userIdHolder.getUserId();
+
+        try {
+            List<InnerListBeverageDTO> beverages = beverageService.findBeveragesByFilters(
+                    userId, brand, category, keyword, sort, page, size
+            );
+            return ResponseEntity.ok(
+                    DefaultResponseDTO.success("조건부 음료 리스트 조회 성공", beverages)
+            );
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(
+                    DefaultResponseDTO.error(400, 101, "잘못된 파라미터 값입니다.")
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(
+                    DefaultResponseDTO.error(500, 999, "조건부 음료 리스트 조회 실패")
             );
         }
     }

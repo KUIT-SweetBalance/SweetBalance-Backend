@@ -13,7 +13,10 @@ import java.util.Locale;
 @Getter @Setter @Builder
 public class DailyConsumeBeverageListDTO {
 
+    private Long beverageLogId;
+    private Long beverageSizeId;
     private String createdAt;
+    private String brand;
     private String beverageName;
     private String imgUrl;
     private int sugar;
@@ -35,7 +38,10 @@ public class DailyConsumeBeverageListDTO {
         int roundedSugar = (int) Math.round(rawSugar);
 
         return DailyConsumeBeverageListDTO.builder()
+                .beverageLogId(log.getLogId())
+                .beverageSizeId(beverageSize.getId())
                 .createdAt(formattedDateTime)
+                .brand(beverage.getBrand())
                 .beverageName(beverage.getName())
                 .imgUrl(beverage.getImgUrl())
                 .sugar(roundedSugar)
