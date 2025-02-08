@@ -124,4 +124,36 @@ public class AuthController {
                 DefaultResponseDTO.error(400, 999, errorMessage)
         );
     }
+
+    @PostMapping("/email-verification")
+    public ResponseEntity<?> sendEmailVerificationCode(@RequestBody Map<String, String> requestBody) {
+        String email = requestBody.get("email");
+        if (email == null || email.isEmpty()) {
+            return ResponseEntity.status(400).body(
+                    DefaultResponseDTO.error(400, 1000, "이메일이 입력되지 않았습니다.")
+            );
+        }
+        if (!email.matches("^\\S+@\\S+\\.\\S+$")) {
+            return ResponseEntity.status(400).body(
+                    DefaultResponseDTO.error(400, 1003, "유효하지 않은 이메일 형식입니다.")
+            );
+        }
+        try {
+            boolean result = userService.sendEmailVerificationCode(email);
+            if(result) {
+                return ResponseEntity.status(200).body(
+                        DefaultResponseDTO.success("6자리 인증코드가 발송되었습니다.", null)
+                );
+            } else {
+                return ResponseEntity.status(400).body(
+                        DefaultResponseDTO.error(400, 1004, "인증코드 발송에 실패했습니다.")
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(
+                    DefaultResponseDTO.error(500, 999, "인증코드 발급 중 오류가 발생했습니다.")
+            );
+        }
+    }
 }

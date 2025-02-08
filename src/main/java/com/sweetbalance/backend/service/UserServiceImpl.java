@@ -484,4 +484,16 @@ public class UserServiceImpl implements UserService {
 
         return sb.toString();
     }
+
+    @Override
+    public boolean sendEmailVerificationCode(String email) {
+        String verificationCode = String.format("%06d", new Random().nextInt(1000000));
+        try {
+            emailService.sendEmailVerificationCodeMail(email, verificationCode);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

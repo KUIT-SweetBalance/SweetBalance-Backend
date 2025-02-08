@@ -56,4 +56,6 @@ public interface UserService {
     int getNumberOfUnreadLogWithinAWeek();
 
     public boolean sendTemporaryPassword(String email);
+
+    public boolean sendEmailVerificationCode(String email);
 }
