@@ -351,32 +351,35 @@ public class UserServiceImpl implements UserService {
         List<ListNoticeDTO> result = integratedLogs
                 .stream()
                 .map(entity -> {
+                    
             String timeString = entity.getCreatedAt().format(formatter);
-
             String message;
+            
+            switch (entity) {
+                case BeverageLog log -> {
+                    Beverage beverage =  log.getBeverageSize().getBeverage();
+                    message = beverage.getBrand() + " " +  beverage.getName();
 
+                    Map<String, Object> beverageLogInfo = new LinkedHashMap<>();
+                    beverageLogInfo.put("image",beverage.getImgUrl());
+                    beverageLogInfo.put("sugar",beverage.getSugar());
+                    beverageLogInfo.put("syrupName",log.getSyrupName());
+                    beverageLogInfo.put("syrupCount",log.getSyrupCount());
+                    beverageLogInfo.put("size",log.getBeverageSize().getSizeType());
+                    beverageLogInfo.put("beverageLogId",log.getLogId());
+                    beverageLogInfo.put("isReaded",log.getReadByUser());
 
-            if(entity instanceof BeverageLog log){
-                Beverage beverage =  log.getBeverageSize().getBeverage();
-                message = beverage.getBrand() + " " +  beverage.getName();
-
-                Map<String, Object> beverageLogInfo = new LinkedHashMap<>();
-                beverageLogInfo.put("image",beverage.getImgUrl());
-                beverageLogInfo.put("sugar",beverage.getSugar());
-                beverageLogInfo.put("syrupName",log.getSyrupName());
-                beverageLogInfo.put("syrupCount",log.getSyrupCount());
-                beverageLogInfo.put("size",log.getBeverageSize().getSizeType());
-                beverageLogInfo.put("beverageLogId",log.getLogId());
-                beverageLogInfo.put("isReaded",log.getReadByUser());
-
-                return new ListNoticeDTO(timeString,message,beverageLogInfo);
-            } else if (entity instanceof Alarm alarm){
-                message = alarm.getContent();
-                return  new ListNoticeDTO(timeString,message,null);
-            } else {
-                throw new IllegalStateException("알 수 없는 타입: " + entity.getClass());
+                    return new ListNoticeDTO(timeString,message,beverageLogInfo);
+                }
+                
+                case Alarm alarm -> {
+                    message = alarm.getContent();
+                    return  new ListNoticeDTO(timeString,message,null);
+                }
+                
+                default -> throw new IllegalStateException("알 수 없는 타입: " + entity.getClass());
             }
-
+            
         }).toList().reversed();
 
         end = System.nanoTime();
