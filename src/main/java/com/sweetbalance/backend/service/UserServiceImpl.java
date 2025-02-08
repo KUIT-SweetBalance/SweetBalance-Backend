@@ -102,7 +102,7 @@ public class UserServiceImpl implements UserService {
                 .name(beverage.getName())
                 .brand(beverage.getBrand())
                 .imgUrl(beverage.getImgUrl())
-                .sugar((int) Math.round(beverage.getSugar()))
+                .sugarPer100ml((int) Math.round(beverage.getSugar()))
                 .timeString(TimeStringConverter.convertLocalDateTimeToKoreanTimeString(favorite.getCreatedAt()))
                 .build();
     }
