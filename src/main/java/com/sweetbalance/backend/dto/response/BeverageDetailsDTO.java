@@ -1,6 +1,5 @@
 package com.sweetbalance.backend.dto.response;
 
-import com.sweetbalance.backend.enums.beverage.BeverageCategory;
 import lombok.*;
 
 import java.util.List;
@@ -14,6 +13,7 @@ public class BeverageDetailsDTO {
     private String name;
     private String brand;
     private String imgUrl;
+    private boolean favorite;
 
     private List<String> syrups;
     private List<BeverageSizeDetailsWithRecommendDTO> sizeDetails;
