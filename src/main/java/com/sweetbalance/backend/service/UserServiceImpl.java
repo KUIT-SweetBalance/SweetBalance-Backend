@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -51,6 +52,8 @@ public class UserServiceImpl implements UserService {
     private final BeverageLogRepository beverageLogRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final EmailService emailService;
+
+    private final Map<String, Pair<String, LocalDateTime>> emailVerificationCodeStore = new ConcurrentHashMap<>();
 
     @Override
     public void join(SignUpRequestDTO signUpRequestDTO){
@@ -488,6 +491,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean sendEmailVerificationCode(String email) {
         String verificationCode = String.format("%06d", new Random().nextInt(1000000));
+        LocalDateTime expirationTime = LocalDateTime.now().plusMinutes(3);
+        emailVerificationCodeStore.put(email, Pair.of(verificationCode, expirationTime));
         try {
             emailService.sendEmailVerificationCodeMail(email, verificationCode);
             return true;
@@ -495,5 +500,24 @@ public class UserServiceImpl implements UserService {
             e.printStackTrace();
             return false;
         }
+    }
+
+    @Override
+    public boolean checkEmailVerificationCode(String email, String code) {
+        Pair<String, LocalDateTime> storedInfo = emailVerificationCodeStore.get(email);
+        if (storedInfo == null) {
+            return false;
+        }
+        String storedCode = storedInfo.getLeft();
+        LocalDateTime expirationTime = storedInfo.getRight();
+        if (LocalDateTime.now().isAfter(expirationTime)) {
+            emailVerificationCodeStore.remove(email);
+            return false;
+        }
+        if (storedCode.equals(code)) {
+            emailVerificationCodeStore.remove(email);
+            return true;
+        }
+        return false;
     }
 }

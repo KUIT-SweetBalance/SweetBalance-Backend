@@ -58,4 +58,6 @@ public interface UserService {
     public boolean sendTemporaryPassword(String email);
 
     public boolean sendEmailVerificationCode(String email);
+
+    public boolean checkEmailVerificationCode(String email, String code);
 }

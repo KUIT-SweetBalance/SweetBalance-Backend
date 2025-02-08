@@ -2,6 +2,7 @@ package com.sweetbalance.backend.controller;
 
 import com.sweetbalance.backend.dto.DefaultResponseDTO;
 import com.sweetbalance.backend.dto.identity.UserIdHolder;
+import com.sweetbalance.backend.dto.request.EmailVerificationRequestDTO;
 import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
 import com.sweetbalance.backend.entity.User;
 import com.sweetbalance.backend.enums.user.LoginType;
@@ -153,6 +154,35 @@ public class AuthController {
             e.printStackTrace();
             return ResponseEntity.status(500).body(
                     DefaultResponseDTO.error(500, 999, "인증코드 발급 중 오류가 발생했습니다.")
+            );
+        }
+    }
+
+    @PostMapping("/email-verification-code-check")
+    public ResponseEntity<?> verifyEmailCode(@RequestBody EmailVerificationRequestDTO request) {
+        String email = request.getEmail();
+        String code = request.getCode();
+
+        if(email == null || email.isEmpty() || code == null || code.isEmpty()){
+            return ResponseEntity.status(400).body(
+                    DefaultResponseDTO.error(400, 1006, "이메일 또는 인증코드가 입력되지 않았습니다.")
+            );
+        }
+        try {
+            boolean isValid = userService.checkEmailVerificationCode(email, code);
+            if(isValid) {
+                return ResponseEntity.status(200).body(
+                        DefaultResponseDTO.success("인증코드가 일치합니다.", null)
+                );
+            } else {
+                return ResponseEntity.status(400).body(
+                        DefaultResponseDTO.error(400, 1007, "인증코드가 일치하지 않거나 만료되었습니다.")
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(
+                    DefaultResponseDTO.error(500, 999, "인증코드 검증 중 오류가 발생했습니다.")
             );
         }
     }

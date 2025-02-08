@@ -25,7 +25,7 @@ public class EmailService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
         message.setSubject("[SweetBalance] 이메일 인증코드 안내");
-        message.setText("이메일 인증코드는 " + verificationCode + " 입니다.\n" + "해당 코드를 입력하여 이메일 인증을 완료해주세요.");
+        message.setText("이메일 인증코드는 " + verificationCode + " 입니다.\n" + "3분 내에 해당 코드를 입력하여 이메일 인증을 완료해주세요.");
         mailSender.send(message);
     }
 }
