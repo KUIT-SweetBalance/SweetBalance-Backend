@@ -9,8 +9,6 @@ import com.sweetbalance.backend.dto.response.ListNoticeDTO;
 import com.sweetbalance.backend.dto.response.FavoriteBeverageDTO;
 import com.sweetbalance.backend.dto.response.WeeklyConsumeInfoDTO;
 
-import com.sweetbalance.backend.dto.response.ListBeverageDTO;
-import com.sweetbalance.backend.dto.response.WeeklyInfoDTO;
 import com.sweetbalance.backend.entity.*;
 import com.sweetbalance.backend.enums.alarm.SugarWarningMessage;
 import com.sweetbalance.backend.enums.common.Status;
