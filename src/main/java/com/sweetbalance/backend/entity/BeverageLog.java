@@ -51,10 +51,6 @@ public class BeverageLog extends BaseEntity{
         this.readByUser = false;
     }
 
-    public void readedByUser(){
-        this.readByUser = true;
-    }
-
     /**
      * 음료 기록을 삭제(논리적으로)
      */

@@ -1,26 +1,22 @@
 package com.sweetbalance.backend.controller;
 
 import com.sweetbalance.backend.dto.DefaultResponseDTO;
-import com.sweetbalance.backend.dto.response.TokenPairDTO;
-import com.sweetbalance.backend.util.InnerFilterResponseSender;
+import com.sweetbalance.backend.dto.response.token.TokenPairDTO;
 import com.sweetbalance.backend.util.JWTUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequiredArgsConstructor
 public class ReissueController {
     private final JWTUtil jwtUtil;
-
-    public ReissueController(JWTUtil jwtUtil) {
-
-        this.jwtUtil = jwtUtil;
-    }
 
     @PostMapping("/api/auth/reissue")
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {

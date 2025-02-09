@@ -1,4 +1,4 @@
-package com.sweetbalance.backend.dto.response;
+package com.sweetbalance.backend.dto.response.daily;
 
 import lombok.*;
 

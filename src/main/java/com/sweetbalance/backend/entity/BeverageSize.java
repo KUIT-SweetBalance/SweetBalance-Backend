@@ -33,21 +33,4 @@ public class BeverageSize {
     private double calories;
 
     private double caffeine;
-
-    public static BeverageSize fromBeverageAndVolume(Beverage beverage,
-                                                     String sizeType,
-                                                     int volume) {
-        double sugar = beverage.getSugar() * volume / 100;
-        double calories = beverage.getCalories() * volume / 100;
-        double caffeine = beverage.getCaffeine() * volume / 100;
-
-        return BeverageSize.builder()
-                .beverage(beverage)
-                .sizeType(sizeType)
-                .volume(volume)
-                .sugar(sugar)
-                .calories(calories)
-                .caffeine(caffeine)
-                .build();
-    }
 }

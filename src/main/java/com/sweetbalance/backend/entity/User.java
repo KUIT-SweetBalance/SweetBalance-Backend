@@ -26,7 +26,6 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private Role role;
 
-    // 기존 username을 email에 저장하게 해야함, 기존로직의 모든 username이 email을 대체하는 느낌
     @Column(nullable = false, length = 255)
     private String email;
 
@@ -36,7 +35,6 @@ public class User extends BaseEntity {
     @Column(length = 255)
     private String password;
 
-    // 소셜 로그인 사용자의 서드파티이름_providerID 저장, 중복검사 시 ID가 아닌 providerId 기준 존재 여부 검사
     @Column(name = "provider_id", length = 255)
     private String providerId;
 

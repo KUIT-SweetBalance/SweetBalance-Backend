@@ -1,6 +1,9 @@
 package com.sweetbalance.backend.service;
 
 import com.sweetbalance.backend.dto.response.*;
+import com.sweetbalance.backend.dto.response.beveragedetail.BeverageDetailsDTO;
+import com.sweetbalance.backend.dto.response.beveragedetail.BeverageSizeDetailsWithRecommendDTO;
+import com.sweetbalance.backend.dto.response.beveragedetail.RecommendedBeverageDTO;
 import com.sweetbalance.backend.entity.Beverage;
 import com.sweetbalance.backend.entity.BeverageSize;
 import com.sweetbalance.backend.enums.beverage.BeverageCategory;
@@ -10,7 +13,7 @@ import com.sweetbalance.backend.repository.FavoriteRepository;
 import com.sweetbalance.backend.util.syrup.Syrup;
 import com.sweetbalance.backend.util.syrup.SyrupManager;
 import jakarta.persistence.criteria.Predicate;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -22,21 +25,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class BeverageServiceImpl implements BeverageService {
 
     private final BeverageRepository beverageRepository;
     private final BeverageSizeRepository beverageSizeRepository;
     private final FavoriteRepository favoriteRepository;
-
-    @Autowired
-    public BeverageServiceImpl(
-            BeverageRepository beverageRepository,
-            BeverageSizeRepository beverageSizeRepository,
-            FavoriteRepository favoriteRepository) {
-        this.beverageRepository = beverageRepository;
-        this.beverageSizeRepository = beverageSizeRepository;
-        this.favoriteRepository = favoriteRepository;
-    }
 
     public List<String> getUniqueBrands() {
         return beverageRepository.findDistinctBrands();

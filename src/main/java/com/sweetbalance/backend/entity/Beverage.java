@@ -50,15 +50,5 @@ public class Beverage extends BaseEntity{
     @Builder.Default
     @OneToMany(mappedBy = "beverage", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BeverageSize> sizes = new ArrayList<>();
-
-    public void addSize(BeverageSize size) {
-        sizes.add(size);
-        size.setBeverage(this);
-    }
-
-    public void removeSize(BeverageSize size) {
-        sizes.remove(size);
-        size.setBeverage(null);
-    }
 }
 
