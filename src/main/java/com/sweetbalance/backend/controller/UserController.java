@@ -5,6 +5,8 @@ import com.sweetbalance.backend.dto.identity.UserIdHolder;
 import com.sweetbalance.backend.dto.response.*;
 import com.sweetbalance.backend.dto.request.AddBeverageRecordRequestDTO;
 import com.sweetbalance.backend.dto.request.MetadataRequestDTO;
+import com.sweetbalance.backend.dto.response.notice.EachEntry;
+import com.sweetbalance.backend.dto.response.notice.ListNoticeDTO;
 import com.sweetbalance.backend.entity.Beverage;
 import com.sweetbalance.backend.entity.BeverageLog;
 import com.sweetbalance.backend.entity.BeverageSize;

@@ -4,11 +4,10 @@ import com.nimbusds.jose.util.Pair;
 import com.sweetbalance.backend.dto.request.AddBeverageRecordRequestDTO;
 import com.sweetbalance.backend.dto.request.MetadataRequestDTO;
 import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
-import com.sweetbalance.backend.dto.response.DailySugarDTO;
-import com.sweetbalance.backend.dto.response.ListNoticeDTO;
-import com.sweetbalance.backend.dto.response.FavoriteBeverageDTO;
-import com.sweetbalance.backend.dto.response.WeeklyInfoDTO;
+import com.sweetbalance.backend.dto.response.*;
 
+import com.sweetbalance.backend.dto.response.notice.EachEntry;
+import com.sweetbalance.backend.dto.response.notice.ListNoticeDTO;
 import com.sweetbalance.backend.entity.*;
 import com.sweetbalance.backend.enums.alarm.SugarWarningMessage;
 import com.sweetbalance.backend.enums.common.Status;
@@ -21,8 +20,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import com.sweetbalance.backend.util.TimeStringConverter;
-
-import com.sweetbalance.backend.util.syrup.SugarCalculator;
 
 import org.springframework.data.domain.Pageable;
 
@@ -345,14 +342,14 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         start = System.nanoTime();
-        List<ListNoticeDTO> result = integratedLogs
+        List<EachEntry> flatList = integratedLogs
                 .stream()
                 .map(entity -> {
                     
-            String timeString = entity.getCreatedAt().format(formatter);
+            String timeString = entity.getCreatedAt().format(dateTimeFormatter);
             String message;
             
             switch (entity) {
@@ -362,25 +359,62 @@ public class UserServiceImpl implements UserService {
 
                     Map<String, Object> beverageLogInfo = new LinkedHashMap<>();
                     beverageLogInfo.put("image",beverage.getImgUrl());
-                    beverageLogInfo.put("sugar",beverage.getSugar());
+                    beverageLogInfo.put("sugar",(int)Math.ceil(beverage.getSugar()));
                     beverageLogInfo.put("syrupName",log.getSyrupName());
                     beverageLogInfo.put("syrupCount",log.getSyrupCount());
                     beverageLogInfo.put("size",log.getBeverageSize().getSizeType());
                     beverageLogInfo.put("beverageLogId",log.getLogId());
-                    beverageLogInfo.put("isReaded",log.getReadByUser());
+                    beverageLogInfo.put("isRead",log.getReadByUser());
 
-                    return new ListNoticeDTO(timeString,message,beverageLogInfo);
+                    return new EachEntry(timeString,message,beverageLogInfo);
                 }
                 
                 case Alarm alarm -> {
                     message = alarm.getContent();
-                    return  new ListNoticeDTO(timeString,message,null);
+                    return  new EachEntry(timeString,message,null);
                 }
                 
                 default -> throw new IllegalStateException("알 수 없는 타입: " + entity.getClass());
             }
             
         }).toList().reversed();
+
+        Map<String, List<EachEntry>> groupedMap = new LinkedHashMap<>();
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+
+        for (EachEntry dto : flatList) {
+            // (1) timeString 파싱 → LocalDateTime
+            LocalDateTime parsed = LocalDateTime.parse(dto.timeString(), dateTimeFormatter);
+
+            // (2) 날짜 문자열 만들기: "yyyy.MM.dd"
+            String dateKey = parsed.format(dateFormatter);
+
+            // (3) dto의 timeString(시각 부분)도 "HH:mm"으로 변경하고 싶다면, 새 DTO를 만들거나 수정
+            String onlyTime = parsed.format(timeFormatter);
+
+            // beverageLogInfo는 그대로 쓰고, message도 그대로 쓰되 timeString만 교체
+            EachEntry newDto = new EachEntry(
+                    onlyTime,             // "HH:mm"
+                    dto.message(),
+                    dto.beverageLogInfo()
+            );
+
+            // (4) dateKey로 groupedMap에 put
+            groupedMap.computeIfAbsent(dateKey, k -> new ArrayList<>())
+                    .add(newDto);
+        }
+
+        // 2) groupedMap을 최종 List<DayGroupedDTO>로 변환
+        List<ListNoticeDTO> result = new ArrayList<>();
+        for (Map.Entry<String, List<EachEntry>> entry : groupedMap.entrySet()) {
+            String date = entry.getKey();
+            List<EachEntry> infoList = entry.getValue();
+
+            // 하나의 날짜에 대한 DTO 생성
+            ListNoticeDTO dayDTO = new ListNoticeDTO(date, infoList);
+            result.add(dayDTO);
+        }
 
         end = System.nanoTime();
         ms = (end - start) / (1000 * 1000D);
