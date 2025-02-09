@@ -3,6 +3,7 @@ package com.sweetbalance.backend.controller;
 import com.sweetbalance.backend.dto.DefaultResponseDTO;
 import com.sweetbalance.backend.dto.identity.UserIdHolder;
 import com.sweetbalance.backend.dto.request.EmailVerificationRequestDTO;
+import com.sweetbalance.backend.dto.request.ResetPasswordRequestDTO;
 import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
 import com.sweetbalance.backend.entity.User;
 import com.sweetbalance.backend.enums.user.LoginType;
@@ -159,7 +160,7 @@ public class AuthController {
     }
 
     @PostMapping("/email-verification-code-check")
-    public ResponseEntity<?> verifyEmailCode(@RequestBody EmailVerificationRequestDTO request) {
+    public ResponseEntity<?> checkEmailVerificationCode(@RequestBody EmailVerificationRequestDTO request) {
         String email = request.getEmail();
         String code = request.getCode();
 
@@ -186,4 +187,33 @@ public class AuthController {
             );
         }
     }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequestDTO request) {
+        String email = request.getEmail();
+        String newPassword = request.getNewPassword();
+        if (email == null || email.isEmpty() || newPassword == null || newPassword.isEmpty()) {
+            return ResponseEntity.status(400).body(
+                    DefaultResponseDTO.error(400, 1008, "이메일 또는 새 비밀번호가 입력되지 않았습니다.")
+            );
+        }
+        try {
+            boolean result = userService.resetPassword(email, newPassword);
+            if (result) {
+                return ResponseEntity.status(200).body(
+                        DefaultResponseDTO.success("비밀번호가 재설정되었습니다.", null)
+                );
+            } else {
+                return ResponseEntity.status(400).body(
+                        DefaultResponseDTO.error(400, 1009, "이메일 인증이 만료되었거나, 유효하지 않은 이메일입니다.")
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(
+                    DefaultResponseDTO.error(500, 999, "비밀번호 재설정 중 오류가 발생했습니다.")
+            );
+        }
+    }
+
 }

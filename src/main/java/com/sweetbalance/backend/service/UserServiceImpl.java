@@ -55,6 +55,8 @@ public class UserServiceImpl implements UserService {
 
     private final Map<String, Pair<String, LocalDateTime>> emailVerificationCodeStore = new ConcurrentHashMap<>();
 
+    private final Map<String, LocalDateTime> verifiedEmailStore = new ConcurrentHashMap<>();
+
     @Override
     public void join(SignUpRequestDTO signUpRequestDTO){
         User bCryptPasswordEncodedUser = makeBCryptPasswordEncodedUser(signUpRequestDTO);
@@ -516,8 +518,27 @@ public class UserServiceImpl implements UserService {
         }
         if (storedCode.equals(code)) {
             emailVerificationCodeStore.remove(email);
+            verifiedEmailStore.put(email, LocalDateTime.now().plusMinutes(5));
             return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean resetPassword(String email, String newPassword) {
+        LocalDateTime verifiedExpiration = verifiedEmailStore.get(email);
+        if (verifiedExpiration == null || LocalDateTime.now().isAfter(verifiedExpiration)) {
+            return false;
+        }
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        if (userOptional.isEmpty()) {
+            return false;
+        }
+        User user = userOptional.get();
+        String encodedNewPassword = bCryptPasswordEncoder.encode(newPassword);
+        user.setPassword(encodedNewPassword);
+        userRepository.save(user);
+        verifiedEmailStore.remove(email);
+        return true;
     }
 }

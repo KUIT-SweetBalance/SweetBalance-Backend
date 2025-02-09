@@ -60,4 +60,6 @@ public interface UserService {
     public boolean sendEmailVerificationCode(String email);
 
     public boolean checkEmailVerificationCode(String email, String code);
+
+    public boolean resetPassword(String email, String newPassword);
 }
