@@ -12,6 +12,7 @@ import com.sweetbalance.backend.entity.*;
 import com.sweetbalance.backend.enums.alarm.SugarWarningMessage;
 import com.sweetbalance.backend.enums.common.Status;
 
+import com.sweetbalance.backend.enums.user.Gender;
 import com.sweetbalance.backend.enums.user.LoginType;
 import com.sweetbalance.backend.repository.*;
 import com.sweetbalance.backend.util.syrup.SugarCalculator;
@@ -190,8 +191,12 @@ public class UserServiceImpl implements UserService {
         System.out.println("logsOnSameDay = " + logsOnSameDay);
         System.out.println("alarmsOnSameDay = " + alarmsOnSameDay);
 
+        Gender gender = user.getGender();
+        final int cautionAmountOfSugar = (gender == Gender.MALE) ? 33 : 20;
+        final int exceedAmountOfSugar = (gender == Gender.MALE) ? 38 : 25;
+
         // 알람의 위치는 어디가 적절한가?
-        List<Pair<Long,SugarWarningMessage>> properAlarm = getproperAlarm(logsOnSameDay);
+        List<Pair<Long,SugarWarningMessage>> properAlarm = getproperAlarm(user.getGender(), logsOnSameDay, (double)cautionAmountOfSugar, (double)exceedAmountOfSugar);
         System.out.println("properAlarm = " + properAlarm);
 
         int size1 = alarmsOnSameDay.size();
@@ -224,9 +229,9 @@ public class UserServiceImpl implements UserService {
                     // appropriatePositions에만 값이 남아 있을 때
                     String warningMessage;
                     if(i == 1){
-                        warningMessage = "당 25g 이상 섭취, 일일 권장량 초과";
+                        warningMessage = "당 " + exceedAmountOfSugar + "g 이상 섭취, 일일 권장량 초과";
                     } else {
-                        warningMessage = "당 20g 섭취, 주의 필요";
+                        warningMessage = "당 " + cautionAmountOfSugar +"g 섭취, 주의 필요";
                     }
                     Alarm alarm = Alarm.of(beverageLogRepository.findById(val2).get(), properAlarm.get(i).getRight().getMessage());
                     System.out.println("alarm = " + alarm);
@@ -238,9 +243,7 @@ public class UserServiceImpl implements UserService {
 
     }
 
-    private List<Pair<Long,SugarWarningMessage>> getproperAlarm(List<BeverageLog> logsOnSameDay) {
-        final double cautionAmountOfSugar = 20.0D;
-        final double exceedAmountOfSugar = 25.0D;
+    private List<Pair<Long,SugarWarningMessage>> getproperAlarm(Gender gender, List<BeverageLog> logsOnSameDay, double cautionAmountOfSugar, double exceedAmountOfSugar) {
 
         List<Pair<Long,SugarWarningMessage>> properAlarm = new ArrayList<>();
         double accumulatedSugar = 0.0D;
