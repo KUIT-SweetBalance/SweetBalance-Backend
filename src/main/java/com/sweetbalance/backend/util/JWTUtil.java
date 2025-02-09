@@ -1,7 +1,7 @@
 package com.sweetbalance.backend.util;
 
 import com.sweetbalance.backend.entity.RefreshEntity;
-import com.sweetbalance.backend.repository.RefreshRepository;
+import com.sweetbalance.backend.repository.refresh.RefreshTokenRepository;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,22 +10,23 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Component
 public class JWTUtil {
 
     private SecretKey secretKey;
-    private final RefreshRepository refreshRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
 
 //    private final long accessTokenExpirationMs = 3600000L; // 1 hour
     private final long accessTokenExpirationMs = 3600000L * 24 * 90; // 90 days
     private final long refreshTokenExpirationMs = 3600000L * 24 * 30; // 30 days
 
     @Autowired
-    public JWTUtil(@Value("${spring.jwt.secret}")String secret, RefreshRepository refreshRepository) {
+    public JWTUtil(@Value("${spring.jwt.secret}")String secret, RefreshTokenRepository refreshTokenRepository) {
         secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
-        this.refreshRepository = refreshRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
     }
 
     public Long getUserId(String token) {
@@ -110,22 +111,22 @@ public class JWTUtil {
     }
 
     public boolean isRefreshExist(String refresh){
-        return refreshRepository.existsByRefresh(refresh);
+        return refreshTokenRepository.existsByRefresh(refresh);
     }
 
     public void deleteRefreshEntity(String refresh){
-        refreshRepository.deleteByRefresh(refresh);
+        refreshTokenRepository.deleteByRefresh(refresh);
     }
 
     private void addRefreshEntity(String email, String refresh) {
 
-        Date date = new Date(System.currentTimeMillis() + refreshTokenExpirationMs);
+        LocalDateTime expirationDateTime = LocalDateTime.now().plusSeconds(refreshTokenExpirationMs / 1000);
 
         RefreshEntity refreshEntity = new RefreshEntity();
         refreshEntity.setEmail(email);
         refreshEntity.setRefresh(refresh);
-        refreshEntity.setExpiration(date.toString());
+        refreshEntity.setExpiration(expirationDateTime);
 
-        refreshRepository.save(refreshEntity);
+        refreshTokenRepository.save(refreshEntity);
     }
 }
