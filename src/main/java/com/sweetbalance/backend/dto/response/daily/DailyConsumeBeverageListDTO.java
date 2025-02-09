@@ -14,6 +14,7 @@ import java.util.Locale;
 public class DailyConsumeBeverageListDTO {
 
     private Long beverageLogId;
+    private Long beverageId;
     private Long beverageSizeId;
     private String createdAt;
     private String brand;
@@ -39,6 +40,7 @@ public class DailyConsumeBeverageListDTO {
 
         return DailyConsumeBeverageListDTO.builder()
                 .beverageLogId(log.getLogId())
+                .beverageId(beverage.getBeverageId())
                 .beverageSizeId(beverageSize.getId())
                 .createdAt(formattedDateTime)
                 .brand(beverage.getBrand())
