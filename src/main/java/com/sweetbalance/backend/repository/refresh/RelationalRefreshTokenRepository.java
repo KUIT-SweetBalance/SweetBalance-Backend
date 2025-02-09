@@ -3,8 +3,10 @@ package com.sweetbalance.backend.repository.refresh;
 import com.sweetbalance.backend.entity.RefreshEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.context.annotation.Primary;
 
 @Repository
+@Primary
 public class RelationalRefreshTokenRepository implements RefreshTokenRepository {
 
     private final JpaRefreshTokenRepository jpaRefreshTokenRepository;
