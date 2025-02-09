@@ -5,10 +5,13 @@ import com.sweetbalance.backend.dto.identity.UserIdHolder;
 import com.sweetbalance.backend.dto.response.*;
 import com.sweetbalance.backend.dto.request.AddBeverageRecordRequestDTO;
 import com.sweetbalance.backend.dto.request.MetadataRequestDTO;
+import com.sweetbalance.backend.dto.response.notice.EachEntry;
+import com.sweetbalance.backend.dto.response.notice.ListNoticeDTO;
 import com.sweetbalance.backend.entity.Beverage;
 import com.sweetbalance.backend.entity.BeverageLog;
 import com.sweetbalance.backend.entity.BeverageSize;
 import com.sweetbalance.backend.entity.User;
+import com.sweetbalance.backend.repository.FavoriteRepository;
 import com.sweetbalance.backend.enums.user.Gender;
 import com.sweetbalance.backend.service.BeverageService;
 import com.sweetbalance.backend.service.BeverageSizeService;
@@ -32,6 +35,7 @@ public class UserController {
     private final UserService userService;
     private final BeverageService beverageService;
     private final BeverageSizeService beverageSizeService;
+    private final FavoriteRepository favoriteRepository;
 
 
     @GetMapping("/my-info")
@@ -322,6 +326,12 @@ public class UserController {
         if (beverageOptional.isEmpty()) {
             return ResponseEntity.status(404).body(
                     DefaultResponseDTO.error(404, 999, "등록된 음료 정보를 찾을 수 없습니다.")
+            );
+        }
+
+        if (favoriteRepository.findByUserAndBeverage(userOptional.get(), beverageOptional.get()).isPresent()) {
+            return ResponseEntity.status(404).body(
+                    DefaultResponseDTO.error(404, 999, "해당 음료로 이미 즐겨찾기가 등록되어 있습니다.")
             );
         }
 

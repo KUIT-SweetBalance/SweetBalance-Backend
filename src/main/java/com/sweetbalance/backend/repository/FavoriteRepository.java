@@ -28,4 +28,5 @@ public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
             @Param("userId") Long userId,
             @Param("beverageIds") List<Long> beverageIds
     );
+
 }
