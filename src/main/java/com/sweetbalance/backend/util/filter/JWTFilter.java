@@ -48,13 +48,13 @@ public class JWTFilter extends OncePerRequestFilter {
             jwtUtil.isExpired(accessToken);
         } catch (ExpiredJwtException e) {
 
-            InnerFilterResponseSender.sendInnerResponse(response, 400, 999,
+            InnerFilterResponseSender.sendInnerResponse(response, 400, 402,
                     "엑세스 토큰 만료", null);
             return;
         } catch (JwtException e) {
 
-            InnerFilterResponseSender.sendInnerResponse(response, 400, 999,
-                    "유효하지 않은 토큰", null);
+            InnerFilterResponseSender.sendInnerResponse(response, 400, 403,
+                    "유효하지 않은 엑세스 토큰", null);
             return;
         }
 
@@ -63,8 +63,8 @@ public class JWTFilter extends OncePerRequestFilter {
 
         if (!tokenType.equals("access")) {
 
-            InnerFilterResponseSender.sendInnerResponse(response, 400, 999,
-                    "토큰 타입 미일치", null);
+            InnerFilterResponseSender.sendInnerResponse(response, 400, 404,
+                    "엑세스 토큰 타입 미일치", null);
             return;
         }
 

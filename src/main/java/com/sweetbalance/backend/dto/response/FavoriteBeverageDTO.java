@@ -14,6 +14,6 @@ public class FavoriteBeverageDTO {
     private String brand;
     private String imgUrl;
 
-    private int sugar;
+    private int sugarPer100ml;
     private String timeString;
 }

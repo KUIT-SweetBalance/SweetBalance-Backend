@@ -12,6 +12,7 @@ import com.sweetbalance.backend.entity.BeverageLog;
 import com.sweetbalance.backend.entity.BeverageSize;
 import com.sweetbalance.backend.entity.User;
 import com.sweetbalance.backend.repository.FavoriteRepository;
+import com.sweetbalance.backend.enums.user.Gender;
 import com.sweetbalance.backend.service.BeverageService;
 import com.sweetbalance.backend.service.BeverageSizeService;
 import com.sweetbalance.backend.service.UserService;
@@ -61,14 +62,22 @@ public class UserController {
     public ResponseEntity<?> getFavoriteList(@AuthenticationPrincipal UserIdHolder userIdHolder,
                                              @RequestParam("page") int page,
                                              @RequestParam("size") int size) {
-        Long userId = userIdHolder.getUserId();
-        Pageable pageable = PageRequest.of(page, size);
+        try{
 
-        List<FavoriteBeverageDTO> listBeverages = userService.getFavoriteListByUserId(userId, pageable);
+            Long userId = userIdHolder.getUserId();
+            Pageable pageable = PageRequest.of(page, size);
 
-        return ResponseEntity.status(200).body(
-                DefaultResponseDTO.success("즐겨찾기 음료 리스트 반환 성공", listBeverages)
-        );
+            List<FavoriteBeverageDTO> listBeverages = userService.getFavoriteListByUserId(userId, pageable);
+
+            return ResponseEntity.status(200).body(
+                    DefaultResponseDTO.success("즐겨찾기 음료 리스트 반환 성공", listBeverages)
+            );
+        } catch(Exception e){
+            
+            return ResponseEntity.status(500).body(
+                    DefaultResponseDTO.error(500, 999, "즐겨찾기 음료 리스트 반환 실패")
+            );
+        }
     }
 
     @GetMapping("/weekly-consume-info")
@@ -76,15 +85,23 @@ public class UserController {
             @AuthenticationPrincipal UserIdHolder userIdHolder,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate) {
 
-        Long userId = userIdHolder.getUserId();
-        LocalDate endDate = (startDate != null) ? startDate.plusDays(6) : LocalDate.now();
-        startDate = (startDate != null) ? startDate : endDate.minusDays(6);
+        try{
 
-        WeeklyInfoDTO weeklyInfoDTO = userService.getWeeklyConsumeInfo(userId, startDate, endDate);
+            Long userId = userIdHolder.getUserId();
+            LocalDate endDate = (startDate != null) ? startDate.plusDays(6) : LocalDate.now();
+            startDate = (startDate != null) ? startDate : endDate.minusDays(6);
 
-        return ResponseEntity.status(200).body(
-                DefaultResponseDTO.success("주간 영양정보 반환 성공", weeklyInfoDTO)
-        );
+            WeeklyConsumeInfoDTO weeklyConsumeInfoDTO = userService.getWeeklyConsumeInfo(userId, startDate, endDate);
+
+            return ResponseEntity.status(200).body(
+                    DefaultResponseDTO.success("주간 영양정보 반환 성공", weeklyConsumeInfoDTO)
+            );
+        } catch (Exception e){
+
+            return ResponseEntity.status(500).body(
+                    DefaultResponseDTO.error(500, 999, "주간 영양정보 반환 실패")
+            );
+        }
     }
 
     @PostMapping("/meta-data")
@@ -190,6 +207,8 @@ public class UserController {
             );
         }
 
+        User user = userOptional.get();
+
         List<BeverageLog> dailyBeverageLogs = userService.findTodayBeverageLogsByUserId(userId);
 
         double initSugarSum = 0.0;
@@ -201,9 +220,20 @@ public class UserController {
 
         int beverageCount = dailyBeverageLogs.size();
 
+        int unreadAlarmCount = userService.getNumberOfUnreadLogWithinAWeek();
+
+        int additionalSugar = 0;
+        if (user.getGender() == Gender.MALE) {
+            additionalSugar = 25 - totalSugar;
+        } else if (user.getGender() == Gender.FEMALE) {
+            additionalSugar = 20 - totalSugar;
+        }
+
         DailyConsumeInfoDTO dailyConsumeInfo = DailyConsumeInfoDTO.builder()
                 .totalSugar(totalSugar)
+                .additionalSugar(additionalSugar)
                 .beverageCount(beverageCount)
+                .unreadAlarmCount(unreadAlarmCount)
                 .build();
 
         return ResponseEntity.status(200).body(

@@ -16,7 +16,7 @@ public interface BeverageService {
   
     List<BrandPopularBeverageDTO> getPopularBeveragesByBrand(String brandName, int limit);
 
-    BeverageDetailsDTO getBeverageDetails(Long beverageId, int limit);
+    BeverageDetailsDTO getBeverageDetails(Long userId, Long beverageId, int limit);
 
-    List<InnerListBeverageDTO> findBeveragesByFilters(String brand, String category, String keyword, String sort);
+    List<InnerListBeverageDTO> findBeveragesByFilters(Long userId, String brand, String category, String keyword, String sort, Integer page, Integer size);
 }

@@ -51,10 +51,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void join(SignUpRequestDTO signUpRequestDTO){
-        // 정규식 처리 등 가입 불가 문자에 대한 처리도 진행해주어야 한다.
-        boolean userExists = userRepository.existsByEmailAndLoginType(signUpRequestDTO.getEmail(), LoginType.BASIC);
-        if(userExists) throw new RuntimeException("The email '" + signUpRequestDTO.getEmail() + "' is already taken.");
-
         User bCryptPasswordEncodedUser = makeBCryptPasswordEncodedUser(signUpRequestDTO);
         userRepository.save(bCryptPasswordEncodedUser);
     }
@@ -73,8 +69,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> findUserByEmailAndLoginType(String email, LoginType loginType) {
-        return userRepository.findByEmailAndLoginType(email, loginType);
+    public Optional<User> findUserByEmailAndLoginTypeAndDeletedAtIsNull(String email, LoginType loginType) {
+        return userRepository.findByEmailAndLoginTypeAndDeletedAtIsNull(email, loginType);
+    }
+
+    @Override
+    public void softDeleteUser(User user) {
+        user.setStatus(Status.DELETED);
+        user.setDeletedAt(LocalDateTime.now());
+        userRepository.save(user);
     }
 
     @Override
@@ -98,13 +101,13 @@ public class UserServiceImpl implements UserService {
                 .name(beverage.getName())
                 .brand(beverage.getBrand())
                 .imgUrl(beverage.getImgUrl())
-                .sugar((int) Math.round(beverage.getSugar()))
+                .sugarPer100ml((int) Math.round(beverage.getSugar()))
                 .timeString(TimeStringConverter.convertLocalDateTimeToKoreanTimeString(favorite.getCreatedAt()))
                 .build();
     }
 
     @Override
-    public WeeklyInfoDTO getWeeklyConsumeInfo(Long userId, LocalDate startDate, LocalDate endDate) {
+    public WeeklyConsumeInfoDTO getWeeklyConsumeInfo(Long userId, LocalDate startDate, LocalDate endDate) {
         LocalDate today = LocalDate.now();
         LocalDate effectiveEndDate = endDate.isAfter(today) ? today : endDate;
 
@@ -137,11 +140,12 @@ public class UserServiceImpl implements UserService {
             dailySugarList.add(new DailySugarDTO(date, Math.round(dailySugar.getOrDefault(date, 0.0) * 10.0) / 10.0));
         }
 
-        return WeeklyInfoDTO.builder()
+        return WeeklyConsumeInfoDTO.builder()
                 .intake(intake)
                 .totalSugar((int) Math.round(totalSugar))
                 .averageSugar(Math.round(averageSugar * 10.0) / 10.0)
                 .totalCalories((int) Math.round(totalCalories))
+                .unreadAlarmCount(getNumberOfUnreadLogWithinAWeek())
                 .dailySugar(dailySugarList)
                 .build();
     }
@@ -470,13 +474,21 @@ public class UserServiceImpl implements UserService {
         LocalDateTime endOfToday = today.plusDays(1).atStartOfDay().minusNanos(1);
 
         //findAllByUserUserIdAndCreatedAtBetween
-        return beverageLogRepository.findByUser_UserIdAndCreatedAtBetween(
-                userId, startOfToday, endOfToday
+        return beverageLogRepository.findByUser_UserIdAndCreatedAtBetweenAndStatus(
+                userId, startOfToday, endOfToday, Status.ACTIVE
         );
     }
 
     @Override
     public List<BeverageLog> findTotalBeverageLogsByUserId(Long userId, Pageable pageable) {
-        return beverageLogRepository.findTotalByUserUserId(userId, pageable);
+        return beverageLogRepository.findTotalByUserUserIdAndStatus(userId, pageable, Status.ACTIVE);
+    }
+
+    @Override
+    public int getNumberOfUnreadLogWithinAWeek() {
+        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+        return beverageLogRepository
+                .findByCreatedAtAfterAndReadByUserFalse(sevenDaysAgo)
+                .size();
     }
 }

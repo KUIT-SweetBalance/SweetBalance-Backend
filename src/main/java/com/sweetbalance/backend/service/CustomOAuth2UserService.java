@@ -58,7 +58,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         //리소스 서버에서 발급 받은 정보로 사용자를 특정할 아이디값을 만들어 존재하는 유저인지 확인
         String providerID = oAuth2Response.getProvider()+" "+oAuth2Response.getProviderId();
-        Optional<User> existData = userRepository.findByProviderIdAndStatus(providerID, ACTIVE);
+        Optional<User> existData = userRepository.findByProviderIdAndDeletedAtIsNull(providerID);
 
         // DB에 존재하지 않는 신규 유저일 때
         if (existData.isEmpty()) {
