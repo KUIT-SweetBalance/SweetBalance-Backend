@@ -1,7 +1,7 @@
 package com.sweetbalance.backend.util;
 
 import com.sweetbalance.backend.entity.RefreshEntity;
-import com.sweetbalance.backend.repository.RefreshTokenRepository;
+import com.sweetbalance.backend.repository.refresh.RefreshTokenRepository;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

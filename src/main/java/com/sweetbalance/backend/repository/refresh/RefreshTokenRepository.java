@@ -1,4 +1,4 @@
-package com.sweetbalance.backend.repository;
+package com.sweetbalance.backend.repository.refresh;
 
 import com.sweetbalance.backend.entity.RefreshEntity;
 

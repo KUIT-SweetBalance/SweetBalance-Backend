@@ -1,6 +1,7 @@
-package com.sweetbalance.backend.repository;
+package com.sweetbalance.backend.repository.refresh;
 
 import com.sweetbalance.backend.entity.RefreshEntity;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -8,6 +9,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Repository
+@Primary
 public class RedisRefreshTokenRepository implements RefreshTokenRepository {
     private final RedisTemplate<String, Object> redisTemplate;
     private static final String KEY_PREFIX = "refresh_token:";
