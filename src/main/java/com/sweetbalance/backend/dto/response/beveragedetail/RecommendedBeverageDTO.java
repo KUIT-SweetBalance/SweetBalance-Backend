@@ -1,6 +1,5 @@
-package com.sweetbalance.backend.dto.response;
+package com.sweetbalance.backend.dto.response.beveragedetail;
 
-import com.sweetbalance.backend.enums.beverage.BeverageCategory;
 import lombok.*;
 
 @NoArgsConstructor

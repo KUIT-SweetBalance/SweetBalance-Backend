@@ -80,7 +80,7 @@ public class SecurityConfig {
 
                         CorsConfiguration configuration = new CorsConfiguration();
 
-                        configuration.setAllowedOrigins(List.of(frontOriginHttp, frontOriginHttps, "http://localhost:3000"));
+                        configuration.setAllowedOrigins(List.of(frontOriginHttp, frontOriginHttps));
                         configuration.setAllowedHeaders(Collections.singletonList("*"));
                         configuration.setAllowedMethods(Collections.singletonList("*"));
                         configuration.setAllowCredentials(true);
@@ -115,9 +115,6 @@ public class SecurityConfig {
         //경로별 인가 작업
         httpSecurity
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/api/auth/sign-up", "/api/auth/sign-in").permitAll()
-                        .requestMatchers("/api/auth/reissue").permitAll()
-                        .requestMatchers("/api/auth/email-duplicate").permitAll()
                         .requestMatchers("/api/auth/sign-out").hasAnyAuthority(ADMIN.getValue(), USER.getValue())
                         .requestMatchers("/api/auth/withdraw").hasAnyAuthority(ADMIN.getValue(), USER.getValue())
                         .requestMatchers("/api/user/**").hasAnyAuthority(ADMIN.getValue(), USER.getValue())

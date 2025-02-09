@@ -2,14 +2,14 @@ package com.sweetbalance.backend.service;
 
 import com.sweetbalance.backend.dto.response.InnerListBeverageDTO;
 import com.sweetbalance.backend.entity.Beverage;
-import com.sweetbalance.backend.entity.User;
-import com.sweetbalance.backend.dto.response.BeverageDetailsDTO;
+import com.sweetbalance.backend.dto.response.beveragedetail.BeverageDetailsDTO;
 import com.sweetbalance.backend.dto.response.BrandPopularBeverageDTO;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface BeverageService {
+
     List<String> getUniqueBrands();
 
     Optional<Beverage> findBeverageByBeverageId(Long beverageId);

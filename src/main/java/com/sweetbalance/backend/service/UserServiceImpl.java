@@ -6,8 +6,10 @@ import com.sweetbalance.backend.dto.request.MetadataRequestDTO;
 import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
 import com.sweetbalance.backend.dto.response.*;
 
+import com.sweetbalance.backend.dto.response.daily.DailySugarDTO;
 import com.sweetbalance.backend.dto.response.notice.EachEntry;
 import com.sweetbalance.backend.dto.response.notice.ListNoticeDTO;
+import com.sweetbalance.backend.dto.response.weekly.WeeklyConsumeInfoDTO;
 import com.sweetbalance.backend.entity.*;
 import com.sweetbalance.backend.enums.alarm.SugarWarningMessage;
 import com.sweetbalance.backend.enums.common.Status;
@@ -15,14 +17,12 @@ import com.sweetbalance.backend.enums.common.Status;
 import com.sweetbalance.backend.enums.user.LoginType;
 import com.sweetbalance.backend.repository.*;
 import com.sweetbalance.backend.util.syrup.SugarCalculator;
+import com.sweetbalance.backend.util.TimeStringConverter;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
-import com.sweetbalance.backend.util.TimeStringConverter;
-
 import org.springframework.data.domain.Pageable;
-
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +32,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -48,6 +49,11 @@ public class UserServiceImpl implements UserService {
     private final SugarCalculator sugarCalculator;
     private final BeverageLogRepository beverageLogRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final EmailService emailService;
+
+    private final Map<String, Pair<String, LocalDateTime>> emailVerificationCodeStore = new ConcurrentHashMap<>();
+
+    private final Map<String, LocalDateTime> verifiedEmailStore = new ConcurrentHashMap<>();
 
     @Override
     public void join(SignUpRequestDTO signUpRequestDTO){
@@ -272,7 +278,6 @@ public class UserServiceImpl implements UserService {
         return alarmRepository.findAllByLogUserUserIdAndUpdatedAtBetween(userId,startOfDay,endOfDay);
     }
 
-
     // 로그 Id로 음료 기록 찾고, 음료 사이즈 정보, 시럽 이름, 시럽 개수, 추가 당 함량 다시 설정.
     @Override
     public void editBeverageRecord(Long beverageLogId, BeverageSize newBeverageSize, AddBeverageRecordRequestDTO dto) {
@@ -490,5 +495,57 @@ public class UserServiceImpl implements UserService {
         return beverageLogRepository
                 .findByCreatedAtAfterAndReadByUserFalse(sevenDaysAgo)
                 .size();
+    }
+
+    @Override
+    public boolean sendEmailVerificationCode(String email) {
+        String verificationCode = String.format("%06d", new Random().nextInt(1000000));
+        LocalDateTime expirationTime = LocalDateTime.now().plusMinutes(3);
+        emailVerificationCodeStore.put(email, Pair.of(verificationCode, expirationTime));
+        try {
+            emailService.sendEmailVerificationCodeMail(email, verificationCode);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public boolean checkEmailVerificationCode(String email, String code) {
+        Pair<String, LocalDateTime> storedInfo = emailVerificationCodeStore.get(email);
+        if (storedInfo == null) {
+            return false;
+        }
+        String storedCode = storedInfo.getLeft();
+        LocalDateTime expirationTime = storedInfo.getRight();
+        if (LocalDateTime.now().isAfter(expirationTime)) {
+            emailVerificationCodeStore.remove(email);
+            return false;
+        }
+        if (storedCode.equals(code)) {
+            emailVerificationCodeStore.remove(email);
+            verifiedEmailStore.put(email, LocalDateTime.now().plusMinutes(5));
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean resetPassword(String email, String newPassword) {
+        LocalDateTime verifiedExpiration = verifiedEmailStore.get(email);
+        if (verifiedExpiration == null || LocalDateTime.now().isAfter(verifiedExpiration)) {
+            return false;
+        }
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        if (userOptional.isEmpty()) {
+            return false;
+        }
+        User user = userOptional.get();
+        String encodedNewPassword = bCryptPasswordEncoder.encode(newPassword);
+        user.setPassword(encodedNewPassword);
+        userRepository.save(user);
+        verifiedEmailStore.remove(email);
+        return true;
     }
 }

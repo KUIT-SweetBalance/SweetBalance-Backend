@@ -4,9 +4,8 @@ import com.sweetbalance.backend.dto.request.AddBeverageRecordRequestDTO;
 import com.sweetbalance.backend.dto.request.MetadataRequestDTO;
 import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
 import com.sweetbalance.backend.dto.response.FavoriteBeverageDTO;
-import com.sweetbalance.backend.dto.response.notice.EachEntry;
 import com.sweetbalance.backend.dto.response.notice.ListNoticeDTO;
-import com.sweetbalance.backend.dto.response.WeeklyConsumeInfoDTO;
+import com.sweetbalance.backend.dto.response.weekly.WeeklyConsumeInfoDTO;
 import com.sweetbalance.backend.entity.Beverage;
 import com.sweetbalance.backend.entity.BeverageLog;
 import com.sweetbalance.backend.entity.BeverageSize;
@@ -20,39 +19,38 @@ import java.util.Optional;
 
 public interface UserService {
 
-    public void join(SignUpRequestDTO signUpRequestDTO);
-
-    public Optional<User> findUserByUserId(Long userId);
-
-    Optional<User> findUserByEmailAndLoginTypeAndDeletedAtIsNull(String email, LoginType loginType);
-
+    // user date
+    void join(SignUpRequestDTO signUpRequestDTO);
+    void updateMetaData(User user, MetadataRequestDTO metaDataRequestDTO);
+    boolean resetPassword(String email, String newPassword);
     void softDeleteUser(User user);
 
-    List<FavoriteBeverageDTO> getFavoriteListByUserId(Long userId, Pageable pageable);
+    Optional<User> findUserByUserId(Long userId);
+    Optional<User> findUserByEmailAndLoginTypeAndDeletedAtIsNull(String email, LoginType loginType);
+
+    // beverage log
+    void addBeverageRecord(User user, BeverageSize beverageSize, AddBeverageRecordRequestDTO addBeverageRecordRequestDTO);
+    void editBeverageRecord(Long beverageLogId, BeverageSize beverageSize, AddBeverageRecordRequestDTO dto);
+    void deleteBeverageRecord(BeverageLog beverageLog);
+
+    Optional<BeverageLog> findBeverageLogByBeverageLogId(Long beverageLogId);
+
+    List<BeverageLog> findTodayBeverageLogsByUserId(Long userId);
+    List<BeverageLog> findTotalBeverageLogsByUserId(Long userId, Pageable pageable);
 
     WeeklyConsumeInfoDTO getWeeklyConsumeInfo(Long userId, LocalDate startDate, LocalDate endDate);
 
-    public Optional<BeverageLog> findBeverageLogByBeverageLogId(Long beverageLogId);
+    // favorite
+    List<FavoriteBeverageDTO> getFavoriteListByUserId(Long userId, Pageable pageable);
+    void addFavoriteRecord(User user, Beverage beverage);
+    void deleteFavoriteRecord(User user, Beverage beverage);
 
-    public void updateMetaData(User user, MetadataRequestDTO metaDataRequestDTO);
-
-    public void addBeverageRecord(User user, BeverageSize beverageSize, AddBeverageRecordRequestDTO addBeverageRecordRequestDTO);
-
-    public void deleteBeverageRecord(BeverageLog beverageLog);
-
-    public List<ListNoticeDTO> getNoticeListByUserId(Long userId);
-
-    public void checkNoticeReaded(Long beverageLogId);
-
-    public void addFavoriteRecord(User user, Beverage beverage);
-
-    public void deleteFavoriteRecord(User user, Beverage beverage);
-
-    public void editBeverageRecord(Long beverageLogId, BeverageSize beverageSize, AddBeverageRecordRequestDTO dto);
-
-    public List<BeverageLog> findTodayBeverageLogsByUserId(Long userId);
-
-    List<BeverageLog> findTotalBeverageLogsByUserId(Long userId, Pageable pageable);
-
+    // notice
+    List<ListNoticeDTO> getNoticeListByUserId(Long userId);
+    void checkNoticeReaded(Long beverageLogId);
     int getNumberOfUnreadLogWithinAWeek();
+    
+    // email
+    boolean sendEmailVerificationCode(String email);
+    boolean checkEmailVerificationCode(String email, String code);
 }
