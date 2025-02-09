@@ -2,13 +2,13 @@ package com.sweetbalance.backend.util.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sweetbalance.backend.dto.identity.CustomUserDetails;
-import com.sweetbalance.backend.dto.response.TokenPairDTO;
+import com.sweetbalance.backend.dto.response.token.TokenPairDTO;
 import com.sweetbalance.backend.util.InnerFilterResponseSender;
 import com.sweetbalance.backend.util.JWTUtil;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -29,6 +29,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final ObjectMapper objectMapper;
     private final JWTUtil jwtUtil;
 
+    @Autowired
     public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil) {
         this.authenticationManager = authenticationManager;
         this.objectMapper = new ObjectMapper();
@@ -75,10 +76,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String accessToken = jwtUtil.generateBasicAccessToken(userId, username, role);
         String refreshToken = jwtUtil.generateBasicRefreshToken(userId, username, role);
 
-        // 프론트 HTTPS 배포 이전 까지는 쿠키 방식 응답 미사용
-//        response.setHeader("Authorization", "Bearer " + accessToken);
-//        response.addCookie(createCookie("refresh", refreshToken));
-
         TokenPairDTO tokens = new TokenPairDTO(accessToken, refreshToken);
         InnerFilterResponseSender.sendInnerResponse(response, 200, 0,
                 "로그인 성공, 토큰 발급 성공", tokens);
@@ -90,16 +87,5 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         InnerFilterResponseSender.sendInnerResponse(response, 400, 999,
                 "로그인 인증 실패", null);
-    }
-
-    private Cookie createCookie(String key, String value) {
-
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(24*60*60);
-        cookie.setPath("/");
-        //cookie.setHttpOnly(true);
-        //cookie.setSecure(true);
-
-        return cookie;
     }
 }

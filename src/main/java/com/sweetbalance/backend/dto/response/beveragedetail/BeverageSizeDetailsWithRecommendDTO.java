@@ -1,7 +1,5 @@
-package com.sweetbalance.backend.dto.response;
+package com.sweetbalance.backend.dto.response.beveragedetail;
 
-import com.sweetbalance.backend.entity.Beverage;
-import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;

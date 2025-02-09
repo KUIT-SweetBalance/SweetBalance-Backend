@@ -22,7 +22,7 @@ import static com.sweetbalance.backend.enums.user.Role.USER;
 @Service
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Autowired
     public CustomOAuth2UserService(UserRepository userRepository) {

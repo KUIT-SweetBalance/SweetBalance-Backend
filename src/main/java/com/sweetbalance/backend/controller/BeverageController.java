@@ -2,11 +2,11 @@ package com.sweetbalance.backend.controller;
 
 import com.sweetbalance.backend.dto.DefaultResponseDTO;
 import com.sweetbalance.backend.dto.identity.UserIdHolder;
-import com.sweetbalance.backend.dto.response.BeverageDetailsDTO;
+import com.sweetbalance.backend.dto.response.beveragedetail.BeverageDetailsDTO;
 import com.sweetbalance.backend.dto.response.BrandPopularBeverageDTO;
 import com.sweetbalance.backend.dto.response.InnerListBeverageDTO;
 import com.sweetbalance.backend.service.BeverageService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -15,14 +15,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/beverages")
+@RequiredArgsConstructor
 public class BeverageController {
 
     private final BeverageService beverageService;
-
-    @Autowired
-    public BeverageController(BeverageService beverageService) {
-        this.beverageService = beverageService;
-    }
 
     @GetMapping("/brand/list")
     public ResponseEntity<?> getBrandList() {

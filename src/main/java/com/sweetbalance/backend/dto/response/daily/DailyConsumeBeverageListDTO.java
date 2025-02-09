@@ -1,4 +1,4 @@
-package com.sweetbalance.backend.dto.response;
+package com.sweetbalance.backend.dto.response.daily;
 
 import com.sweetbalance.backend.entity.Beverage;
 import com.sweetbalance.backend.entity.BeverageLog;

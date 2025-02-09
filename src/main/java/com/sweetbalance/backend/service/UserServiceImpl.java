@@ -6,8 +6,10 @@ import com.sweetbalance.backend.dto.request.MetadataRequestDTO;
 import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
 import com.sweetbalance.backend.dto.response.*;
 
+import com.sweetbalance.backend.dto.response.daily.DailySugarDTO;
 import com.sweetbalance.backend.dto.response.notice.EachEntry;
 import com.sweetbalance.backend.dto.response.notice.ListNoticeDTO;
+import com.sweetbalance.backend.dto.response.weekly.WeeklyConsumeInfoDTO;
 import com.sweetbalance.backend.entity.*;
 import com.sweetbalance.backend.enums.alarm.SugarWarningMessage;
 import com.sweetbalance.backend.enums.common.Status;
@@ -20,8 +22,6 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
-import com.sweetbalance.backend.util.TimeStringConverter;
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -31,7 +31,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -279,7 +278,6 @@ public class UserServiceImpl implements UserService {
         return alarmRepository.findAllByLogUserUserIdAndUpdatedAtBetween(userId,startOfDay,endOfDay);
     }
 
-
     // 로그 Id로 음료 기록 찾고, 음료 사이즈 정보, 시럽 이름, 시럽 개수, 추가 당 함량 다시 설정.
     @Override
     public void editBeverageRecord(Long beverageLogId, BeverageSize newBeverageSize, AddBeverageRecordRequestDTO dto) {
@@ -497,36 +495,6 @@ public class UserServiceImpl implements UserService {
         return beverageLogRepository
                 .findByCreatedAtAfterAndReadByUserFalse(sevenDaysAgo)
                 .size();
-    }
-
-    @Override
-    public boolean sendTemporaryPassword(String email) {
-        Optional<User> userOptional = userRepository.findByEmail(email);
-        if (userOptional.isEmpty()) {
-            return false;
-        }
-        User user = userOptional.get();
-
-        String tempPassword = generateRandomPassword(8);
-        user.setPassword(bCryptPasswordEncoder.encode(tempPassword));
-        userRepository.save(user);
-
-        emailService.sendTemporaryPasswordMail(email, tempPassword);
-
-        return true;
-    }
-
-    private String generateRandomPassword(int length) {
-        String charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$";
-        Random random = new Random();
-        StringBuilder sb = new StringBuilder();
-
-        for(int i=0; i<length; i++){
-            int randIndex = random.nextInt(charSet.length());
-            sb.append(charSet.charAt(randIndex));
-        }
-
-        return sb.toString();
     }
 
     @Override

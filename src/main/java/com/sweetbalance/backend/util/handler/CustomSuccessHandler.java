@@ -49,6 +49,9 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         boolean isNew = customUserDetails.isNewUser();
 
         // addSecureCookie(response, "refresh", refreshToken);
+        // addSecureCookie(response, "new", isNew);
+        // response.sendRedirect(frontOriginHttps);
+
         response.sendRedirect(frontOriginHttps+"?new="+isNew+"&refresh="+refreshToken);
     }
 

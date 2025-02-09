@@ -1,4 +1,4 @@
-package com.sweetbalance.backend.dto.response;
+package com.sweetbalance.backend.dto.response.token;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

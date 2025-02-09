@@ -1,5 +1,6 @@
-package com.sweetbalance.backend.dto.response;
+package com.sweetbalance.backend.dto.response.weekly;
 
+import com.sweetbalance.backend.dto.response.daily.DailySugarDTO;
 import lombok.*;
 
 import java.util.List;
