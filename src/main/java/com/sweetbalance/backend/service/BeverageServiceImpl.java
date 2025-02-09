@@ -148,7 +148,7 @@ public class BeverageServiceImpl implements BeverageService {
             if (StringUtils.hasText(brand)) {
                 predicates.add(cb.equal(root.get("brand"), brand));
             }
-            if (StringUtils.hasText(category)) {
+            if (StringUtils.hasText(category) && !"전체".equals(category)) {
                 predicates.add(cb.equal(root.get("category"),
                         BeverageCategory.valueOf(category)));
             }
