@@ -126,19 +126,25 @@ public class BeverageServiceImpl implements BeverageService {
     }
 
     @Override
-    public List<InnerListBeverageDTO> findBeveragesByFilters(
+    public BeverageListResponseDTO findBeveragesWithTotalCount(
             Long userId, String brand, String category, String keyword, String sort, Integer page, Integer size
     ) {
         Specification<Beverage> spec = buildSpecification(brand, category, keyword);
         Sort sortOrder = resolveSort(sort);
 
+        long totalCount = beverageRepository.count(spec);
         List<Beverage> beverages = fetchBeverages(spec, sortOrder, page, size);
 
         Set<Long> favoriteIds = getFavoriteBeverageIds(userId, beverages);
 
-        return beverages.stream()
+        List<InnerListBeverageDTO> beverageDTOs = beverages.stream()
                 .map(b -> convertToInnerListBeverageDTO(b, favoriteIds))
                 .collect(Collectors.toList());
+
+        return BeverageListResponseDTO.builder()
+                .totalBeverageNum((int) totalCount)
+                .beverages(beverageDTOs)
+                .build();
     }
 
     private Specification<Beverage> buildSpecification(String brand, String category, String keyword) {

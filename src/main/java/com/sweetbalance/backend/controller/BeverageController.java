@@ -2,9 +2,9 @@ package com.sweetbalance.backend.controller;
 
 import com.sweetbalance.backend.dto.DefaultResponseDTO;
 import com.sweetbalance.backend.dto.identity.UserIdHolder;
+import com.sweetbalance.backend.dto.response.BeverageListResponseDTO;
 import com.sweetbalance.backend.dto.response.beveragedetail.BeverageDetailsDTO;
 import com.sweetbalance.backend.dto.response.BrandPopularBeverageDTO;
-import com.sweetbalance.backend.dto.response.InnerListBeverageDTO;
 import com.sweetbalance.backend.service.BeverageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -88,11 +88,11 @@ public class BeverageController {
         Long userId = userIdHolder.getUserId();
 
         try {
-            List<InnerListBeverageDTO> beverages = beverageService.findBeveragesByFilters(
+            BeverageListResponseDTO response = beverageService.findBeveragesWithTotalCount(
                     userId, brand, category, keyword, sort, page, size
             );
             return ResponseEntity.ok(
-                    DefaultResponseDTO.success("조건부 음료 리스트 조회 성공", beverages)
+                    DefaultResponseDTO.success("조건부 음료 리스트 조회 성공", response)
             );
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(
