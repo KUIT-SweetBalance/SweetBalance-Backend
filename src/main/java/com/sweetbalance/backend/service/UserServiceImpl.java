@@ -324,11 +324,10 @@ public class UserServiceImpl implements UserService {
         start = System.nanoTime();
 
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime oneWeekAgo = LocalDateTime.now().minusWeeks(1);
+        LocalDateTime oneWeekAgo = LocalDateTime.now().minusWeeks(1).toLocalDate().atStartOfDay();
 
         List<Alarm> allAlarms = alarmRepository
                 .findAllByLogUserUserIdAndCreatedAtBetween(userId, oneWeekAgo, now);
-
         Map<Long, Alarm> alarmByLogId = allAlarms.stream().collect(Collectors.toMap(alarm -> alarm.getLog().getLogId(), Function.identity()));
 
         List<BeverageLog> sortedLogs = beverageLogRepository
@@ -422,12 +421,14 @@ public class UserServiceImpl implements UserService {
             ListNoticeDTO dayDTO = new ListNoticeDTO(date, infoList);
             result.add(dayDTO);
         }
+        result.sort(Comparator.comparing(ListNoticeDTO::date));
+
 
         end = System.nanoTime();
         ms = (end - start) / (1000 * 1000D);
         System.out.println(ms + " ms");
 
-        return result;
+        return result.reversed();
     }
 
     @Override
