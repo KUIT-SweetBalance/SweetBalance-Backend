@@ -1,5 +1,6 @@
 package com.sweetbalance.backend.service;
 
+import com.sweetbalance.backend.dto.response.BeverageListResponseDTO;
 import com.sweetbalance.backend.dto.response.InnerListBeverageDTO;
 import com.sweetbalance.backend.entity.Beverage;
 import com.sweetbalance.backend.dto.response.beveragedetail.BeverageDetailsDTO;
@@ -18,5 +19,5 @@ public interface BeverageService {
 
     BeverageDetailsDTO getBeverageDetails(Long userId, Long beverageId, int limit);
 
-    List<InnerListBeverageDTO> findBeveragesByFilters(Long userId, String brand, String category, String keyword, String sort, Integer page, Integer size);
+    BeverageListResponseDTO findBeveragesWithTotalCount(Long userId, String brand, String category, String keyword, String sort, Integer page, Integer size);
 }
