@@ -8,7 +8,7 @@ import com.sweetbalance.backend.dto.response.weekly.WeeklyConsumeInfoDTO;
 import com.sweetbalance.backend.entity.BeverageLog;
 import com.sweetbalance.backend.entity.User;
 import com.sweetbalance.backend.enums.user.Gender;
-import com.sweetbalance.backend.service.BeverageSizeService;
+import com.sweetbalance.backend.service.BeverageLogDataService;
 import com.sweetbalance.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -32,7 +32,7 @@ import java.util.Optional;
 public class BeverageLogDataController {
 
     private final UserService userService;
-    private final BeverageSizeService beverageSizeService;
+    private final BeverageLogDataService beverageLogDataService;
 
     @GetMapping("/daily-brand-list")
     public ResponseEntity<?> getDailyConsumeBrandListOfClient(@AuthenticationPrincipal UserIdHolder userIdHolder){
@@ -45,7 +45,7 @@ public class BeverageLogDataController {
             );
         }
 
-        List<BeverageLog> dailyBrandLogs = userService.findTodayBeverageLogsByUserId(userId);
+        List<BeverageLog> dailyBrandLogs = beverageLogDataService.findTodayBeverageLogsByUserId(userId);
 
         List<String> brandList = dailyBrandLogs.stream()
                 .map(log -> log.getBeverageSize().getBeverage().getBrand())
@@ -68,7 +68,7 @@ public class BeverageLogDataController {
             );
         }
 
-        List<BeverageLog> dailyBeverageLogs = userService.findTodayBeverageLogsByUserId(userId);
+        List<BeverageLog> dailyBeverageLogs = beverageLogDataService.findTodayBeverageLogsByUserId(userId);
 
         List<DailyConsumeBeverageListDTO> todayConsumeBeverageList = dailyBeverageLogs.stream()
                 .map(DailyConsumeBeverageListDTO::fromEntity)
@@ -92,7 +92,7 @@ public class BeverageLogDataController {
 
         User user = userOptional.get();
 
-        List<BeverageLog> dailyBeverageLogs = userService.findTodayBeverageLogsByUserId(userId);
+        List<BeverageLog> dailyBeverageLogs = beverageLogDataService.findTodayBeverageLogsByUserId(userId);
 
         double initSugarSum = 0.0;
         for (BeverageLog log : dailyBeverageLogs) {
@@ -103,13 +103,13 @@ public class BeverageLogDataController {
 
         int beverageCount = dailyBeverageLogs.size();
 
-        int unreadAlarmCount = userService.getNumberOfUnreadLogWithinAWeek();
+        int unreadAlarmCount = beverageLogDataService.getNumberOfUnreadLogWithinAWeek();
 
         int additionalSugar = 0;
         if (user.getGender() == Gender.MALE) {
-            additionalSugar = 25 - totalSugar;
+            additionalSugar = 38 - totalSugar;
         } else if (user.getGender() == Gender.FEMALE) {
-            additionalSugar = 20 - totalSugar;
+            additionalSugar = 25 - totalSugar;
         }
 
         DailyConsumeInfoDTO dailyConsumeInfo = DailyConsumeInfoDTO.builder()
@@ -135,7 +135,7 @@ public class BeverageLogDataController {
             LocalDate endDate = (startDate != null) ? startDate.plusDays(6) : LocalDate.now();
             startDate = (startDate != null) ? startDate : endDate.minusDays(6);
 
-            WeeklyConsumeInfoDTO weeklyConsumeInfoDTO = userService.getWeeklyConsumeInfo(userId, startDate, endDate);
+            WeeklyConsumeInfoDTO weeklyConsumeInfoDTO = beverageLogDataService.getWeeklyConsumeInfo(userId, startDate, endDate);
 
             return ResponseEntity.status(200).body(
                     DefaultResponseDTO.success("주간 영양정보 반환 성공", weeklyConsumeInfoDTO)
@@ -165,7 +165,7 @@ public class BeverageLogDataController {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        List<BeverageLog> beverageLogs = userService.findTotalBeverageLogsByUserId(userId, pageable);
+        List<BeverageLog> beverageLogs = beverageLogDataService.findTotalBeverageLogsByUserId(userId, pageable);
 
         List<DailyConsumeBeverageListDTO> dailyConsumeBeverageList = new ArrayList<>();
         for (BeverageLog log : beverageLogs) {
