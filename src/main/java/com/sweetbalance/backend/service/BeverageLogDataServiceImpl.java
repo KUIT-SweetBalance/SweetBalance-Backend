@@ -39,14 +39,14 @@ public class BeverageLogDataServiceImpl implements BeverageLogDataService {
         LocalDateTime endOfToday = today.plusDays(1).atStartOfDay().minusNanos(1);
 
         //findAllByUserUserIdAndCreatedAtBetween
-        return beverageLogRepository.findByUser_UserIdAndCreatedAtBetweenAndStatus(
+        return beverageLogRepository.findByUser_UserIdAndCreatedAtBetweenAndStatusOrderByCreatedAtDesc(
                 userId, startOfToday, endOfToday, Status.ACTIVE
         );
     }
 
     @Override
     public List<BeverageLog> findTotalBeverageLogsByUserId(Long userId, Pageable pageable) {
-        return beverageLogRepository.findTotalByUserUserIdAndStatus(userId, pageable, Status.ACTIVE);
+        return beverageLogRepository.findTotalByUserUserIdAndStatusOrderByCreatedAtDesc(userId, pageable, Status.ACTIVE);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class BeverageLogDataServiceImpl implements BeverageLogDataService {
         LocalDate today = LocalDate.now();
         LocalDate effectiveEndDate = endDate.isAfter(today) ? today : endDate;
 
-        List<BeverageLog> logs = beverageLogRepository.findByUser_UserIdAndCreatedAtBetweenAndStatus(
+        List<BeverageLog> logs = beverageLogRepository.findByUser_UserIdAndCreatedAtBetweenAndStatusOrderByCreatedAtDesc(
                 userId,
                 startDate.atStartOfDay(),
                 effectiveEndDate.atTime(23, 59, 59),
