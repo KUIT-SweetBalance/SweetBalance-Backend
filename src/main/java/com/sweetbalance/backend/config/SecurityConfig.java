@@ -41,6 +41,9 @@ public class SecurityConfig {
     @Value("${spring.front.origin-https}")
     private String frontOriginHttps;
 
+    @Value("${spring.front.origin-deployed}")
+    private String frontOriginDeployed;
+
     private final AuthenticationConfiguration authenticationConfiguration;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomSuccessHandler customSuccessHandler;
@@ -80,7 +83,7 @@ public class SecurityConfig {
 
                         CorsConfiguration configuration = new CorsConfiguration();
 
-                        configuration.setAllowedOrigins(List.of(frontOriginHttp, frontOriginHttps));
+                        configuration.setAllowedOrigins(List.of(frontOriginHttp, frontOriginHttps, frontOriginDeployed));
                         configuration.setAllowedHeaders(Collections.singletonList("*"));
                         configuration.setAllowedMethods(Collections.singletonList("*"));
                         configuration.setAllowCredentials(true);
