@@ -7,6 +7,8 @@ import com.sweetbalance.backend.entity.Beverage;
 import com.sweetbalance.backend.entity.User;
 import com.sweetbalance.backend.repository.FavoriteRepository;
 import com.sweetbalance.backend.service.BeverageService;
+import com.sweetbalance.backend.service.FavoriteService;
+import com.sweetbalance.backend.service.NoticeService;
 import com.sweetbalance.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -24,6 +26,7 @@ import java.util.Optional;
 public class FavoriteController {
 
     private final UserService userService;
+    private final FavoriteService favoriteService;
     private final BeverageService beverageService;
     private final FavoriteRepository favoriteRepository;
 
@@ -36,7 +39,7 @@ public class FavoriteController {
             Long userId = userIdHolder.getUserId();
             Pageable pageable = PageRequest.of(page, size);
 
-            List<FavoriteBeverageDTO> listBeverages = userService.getFavoriteListByUserId(userId, pageable);
+            List<FavoriteBeverageDTO> listBeverages = favoriteService.getFavoriteListByUserId(userId, pageable);
 
             return ResponseEntity.status(200).body(
                     DefaultResponseDTO.success("즐겨찾기 음료 리스트 반환 성공", listBeverages)
@@ -73,7 +76,7 @@ public class FavoriteController {
             );
         }
 
-        userService.addFavoriteRecord(userOptional.get(), beverageOptional.get());
+        favoriteService.addFavoriteRecord(userOptional.get(), beverageOptional.get());
 
         return ResponseEntity.ok(
                 DefaultResponseDTO.success("즐겨찾기 추가 성공", null)
@@ -98,7 +101,7 @@ public class FavoriteController {
             );
         }
 
-        userService.deleteFavoriteRecord(userOptional.get(), beverageOptional.get());
+        favoriteService.deleteFavoriteRecord(userOptional.get(), beverageOptional.get());
 
         return ResponseEntity.ok(
                 DefaultResponseDTO.success("즐겨찾기 삭제 성공", null)

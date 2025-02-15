@@ -3,6 +3,7 @@ package com.sweetbalance.backend.controller;
 import com.sweetbalance.backend.dto.DefaultResponseDTO;
 import com.sweetbalance.backend.dto.identity.UserIdHolder;
 import com.sweetbalance.backend.dto.response.notice.ListNoticeDTO;
+import com.sweetbalance.backend.service.NoticeService;
 import com.sweetbalance.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,13 +17,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class NoticeController {
 
-    private final UserService userService;
+    private final NoticeService noticeService;
 
     @GetMapping("/notice-list")
     public ResponseEntity<?> getNoticeList(@AuthenticationPrincipal UserIdHolder userIdHolder) {
         Long userId = userIdHolder.getUserId();
 
-        List<ListNoticeDTO> listBeverages = userService.getNoticeListByUserId(userId);
+        List<ListNoticeDTO> listBeverages = noticeService.getNoticeListByUserId(userId);
 
         return ResponseEntity.status(200).body(
                 DefaultResponseDTO.success("알림 리스트 반환 성공", listBeverages)
@@ -32,7 +33,7 @@ public class NoticeController {
     @PostMapping("/notice/{beverageLogId}")
     public ResponseEntity<?> checkAlarmReaded(@AuthenticationPrincipal UserIdHolder userIdHolder, @PathVariable("beverageLogId") Long beverageLogId){
 
-        userService.checkNoticeReaded(beverageLogId);
+        noticeService.checkNoticeReaded(beverageLogId);
         return ResponseEntity.ok(DefaultResponseDTO.success("알람 읽음 기록 추가 성공", null));
     }
 }
