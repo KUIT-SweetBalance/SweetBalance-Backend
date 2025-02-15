@@ -148,8 +148,6 @@ public class BeverageLogDataController {
         }
     }
 
-    // 상단 하단 메소드들 클래스 분리 고려
-
     @GetMapping("/beverage-record")
     public ResponseEntity<?> getTotalBeverageListOfClient(@AuthenticationPrincipal UserIdHolder userIdHolder,
                                                           @RequestParam("page") int page,
