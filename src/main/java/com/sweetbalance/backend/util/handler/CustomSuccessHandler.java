@@ -21,8 +21,8 @@ import java.util.Iterator;
 @Component
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    @Value("${spring.front.origin-https}")
-    private String frontOriginHttps;
+    @Value("${spring.front.origin-deployed}")
+    private String frontOriginDeployed;
 
     private final JWTUtil jwtUtil;
 
@@ -48,11 +48,10 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String refreshToken = jwtUtil.generateSocialRefreshToken(userId, email, role);
         boolean isNew = customUserDetails.isNewUser();
 
-        // addSecureCookie(response, "refresh", refreshToken);
-        // addSecureCookie(response, "new", isNew);
-        // response.sendRedirect(frontOriginHttps);
+        addSecureCookie(response, "new", String.valueOf(isNew));
+        addSecureCookie(response, "refresh", refreshToken);
 
-        response.sendRedirect(frontOriginHttps+"?new="+isNew+"&refresh="+refreshToken);
+        response.sendRedirect(frontOriginDeployed+"?new="+isNew+"&refresh="+refreshToken);
     }
 
     // 프론트 측 배포이후 공통된 서브 도메인으로 cookie domain 설정해야만 서드파티 쿠키 사용 가능
