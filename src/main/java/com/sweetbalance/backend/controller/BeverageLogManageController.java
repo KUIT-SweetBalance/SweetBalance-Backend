@@ -10,6 +10,7 @@ import com.sweetbalance.backend.entity.BeverageLog;
 import com.sweetbalance.backend.entity.BeverageSize;
 import com.sweetbalance.backend.entity.User;
 import com.sweetbalance.backend.enums.user.Gender;
+import com.sweetbalance.backend.service.BeverageLogManageService;
 import com.sweetbalance.backend.service.BeverageSizeService;
 import com.sweetbalance.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class BeverageLogManageController {
 
     private final UserService userService;
     private final BeverageSizeService beverageSizeService;
+    private final BeverageLogManageService beverageLogManageService;
 
     @PostMapping("/beverage-record")
     public ResponseEntity<?> addBeverageRecord(@AuthenticationPrincipal UserIdHolder userIdHolder,
@@ -40,7 +42,7 @@ public class BeverageLogManageController {
             User user = getUser(userIdHolder.getUserId());
             BeverageSize beverageSize = getBeverageSize(dto.getBeverageSizeId());
 
-            userService.addBeverageRecord(user, beverageSize, dto);
+            beverageLogManageService.addBeverageRecord(user, beverageSize, dto);
             return ResponseEntity.ok(DefaultResponseDTO.success("음료 섭취 기록 추가 성공", null));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(404).body(DefaultResponseDTO.error(404, 999, e.getMessage()));
@@ -58,7 +60,7 @@ public class BeverageLogManageController {
             BeverageLog beverageLog = getBeverageLog(beverageLogId);
             BeverageSize beverageSize = getBeverageSize(dto.getBeverageSizeId());
 
-            userService.editBeverageRecord(beverageLogId, beverageSize, dto);
+            beverageLogManageService.editBeverageRecord(beverageLogId, beverageSize, dto);
             return ResponseEntity.ok(DefaultResponseDTO.success("음료 섭취 기록 수정 성공", null));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(404).body(DefaultResponseDTO.error(404, 999, e.getMessage()));
@@ -72,7 +74,7 @@ public class BeverageLogManageController {
             // 사용자 검증
             getUser(userIdHolder.getUserId());
             BeverageLog beverageLog = getBeverageLog(beverageLogId);
-            userService.deleteBeverageRecord(beverageLog);
+            beverageLogManageService.deleteBeverageRecord(beverageLog);
             return ResponseEntity.ok(DefaultResponseDTO.success("음료 섭취 기록 삭제 성공", null));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(404).body(DefaultResponseDTO.error(404, 999, e.getMessage()));
@@ -102,7 +104,7 @@ public class BeverageLogManageController {
      * 없을 경우 IllegalArgumentException을 발생
      */
     private BeverageLog getBeverageLog(Long beverageLogId) {
-        return userService.findBeverageLogByBeverageLogId(beverageLogId)
+        return beverageLogManageService.findBeverageLogByBeverageLogId(beverageLogId)
                 .orElseThrow(() -> new IllegalArgumentException("일치하는 음료 기록을 찾을 수 없습니다."));
     }
 }
