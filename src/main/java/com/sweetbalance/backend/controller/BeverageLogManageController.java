@@ -3,28 +3,16 @@ package com.sweetbalance.backend.controller;
 import com.sweetbalance.backend.dto.DefaultResponseDTO;
 import com.sweetbalance.backend.dto.identity.UserIdHolder;
 import com.sweetbalance.backend.dto.request.AddBeverageRecordRequestDTO;
-import com.sweetbalance.backend.dto.response.daily.DailyConsumeBeverageListDTO;
-import com.sweetbalance.backend.dto.response.daily.DailyConsumeInfoDTO;
-import com.sweetbalance.backend.dto.response.weekly.WeeklyConsumeInfoDTO;
 import com.sweetbalance.backend.entity.BeverageLog;
 import com.sweetbalance.backend.entity.BeverageSize;
 import com.sweetbalance.backend.entity.User;
-import com.sweetbalance.backend.enums.user.Gender;
 import com.sweetbalance.backend.service.BeverageLogManageService;
 import com.sweetbalance.backend.service.BeverageSizeService;
 import com.sweetbalance.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/user")

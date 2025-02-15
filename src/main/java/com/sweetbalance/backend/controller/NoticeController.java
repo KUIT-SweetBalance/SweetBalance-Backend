@@ -4,7 +4,6 @@ import com.sweetbalance.backend.dto.DefaultResponseDTO;
 import com.sweetbalance.backend.dto.identity.UserIdHolder;
 import com.sweetbalance.backend.dto.response.notice.ListNoticeDTO;
 import com.sweetbalance.backend.service.NoticeService;
-import com.sweetbalance.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

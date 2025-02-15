@@ -2,7 +2,10 @@ package com.sweetbalance.backend.service;
 
 import com.sweetbalance.backend.dto.identity.AuthUserDTO;
 import com.sweetbalance.backend.dto.identity.CustomOAuth2User;
-import com.sweetbalance.backend.dto.oauth2.*;
+import com.sweetbalance.backend.dto.oauth2.GoogleResponse;
+import com.sweetbalance.backend.dto.oauth2.KakaoResponse;
+import com.sweetbalance.backend.dto.oauth2.NaverResponse;
+import com.sweetbalance.backend.dto.oauth2.OAuth2Response;
 import com.sweetbalance.backend.entity.User;
 import com.sweetbalance.backend.enums.user.LoginType;
 import com.sweetbalance.backend.repository.UserRepository;

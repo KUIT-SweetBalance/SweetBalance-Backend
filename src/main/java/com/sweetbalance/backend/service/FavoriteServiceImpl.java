@@ -4,9 +4,8 @@ import com.sweetbalance.backend.dto.response.FavoriteBeverageDTO;
 import com.sweetbalance.backend.entity.Beverage;
 import com.sweetbalance.backend.entity.Favorite;
 import com.sweetbalance.backend.entity.User;
-import com.sweetbalance.backend.repository.*;
+import com.sweetbalance.backend.repository.FavoriteRepository;
 import com.sweetbalance.backend.util.TimeStringConverter;
-import com.sweetbalance.backend.util.syrup.SugarCalculator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -22,8 +21,6 @@ import java.util.stream.Collectors;
 public class FavoriteServiceImpl implements FavoriteService{
 
     private final FavoriteRepository favoriteRepository;
-    private final BeverageSizeRepository beverageSizeRepository;
-    private final SugarCalculator sugarCalculator;
 
     @Override
     public List<FavoriteBeverageDTO> getFavoriteListByUserId(Long userId, Pageable pageable) {
@@ -61,6 +58,4 @@ public class FavoriteServiceImpl implements FavoriteService{
 
         favoriteOptional.ifPresent(favoriteRepository::delete);
     }
-
-
 }

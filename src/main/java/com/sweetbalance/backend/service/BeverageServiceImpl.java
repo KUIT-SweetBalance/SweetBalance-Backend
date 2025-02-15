@@ -1,6 +1,8 @@
 package com.sweetbalance.backend.service;
 
-import com.sweetbalance.backend.dto.response.*;
+import com.sweetbalance.backend.dto.response.BeverageListResponseDTO;
+import com.sweetbalance.backend.dto.response.BrandPopularBeverageDTO;
+import com.sweetbalance.backend.dto.response.InnerListBeverageDTO;
 import com.sweetbalance.backend.dto.response.beveragedetail.BeverageDetailsDTO;
 import com.sweetbalance.backend.dto.response.beveragedetail.BeverageSizeDetailsWithRecommendDTO;
 import com.sweetbalance.backend.dto.response.beveragedetail.RecommendedBeverageDTO;

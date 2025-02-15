@@ -8,7 +8,6 @@ import com.sweetbalance.backend.entity.User;
 import com.sweetbalance.backend.repository.FavoriteRepository;
 import com.sweetbalance.backend.service.BeverageService;
 import com.sweetbalance.backend.service.FavoriteService;
-import com.sweetbalance.backend.service.NoticeService;
 import com.sweetbalance.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
