@@ -10,7 +10,7 @@ import java.util.List;
 public interface BeverageLogDataService {
 
     List<BeverageLog> findTodayBeverageLogsByUserId(Long userId);
-    List<BeverageLog> findTotalBeverageLogsByUserId(Long userId, Pageable pageable);
+    List<BeverageLog> findTotalBeverageLogsByUserId(Long userId, Pageable pageable, String sort);
 
     WeeklyConsumeInfoDTO getWeeklyConsumeInfo(Long userId, LocalDate startDate, LocalDate endDate);
 

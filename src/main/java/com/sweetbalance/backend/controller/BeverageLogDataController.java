@@ -151,7 +151,9 @@ public class BeverageLogDataController {
     @GetMapping("/beverage-record")
     public ResponseEntity<?> getTotalBeverageListOfClient(@AuthenticationPrincipal UserIdHolder userIdHolder,
                                                           @RequestParam("page") int page,
-                                                          @RequestParam("size") int size) {
+                                                          @RequestParam("size") int size,
+                                                          @RequestParam(value = "sort", defaultValue = "new") String sort)
+    {
         Long userId = userIdHolder.getUserId();
 
         Optional<User> userOptional = userService.findUserByUserId(userId);
@@ -163,7 +165,7 @@ public class BeverageLogDataController {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        List<BeverageLog> beverageLogs = beverageLogDataService.findTotalBeverageLogsByUserId(userId, pageable);
+        List<BeverageLog> beverageLogs = beverageLogDataService.findTotalBeverageLogsByUserId(userId, pageable, sort);
 
         List<DailyConsumeBeverageListDTO> dailyConsumeBeverageList = new ArrayList<>();
         for (BeverageLog log : beverageLogs) {

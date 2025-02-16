@@ -45,8 +45,15 @@ public class BeverageLogDataServiceImpl implements BeverageLogDataService {
     }
 
     @Override
-    public List<BeverageLog> findTotalBeverageLogsByUserId(Long userId, Pageable pageable) {
-        return beverageLogRepository.findTotalByUserUserIdAndStatusOrderByCreatedAtDesc(userId, pageable, Status.ACTIVE);
+    public List<BeverageLog> findTotalBeverageLogsByUserId(Long userId, Pageable pageable, String sort) {
+        List<BeverageLog> beverageLogs;
+
+        if (sort.equals("old"))
+            beverageLogs = beverageLogRepository.findTotalByUserUserIdAndStatusOrderByCreatedAtAsc(userId, pageable, Status.ACTIVE);
+        else // new
+            beverageLogs = beverageLogRepository.findTotalByUserUserIdAndStatusOrderByCreatedAtDesc(userId, pageable, Status.ACTIVE);
+
+        return beverageLogs;
     }
 
     @Override
