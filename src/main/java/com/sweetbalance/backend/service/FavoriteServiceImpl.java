@@ -23,8 +23,15 @@ public class FavoriteServiceImpl implements FavoriteService{
     private final FavoriteRepository favoriteRepository;
 
     @Override
-    public List<FavoriteBeverageDTO> getFavoriteListByUserId(Long userId, Pageable pageable) {
-        List<Favorite> favorites = favoriteRepository.findByUser_UserIdOrderByCreatedAtDesc(userId, pageable);
+    public List<FavoriteBeverageDTO> getFavoriteListByUserId(Long userId, Pageable pageable, String sort) {
+        List<Favorite> favorites;
+
+        if (sort.equals("old"))
+            favorites = favoriteRepository.findByUser_UserIdOrderByCreatedAtAsc(userId, pageable);
+        else // new
+            favorites = favoriteRepository.findByUser_UserIdOrderByCreatedAtDesc(userId, pageable);
+
+
         return favorites.stream()
                 .map(this::convertToFavoriteBeverageDTO)
                 .collect(Collectors.toList());

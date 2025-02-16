@@ -32,13 +32,14 @@ public class FavoriteController {
     @GetMapping("/favorite")
     public ResponseEntity<?> getFavoriteList(@AuthenticationPrincipal UserIdHolder userIdHolder,
                                              @RequestParam("page") int page,
-                                             @RequestParam("size") int size) {
+                                             @RequestParam("size") int size,
+                                             @RequestParam(value = "sort", defaultValue = "new") String sort) {
         try{
 
             Long userId = userIdHolder.getUserId();
             Pageable pageable = PageRequest.of(page, size);
 
-            List<FavoriteBeverageDTO> listBeverages = favoriteService.getFavoriteListByUserId(userId, pageable);
+            List<FavoriteBeverageDTO> listBeverages = favoriteService.getFavoriteListByUserId(userId, pageable, sort);
 
             return ResponseEntity.status(200).body(
                     DefaultResponseDTO.success("즐겨찾기 음료 리스트 반환 성공", listBeverages)

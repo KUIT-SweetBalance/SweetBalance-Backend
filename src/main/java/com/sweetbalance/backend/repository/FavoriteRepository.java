@@ -15,8 +15,9 @@ import java.util.Set;
 
 @Repository
 public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
-  
+
     List<Favorite> findByUser_UserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
+    List<Favorite> findByUser_UserIdOrderByCreatedAtAsc(Long userId, Pageable pageable);
 
     Optional<Favorite> findByUserAndBeverage(User user, Beverage beverage);
 
