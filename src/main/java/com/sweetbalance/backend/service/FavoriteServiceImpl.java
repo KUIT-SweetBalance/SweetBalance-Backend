@@ -60,9 +60,7 @@ public class FavoriteServiceImpl implements FavoriteService{
     }
 
     @Override
-    public void deleteFavoriteRecord(User user, Beverage beverage) {
-        Optional<Favorite> favoriteOptional = favoriteRepository.findByUserAndBeverage(user, beverage);
-
-        favoriteOptional.ifPresent(favoriteRepository::delete);
+    public void deleteFavoriteRecord(Favorite favorite) {
+        favoriteRepository.delete(favorite);
     }
 }

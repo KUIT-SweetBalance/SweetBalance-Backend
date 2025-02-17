@@ -35,8 +35,10 @@ public class DailyConsumeBeverageListDTO {
 
         String formattedDateTime = log.getCreatedAt().format(dateTimeFormat);
 
-        double rawSugar = beverageSize.getSugar();
-        int roundedSugar = (int) Math.round(rawSugar);
+        double baseSugar = beverageSize.getSugar();
+        double additionalSugar = log.getAdditionalSugar();
+        double totalSugar = baseSugar + additionalSugar;
+        int roundedSugar = (int) Math.round(totalSugar);
 
         return DailyConsumeBeverageListDTO.builder()
                 .beverageLogId(log.getLogId())
