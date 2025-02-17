@@ -9,6 +9,8 @@ import com.sweetbalance.backend.entity.User;
 import com.sweetbalance.backend.service.BeverageLogManageService;
 import com.sweetbalance.backend.service.BeverageSizeService;
 import com.sweetbalance.backend.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/user")
+@Tag(name = "BeverageLog Manage", description = "음료 기록 관련 관리 API")
 @RequiredArgsConstructor
 public class BeverageLogManageController {
 
@@ -23,6 +26,7 @@ public class BeverageLogManageController {
     private final BeverageSizeService beverageSizeService;
     private final BeverageLogManageService beverageLogManageService;
 
+    @Operation(summary = "특정 음료에 대한 섭취기록 생성")
     @PostMapping("/beverage-record")
     public ResponseEntity<?> addBeverageRecord(@AuthenticationPrincipal UserIdHolder userIdHolder,
                                                @RequestBody AddBeverageRecordRequestDTO dto) {
@@ -37,6 +41,7 @@ public class BeverageLogManageController {
         }
     }
 
+    @Operation(summary = "특정 음료에 대한 섭취기록 수정")
     @PostMapping("/beverage-record/{beverageLogId}")
     public ResponseEntity<?> editBeverageRecord(@AuthenticationPrincipal UserIdHolder userIdHolder, @PathVariable("beverageLogId") Long beverageLogId, @RequestBody AddBeverageRecordRequestDTO dto){
 
@@ -55,6 +60,7 @@ public class BeverageLogManageController {
         }
     }
 
+    @Operation(summary = "특정 음료에 대한 섭취기록 삭제")
     @DeleteMapping("/beverage-record/{beverageLogId}")
     public ResponseEntity<?> deleteBeverageRecord(@AuthenticationPrincipal UserIdHolder userIdHolder,
                                                   @PathVariable("beverageLogId") Long beverageLogId){

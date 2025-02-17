@@ -4,6 +4,8 @@ import com.sweetbalance.backend.dto.DefaultResponseDTO;
 import com.sweetbalance.backend.dto.identity.UserIdHolder;
 import com.sweetbalance.backend.dto.response.notice.ListNoticeDTO;
 import com.sweetbalance.backend.service.NoticeService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -13,11 +15,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/user")
+@Tag(name = "Notice", description = "알림 관련 API")
 @RequiredArgsConstructor
 public class NoticeController {
 
     private final NoticeService noticeService;
 
+    @Operation(summary = "알림 리스트 조회")
     @GetMapping("/notice-list")
     public ResponseEntity<?> getNoticeList(@AuthenticationPrincipal UserIdHolder userIdHolder) {
         Long userId = userIdHolder.getUserId();
@@ -29,6 +33,7 @@ public class NoticeController {
         );
     }
 
+    @Operation(summary = "유저가 특정 알림을 읽었다고 표시")
     @PostMapping("/notice/{beverageLogId}")
     public ResponseEntity<?> checkAlarmReaded(@AuthenticationPrincipal UserIdHolder userIdHolder, @PathVariable("beverageLogId") Long beverageLogId){
 

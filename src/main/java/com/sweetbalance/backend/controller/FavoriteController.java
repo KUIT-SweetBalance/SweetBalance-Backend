@@ -9,6 +9,8 @@ import com.sweetbalance.backend.repository.FavoriteRepository;
 import com.sweetbalance.backend.service.BeverageService;
 import com.sweetbalance.backend.service.FavoriteService;
 import com.sweetbalance.backend.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +23,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/user")
+@Tag(name = "Favorite", description = "즐겨찾기 관련 API")
 @RequiredArgsConstructor
 public class FavoriteController {
 
@@ -29,6 +32,7 @@ public class FavoriteController {
     private final BeverageService beverageService;
     private final FavoriteRepository favoriteRepository;
 
+    @Operation(summary = "전체 즐겨찾기 조회")
     @GetMapping("/favorite")
     public ResponseEntity<?> getFavoriteList(@AuthenticationPrincipal UserIdHolder userIdHolder,
                                              @RequestParam("page") int page,
@@ -52,6 +56,7 @@ public class FavoriteController {
         }
     }
 
+    @Operation(summary = "특정 음료에 대한 즐겨찾기 생성")
     @PostMapping("/favorite/{beverageId}")
     public ResponseEntity<?> addFavorite(@AuthenticationPrincipal UserIdHolder userIdHolder, @PathVariable("beverageId") Long beverageId){
         Long userId = userIdHolder.getUserId();
@@ -83,6 +88,7 @@ public class FavoriteController {
         );
     }
 
+    @Operation(summary = "특정 음료에 대한 즐겨찾기 삭제")
     @DeleteMapping("/favorite/{beverageId}")
     public ResponseEntity<?> deleteFavorite(@AuthenticationPrincipal UserIdHolder userIdHolder, @PathVariable("beverageId") Long beverageId){
         Long userId = userIdHolder.getUserId();
