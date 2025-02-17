@@ -95,19 +95,19 @@ public class SecurityConfig {
                     }
                 }));
 
-        //csrf disable
+        //CSRF(Cross-Site Request Forgery) 보호 기능 비활성화
         httpSecurity
                 .csrf((auth) -> auth.disable());
 
-        //From 로그인 방식 disable
+        //Spring Security의 기본 폼 로그인 방식(Username & Password 로그인 폼) 비활성화
         httpSecurity
                 .formLogin((auth) -> auth.disable());
 
-        //HTTP Basic 인증 방식 disable
+        //HTTP Basic 인증 방식 비활성화
         httpSecurity
                 .httpBasic((auth) -> auth.disable());
         
-        //oauth2
+        //OAuth2 로그인 설정
         httpSecurity
                 .oauth2Login((oauth2) -> oauth2
                         .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
@@ -136,7 +136,7 @@ public class SecurityConfig {
                                     "권한이 부족합니다.", null);
                         }));
 
-        //LoginFilter 추가 - BASIC
+        //LoginFilter 추가 - 일반 로그인
         httpSecurity
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
@@ -148,7 +148,7 @@ public class SecurityConfig {
         httpSecurity
                 .addFilterAfter(new JWTFilter(jwtUtil), OAuth2LoginAuthenticationFilter.class);
 
-        //세션 설정 : STATELESS
+        //세션을 사용하지 않는 방식(STATELESS)으로 설정
         httpSecurity
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
