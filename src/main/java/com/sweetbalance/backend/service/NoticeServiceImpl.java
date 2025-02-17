@@ -34,7 +34,7 @@ public class NoticeServiceImpl implements NoticeService{
     public List<ListNoticeDTO> getNoticeListByUserId(Long userId) {
         Long start, end;
         double ms;
-        start = System.nanoTime();
+
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime oneWeekAgo = LocalDateTime.now().minusWeeks(1).toLocalDate().atStartOfDay();
@@ -63,7 +63,7 @@ public class NoticeServiceImpl implements NoticeService{
 
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-        start = System.nanoTime();
+
         List<EachEntry> flatList = integratedLogs
                 .stream()
                 .map(entity -> {
@@ -136,11 +136,6 @@ public class NoticeServiceImpl implements NoticeService{
         }
         result.sort(Comparator.comparing(ListNoticeDTO::date));
 
-
-        end = System.nanoTime();
-        ms = (end - start) / (1000 * 1000D);
-        System.out.println(ms + " ms");
-
         return result.reversed();
     }
 
@@ -166,23 +161,6 @@ public class NoticeServiceImpl implements NoticeService{
 
         // 알람의 위치는 어디가 적절한가?
         List<Pair<Long, SugarWarning>> properAlarmList = getProperAlarmLocation(user.getGender(), logsOnSameDay, (double)cautionAmountOfSugar, (double)exceedAmountOfSugar);
-        System.out.println("alarmsOnSameDay: ");
-        alarmsOnSameDay.forEach(a -> System.out.println(a.getLog().getLogId()));
-        System.out.println("properAlarmList: ");
-        properAlarmList.forEach(p -> System.out.println(p.getLeft() +"," + p.getRight()));
-        /*
-        cases:
-        1.  alarms: 두개
-            proper: none
-        2.  alarms: 두개
-            proper: 하나(위치 바뀜)
-        3.  alarms: 하나
-            proper: 하나(위치 바뀜)
-        4.  alarms: 하나
-            proper: 두개
-            ..... 계속
-         */
-
 
         int size1 = alarmsOnSameDay.size();
         int size2 = properAlarmList.size();
@@ -250,14 +228,11 @@ public class NoticeServiceImpl implements NoticeService{
         for (BeverageLog bl : logsOnSameDay) {
             // 해당 날에 섭취한 당 함량
             accumulatedSugar += bl.getBeverageSize().getSugar() + bl.getAdditionalSugar();
-            System.out.println("accumulatedSugar = " + accumulatedSugar);
             // 한번에 초과했을 경우(주의 알람이 필요 없음) 또는 주의 알람 후 당 함량을 초과했을 경우
             if(accumulatedSugar >= exceedAmountOfSugar){
-                System.out.println("accumulatedSugar exceeded");
                 properAlarm.add(Pair.of(bl.getLogId(),SugarWarning.EXCEED));
                 break;
             } else if (accumulatedSugar >= creteria){
-                System.out.println("accumulatedSugar is over creteria");
                 properAlarm.add(Pair.of(bl.getLogId(),SugarWarning.CAUTION));
                 creteria = exceedAmountOfSugar;
             }
