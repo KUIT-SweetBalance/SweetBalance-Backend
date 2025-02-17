@@ -4,6 +4,7 @@ import com.sweetbalance.backend.dto.DefaultResponseDTO;
 import com.sweetbalance.backend.dto.identity.UserIdHolder;
 import com.sweetbalance.backend.dto.response.FavoriteBeverageDTO;
 import com.sweetbalance.backend.entity.Beverage;
+import com.sweetbalance.backend.entity.Favorite;
 import com.sweetbalance.backend.entity.User;
 import com.sweetbalance.backend.repository.FavoriteRepository;
 import com.sweetbalance.backend.service.BeverageService;
@@ -107,7 +108,14 @@ public class FavoriteController {
             );
         }
 
-        favoriteService.deleteFavoriteRecord(userOptional.get(), beverageOptional.get());
+        Optional<Favorite> favoriteOptional = favoriteRepository.findByUserAndBeverage(userOptional.get(), beverageOptional.get());
+        if(favoriteOptional.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    DefaultResponseDTO.error(404, 999, "등록된 즐겨찾기 정보를 찾을 수 없습니다.")
+            );
+        }
+
+        favoriteService.deleteFavoriteRecord(favoriteOptional.get());
 
         return ResponseEntity.ok(
                 DefaultResponseDTO.success("즐겨찾기 삭제 성공", null)
