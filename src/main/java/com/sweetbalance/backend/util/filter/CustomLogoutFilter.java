@@ -12,6 +12,8 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
@@ -146,14 +148,21 @@ public class CustomLogoutFilter extends GenericFilterBean {
         //Refresh 토큰 DB에서 제거
         jwtUtil.deleteRefreshEntity(refresh);
 
-        //Refresh 토큰 Cookie 값 0
-        Cookie cookie = new Cookie("refresh", null);
-        cookie.setMaxAge(0);
-        cookie.setPath("/");
-
-        response.addCookie(cookie);
+        resetCookie(response, "refresh");
 
         InnerFilterResponseSender.sendInnerResponse(response, 200, 0,
                 "로그아웃 성공", null);
+    }
+
+    private void resetCookie(HttpServletResponse response, String name) {
+        ResponseCookie cookie = ResponseCookie.from(name, "")
+                .httpOnly(false)
+                .secure(true)
+                .path("/")
+                .sameSite("None")
+                .maxAge(0)
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 }
