@@ -5,6 +5,8 @@ import com.sweetbalance.backend.dto.response.token.TokenPairDTO;
 import com.sweetbalance.backend.util.JWTUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -15,9 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "Auth", description = "인증 관련 API")
 public class ReissueController {
     private final JWTUtil jwtUtil;
 
+    @Operation(summary = "토큰 재발행")
     @PostMapping("/api/auth/reissue")
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
 

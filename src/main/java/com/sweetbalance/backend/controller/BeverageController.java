@@ -6,6 +6,8 @@ import com.sweetbalance.backend.dto.response.BeverageListResponseDTO;
 import com.sweetbalance.backend.dto.response.beveragedetail.BeverageDetailsDTO;
 import com.sweetbalance.backend.dto.response.BrandPopularBeverageDTO;
 import com.sweetbalance.backend.service.BeverageService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,11 +17,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/beverages")
+@Tag(name = "Beverage", description = "음료 정보 관련 API")
 @RequiredArgsConstructor
 public class BeverageController {
 
     private final BeverageService beverageService;
 
+    @Operation(summary = "전체 브랜드 리스트 조회")
     @GetMapping("/brand/list")
     public ResponseEntity<?> getBrandList() {
         try {
@@ -37,6 +41,7 @@ public class BeverageController {
         }
     }
 
+    @Operation(summary = "브랜드별 인기 음료 리스트 조회")
     @GetMapping("/brand/popular")
     public ResponseEntity<?> getBrandPopularBeverageList(
             @RequestParam("brand-name") String brandName,
@@ -54,6 +59,7 @@ public class BeverageController {
         }
     }
 
+    @Operation(summary = "특정 음료 상세정보 일괄 조회")
     @GetMapping("/{beverage-id}")
     public ResponseEntity<?> getBeverageDetail(
             @AuthenticationPrincipal UserIdHolder userIdHolder,
@@ -75,6 +81,7 @@ public class BeverageController {
         }
     }
 
+    @Operation(summary = "조건별 음료 리스트 조회")
     @GetMapping("/list")
     public ResponseEntity<?> getBeverageListFilteredByParameters(
             @AuthenticationPrincipal UserIdHolder userIdHolder,

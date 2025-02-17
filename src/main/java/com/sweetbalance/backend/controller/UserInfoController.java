@@ -5,6 +5,8 @@ import com.sweetbalance.backend.dto.identity.UserIdHolder;
 import com.sweetbalance.backend.dto.request.MetadataRequestDTO;
 import com.sweetbalance.backend.entity.User;
 import com.sweetbalance.backend.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,12 +16,14 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/user")
+@Tag(name = "User Info", description = "유저 정보 관련 API")
 @RequiredArgsConstructor
 public class UserInfoController {
 
     private final UserService userService;
 
     // todo User 자체가 아닌 DTO 로 뱉도록 수정 요함
+    @Operation(summary = "본인 정보 반환")
     @GetMapping("/my-info")
     public ResponseEntity<?> findClientInfo(@AuthenticationPrincipal UserIdHolder userIdHolder) {
 
@@ -40,6 +44,7 @@ public class UserInfoController {
         }
     }
 
+    @Operation(summary = "닉네임/성별 수정")
     @PostMapping("/meta-data")
     public ResponseEntity<?> setMetaDataOfClient(@AuthenticationPrincipal UserIdHolder userIdHolder, @RequestBody MetadataRequestDTO metaDataRequestDTO){
 

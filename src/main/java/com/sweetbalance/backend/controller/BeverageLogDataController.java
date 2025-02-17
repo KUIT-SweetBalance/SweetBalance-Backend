@@ -10,6 +10,8 @@ import com.sweetbalance.backend.entity.User;
 import com.sweetbalance.backend.enums.user.Gender;
 import com.sweetbalance.backend.service.BeverageLogDataService;
 import com.sweetbalance.backend.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,12 +30,14 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/user")
+@Tag(name = "BeverageLog Data", description = "음료 기록 관련 조회 API")
 @RequiredArgsConstructor
 public class BeverageLogDataController {
 
     private final UserService userService;
     private final BeverageLogDataService beverageLogDataService;
 
+    @Operation(summary = "오늘 섭취 브랜드 리스트 조회")
     @GetMapping("/daily-brand-list")
     public ResponseEntity<?> getDailyConsumeBrandListOfClient(@AuthenticationPrincipal UserIdHolder userIdHolder){
         Long userId = userIdHolder.getUserId();
@@ -57,6 +61,7 @@ public class BeverageLogDataController {
         );
     }
 
+    @Operation(summary = "오늘 섭취 음료 리스트 조회")
     @GetMapping("/daily-beverage-list")
     public ResponseEntity<?> getDailyConsumeBeverageListOfClient(@AuthenticationPrincipal UserIdHolder userIdHolder){
         Long userId = userIdHolder.getUserId();
@@ -79,6 +84,7 @@ public class BeverageLogDataController {
         );
     }
 
+    @Operation(summary = "오늘 영양섭취 정보 조회")
     @GetMapping("/daily-consume-info")
     public ResponseEntity<?> getDailyConsumeInfoOfClient(@AuthenticationPrincipal UserIdHolder userIdHolder){
         Long userId = userIdHolder.getUserId();
@@ -124,6 +130,7 @@ public class BeverageLogDataController {
         );
     }
 
+    @Operation(summary = "주간 영양섭취 정보 조회")
     @GetMapping("/weekly-consume-info")
     public ResponseEntity<?> getWeeklyConsumeInfo(
             @AuthenticationPrincipal UserIdHolder userIdHolder,
@@ -148,6 +155,7 @@ public class BeverageLogDataController {
         }
     }
 
+    @Operation(summary = "전체 섭취기록 조회")
     @GetMapping("/beverage-record")
     public ResponseEntity<?> getTotalBeverageListOfClient(@AuthenticationPrincipal UserIdHolder userIdHolder,
                                                           @RequestParam("page") int page,

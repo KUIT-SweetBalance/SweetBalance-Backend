@@ -8,6 +8,8 @@ import com.sweetbalance.backend.dto.request.SignUpRequestDTO;
 import com.sweetbalance.backend.entity.User;
 import com.sweetbalance.backend.enums.user.LoginType;
 import com.sweetbalance.backend.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -19,11 +21,13 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Auth", description = "인증 관련 API")
 @RequiredArgsConstructor
 public class AuthController {
 
     private final UserService userService;
 
+    @Operation(summary = "일반 회원가입")
     @PostMapping("/sign-up")
     public ResponseEntity<?> signUp(@RequestBody SignUpRequestDTO signUpRequestDTO){
         try{
@@ -49,6 +53,7 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "이메일 중복 검증")
     @PostMapping("/email-duplicate")
     public ResponseEntity<?> emailDuplicateCheck(@RequestBody Map<String, String> requestBody){
         String email = requestBody.get("email");
@@ -66,6 +71,7 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "회원 탈퇴")
     @DeleteMapping("/withdraw")
     public ResponseEntity<?> withdrawUser(@AuthenticationPrincipal UserIdHolder userIdHolder){
 
@@ -84,6 +90,7 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "이메일 유효성 여부 확인, 인증코드 발송")
     @PostMapping("/email-verification")
     public ResponseEntity<?> sendEmailVerificationCode(@RequestBody Map<String, String> requestBody) {
         String email = requestBody.get("email");
@@ -116,6 +123,7 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "입력한 인증코드 일치 검증")
     @PostMapping("/email-verification-code-check")
     public ResponseEntity<?> checkEmailVerificationCode(@RequestBody EmailVerificationRequestDTO request) {
         String email = request.getEmail();
@@ -145,6 +153,7 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "비밀번호 재설정")
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequestDTO request) {
         String email = request.getEmail();
