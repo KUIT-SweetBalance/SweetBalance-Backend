@@ -100,12 +100,12 @@ public class BeverageLogDataController {
 
         List<BeverageLog> dailyBeverageLogs = beverageLogDataService.findTodayBeverageLogsByUserId(userId);
 
-        double initSugarSum = 0.0;
+        double totalSugarSum = 0.0;
         for (BeverageLog log : dailyBeverageLogs) {
-            initSugarSum += log.getBeverageSize().getSugar();
+            totalSugarSum += log.getBeverageSize().getSugar() + log.getAdditionalSugar();
         }
 
-        int totalSugar = (int) Math.round(initSugarSum);
+        int totalSugar = (int) Math.round(totalSugarSum);
 
         int beverageCount = dailyBeverageLogs.size();
 
