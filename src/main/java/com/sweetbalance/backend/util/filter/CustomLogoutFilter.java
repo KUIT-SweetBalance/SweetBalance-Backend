@@ -156,7 +156,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
     private void resetCookie(HttpServletResponse response, String name) {
         ResponseCookie cookie = ResponseCookie.from(name, "")
-                .httpOnly(false)
+                .httpOnly(true)
                 .secure(true)
                 .path("/")
                 .sameSite("None")

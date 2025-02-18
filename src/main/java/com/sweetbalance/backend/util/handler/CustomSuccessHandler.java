@@ -51,11 +51,9 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         addSecureCookie(response, "new", String.valueOf(isNew));
         addSecureCookie(response, "refresh", refreshToken);
 
-        //response.sendRedirect(frontOriginDeployed+"/oauth2_redirect?new="+isNew+"&refresh="+refreshToken);
         response.sendRedirect(frontOriginDeployed+"/oauth2_redirect");
     }
 
-    // 프론트 측 배포이후 공통된 서브 도메인으로 cookie domain 설정해야만 서드파티 쿠키 사용 가능
     private void addSecureCookie(HttpServletResponse response, String name, String value) {
         ResponseCookie cookie = ResponseCookie.from(name, value)
                 .httpOnly(true)
