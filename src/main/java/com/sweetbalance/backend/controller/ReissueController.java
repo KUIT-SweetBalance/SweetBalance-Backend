@@ -103,7 +103,7 @@ public class ReissueController {
         }
         jwtUtil.deleteRefreshEntity(refresh);
 
-        addSecureCookie(response, "refresh", refresh);
+        addSecureCookie(response, "refresh", newRefreshToken);
 
         TokenPairDTO tokens = new TokenPairDTO(newAccessToken, newRefreshToken);
         return ResponseEntity.status(200).body(
