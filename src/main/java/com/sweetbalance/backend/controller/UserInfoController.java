@@ -3,6 +3,7 @@ package com.sweetbalance.backend.controller;
 import com.sweetbalance.backend.dto.DefaultResponseDTO;
 import com.sweetbalance.backend.dto.identity.UserIdHolder;
 import com.sweetbalance.backend.dto.request.MetadataRequestDTO;
+import com.sweetbalance.backend.dto.response.UserInfoDTO;
 import com.sweetbalance.backend.entity.User;
 import com.sweetbalance.backend.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,7 +23,6 @@ public class UserInfoController {
 
     private final UserService userService;
 
-    // todo User 자체가 아닌 DTO 로 뱉도록 수정 요함
     @Operation(summary = "본인 정보 반환")
     @GetMapping("/my-info")
     public ResponseEntity<?> findClientInfo(@AuthenticationPrincipal UserIdHolder userIdHolder) {
@@ -33,8 +33,9 @@ public class UserInfoController {
 
         if (userOptional.isPresent()) {
 
+            UserInfoDTO userInfoDTO = new UserInfoDTO(userOptional.get());
             return ResponseEntity.status(200).body(
-                    DefaultResponseDTO.success("본인 정보 반환 성공", userOptional.get())
+                    DefaultResponseDTO.success("본인 정보 반환 성공", userInfoDTO)
             );
         } else {
 
