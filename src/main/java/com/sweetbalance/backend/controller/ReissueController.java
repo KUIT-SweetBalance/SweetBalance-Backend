@@ -11,6 +11,8 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -101,9 +103,25 @@ public class ReissueController {
         }
         jwtUtil.deleteRefreshEntity(refresh);
 
+        addSecureCookie(response, "refresh", refresh);
+
         TokenPairDTO tokens = new TokenPairDTO(newAccessToken, newRefreshToken);
         return ResponseEntity.status(200).body(
                 DefaultResponseDTO.success("토큰 재발급 성공", tokens)
         );
+    }
+
+    // 프론트 측 배포이후 공통된 서브 도메인으로 cookie domain 설정해야만 서드파티 쿠키 사용 가능
+    private void addSecureCookie(HttpServletResponse response, String name, String value) {
+        ResponseCookie cookie = ResponseCookie.from(name, value)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .sameSite("None")
+                .maxAge(24 * 60 * 60)
+                //.domain(".nip.io")
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 }
