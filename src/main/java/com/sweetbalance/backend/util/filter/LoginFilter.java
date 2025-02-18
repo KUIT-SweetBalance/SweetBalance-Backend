@@ -9,6 +9,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -76,6 +78,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String accessToken = jwtUtil.generateBasicAccessToken(userId, username, role);
         String refreshToken = jwtUtil.generateBasicRefreshToken(userId, username, role);
 
+        addSecureCookie(response, "refresh", refreshToken);
+
         TokenPairDTO tokens = new TokenPairDTO(accessToken, refreshToken);
         InnerFilterResponseSender.sendInnerResponse(response, 200, 0,
                 "로그인 성공, 토큰 발급 성공", tokens);
@@ -87,5 +91,18 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         InnerFilterResponseSender.sendInnerResponse(response, 400, 999,
                 "로그인 인증 실패", null);
+    }
+
+    private void addSecureCookie(HttpServletResponse response, String name, String value) {
+        ResponseCookie cookie = ResponseCookie.from(name, value)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .sameSite("None")
+                .maxAge(24 * 60 * 60)
+                //.domain(".nip.io")
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 }
