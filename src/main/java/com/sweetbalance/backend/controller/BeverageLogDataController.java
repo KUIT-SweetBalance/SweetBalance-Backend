@@ -109,7 +109,7 @@ public class BeverageLogDataController {
 
         int beverageCount = dailyBeverageLogs.size();
 
-        int unreadAlarmCount = beverageLogDataService.getNumberOfUnreadLogWithinAWeek();
+        int unreadAlarmCount = beverageLogDataService.getNumberOfUnreadLogWithinAWeek(userId);
 
         int additionalSugar = 0;
         if (user.getGender() == Gender.MALE) {

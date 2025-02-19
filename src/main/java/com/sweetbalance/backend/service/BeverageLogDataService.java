@@ -14,5 +14,5 @@ public interface BeverageLogDataService {
 
     WeeklyConsumeInfoDTO getWeeklyConsumeInfo(Long userId, LocalDate startDate, LocalDate endDate);
 
-    int getNumberOfUnreadLogWithinAWeek();
+    int getNumberOfUnreadLogWithinAWeek(Long userId);
 }
