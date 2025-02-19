@@ -1,7 +1,7 @@
 package com.sweetbalance.backend.service;
 
 import com.nimbusds.jose.util.Pair;
-import com.sweetbalance.backend.dto.response.notice.EachEntry;
+import com.sweetbalance.backend.dto.response.notice.EachNotice;
 import com.sweetbalance.backend.dto.response.notice.ListNoticeDTO;
 import com.sweetbalance.backend.entity.*;
 import com.sweetbalance.backend.enums.alarm.SugarWarning;
@@ -32,77 +32,38 @@ public class NoticeServiceImpl implements NoticeService{
 
     @Override
     public List<ListNoticeDTO> getNoticeListByUserId(Long userId) {
-        Long start, end;
-        double ms;
-
-
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime oneWeekAgo = LocalDateTime.now().minusWeeks(1).toLocalDate().atStartOfDay();
-
-        List<Alarm> allAlarms = alarmRepository
-                .findAllByLogUserUserIdAndCreatedAtBetween(userId, oneWeekAgo, now);
-        Map<Long, Alarm> alarmByLogId = allAlarms.stream().collect(Collectors.toMap(alarm -> alarm.getLog().getLogId(), Function.identity()));
-
-        List<BeverageLog> sortedLogs = beverageLogRepository
-                .findAllByUserUserIdAndStatusAndCreatedAtBetween(userId, Status.ACTIVE,oneWeekAgo,now)
-                .stream()
-                .sorted(Comparator.comparing(BeverageLog::getCreatedAt))
-                .collect(Collectors.toList());
-
-
-        List<BaseEntity> integratedLogs = new ArrayList<>();
-
-        for(BeverageLog log: sortedLogs){
-            integratedLogs.add(log);
-
-            Alarm alarm = alarmByLogId.get(log.getLogId());
-            if(alarm != null){
-                integratedLogs.add(alarm);
-            }
-        }
-
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-
-        List<EachEntry> flatList = integratedLogs
-                .stream()
-                .map(entity -> {
-
-                    String timeString = entity.getCreatedAt().format(dateTimeFormatter);
-                    String message;
-
-                    switch (entity) {
-                        case BeverageLog log -> {
-                            Beverage beverage =  log.getBeverageSize().getBeverage();
-                            message = beverage.getBrand() + " " +  beverage.getName();
-
-                            Map<String, Object> beverageLogInfo = new LinkedHashMap<>();
-                            beverageLogInfo.put("image",beverage.getImgUrl());
-                            beverageLogInfo.put("sugar",(int)Math.ceil(beverage.getSugar()));
-                            beverageLogInfo.put("syrupName",log.getSyrupName());
-                            beverageLogInfo.put("syrupCount",log.getSyrupCount());
-                            beverageLogInfo.put("size",log.getBeverageSize().getSizeType());
-                            beverageLogInfo.put("beverageLogId",log.getLogId());
-                            beverageLogInfo.put("isRead",log.getReadByUser());
-
-                            return new EachEntry(timeString,message,beverageLogInfo);
-                        }
-
-                        case Alarm alarm -> {
-                            message = alarm.getContent();
-                            return  new EachEntry(timeString,message,null);
-                        }
-
-                        default -> throw new IllegalStateException("알 수 없는 타입: " + entity.getClass());
-                    }
-
-                }).toList().reversed();
-
-        Map<String, List<EachEntry>> groupedMap = new LinkedHashMap<>();
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
-        for (EachEntry dto : flatList) {
+        Map<Long, Alarm> alarmByLogId = getAlarmMapWithin(userId,oneWeekAgo, now);
+        List<BeverageLog> sortedLogs = getSortedLogsWithin(userId, oneWeekAgo, now);
+        List<BaseEntity> integratedLogs = integrateLogsAndAlarmsToList(sortedLogs, alarmByLogId);
+        List<EachNotice> noticeList = convertToNoticeDTOFormat(integratedLogs, dateTimeFormatter);
+        Map<String, List<EachNotice>> groupedMap = groupNoticeListByDate(noticeList, dateTimeFormatter, dateFormatter, timeFormatter);
+
+        // groupedMap을 최종 List<DayGroupedDTO>로 변환
+        List<ListNoticeDTO> result = convertMapToDTOList(groupedMap);
+
+        result.sort(Comparator.comparing(ListNoticeDTO::date).reversed());
+
+        return result;
+    }
+
+    private static List<ListNoticeDTO> convertMapToDTOList(Map<String, List<EachNotice>> groupedMap) {
+        return groupedMap.entrySet()
+                .stream()
+                .map(entry -> new ListNoticeDTO(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
+    }
+
+
+    private static Map<String, List<EachNotice>> groupNoticeListByDate(List<EachNotice> noticeList, DateTimeFormatter dateTimeFormatter, DateTimeFormatter dateFormatter, DateTimeFormatter timeFormatter) {
+        Map<String, List<EachNotice>> groupedMap = new LinkedHashMap<>();
+
+        for (EachNotice dto : noticeList) {
             // (1) timeString 파싱 → LocalDateTime
             LocalDateTime parsed = LocalDateTime.parse(dto.timeString(), dateTimeFormatter);
 
@@ -113,7 +74,7 @@ public class NoticeServiceImpl implements NoticeService{
             String onlyTime = parsed.format(timeFormatter);
 
             // beverageLogInfo는 그대로 쓰고, message도 그대로 쓰되 timeString만 교체
-            EachEntry newDto = new EachEntry(
+            EachNotice newDto = new EachNotice(
                     onlyTime,             // "HH:mm"
                     dto.message(),
                     dto.beverageLogInfo()
@@ -123,20 +84,77 @@ public class NoticeServiceImpl implements NoticeService{
             groupedMap.computeIfAbsent(dateKey, k -> new ArrayList<>())
                     .add(newDto);
         }
+        return groupedMap;
+    }
 
-        // 2) groupedMap을 최종 List<DayGroupedDTO>로 변환
-        List<ListNoticeDTO> result = new ArrayList<>();
-        for (Map.Entry<String, List<EachEntry>> entry : groupedMap.entrySet()) {
-            String date = entry.getKey();
-            List<EachEntry> infoList = entry.getValue();
+    private static List<EachNotice> convertToNoticeDTOFormat(List<BaseEntity> integratedLogs, DateTimeFormatter dateTimeFormatter) {
+        List<EachNotice> flatList = integratedLogs
+                .stream()
+                .map(entity -> {
 
-            // 하나의 날짜에 대한 DTO 생성
-            ListNoticeDTO dayDTO = new ListNoticeDTO(date, infoList);
-            result.add(dayDTO);
+                    String timeString = entity.getCreatedAt().format(dateTimeFormatter);
+                    String message;
+                    Beverage beverage;
+                    Map<String, Object> beverageLogInfo;
+
+                    switch (entity) {
+                        case BeverageLog log -> {
+                            beverage =  log.getBeverageSize().getBeverage();
+                            message = beverage.getBrand() + " " +  beverage.getName();
+                            beverageLogInfo = getBeverageLogInfoMap(log, beverage);
+                            return new EachNotice(timeString,message,beverageLogInfo);
+                        }
+
+                        case Alarm alarm -> {
+                            message = alarm.getContent();
+                            return  new EachNotice(timeString,message,null);
+                        }
+
+                        default -> throw new IllegalStateException("알 수 없는 타입: " + entity.getClass());
+                    }
+
+                }).toList().reversed();
+        return flatList;
+    }
+
+    private static Map<String, Object> getBeverageLogInfoMap(BeverageLog log, Beverage beverage) {
+        Map<String, Object> beverageLogInfo = new LinkedHashMap<>();
+        beverageLogInfo.put("image", beverage.getImgUrl());
+        beverageLogInfo.put("sugar",(int)Math.ceil(beverage.getSugar()));
+        beverageLogInfo.put("syrupName", log.getSyrupName());
+        beverageLogInfo.put("syrupCount", log.getSyrupCount());
+        beverageLogInfo.put("size", log.getBeverageSize().getSizeType());
+        beverageLogInfo.put("beverageLogId", log.getLogId());
+        beverageLogInfo.put("isRead", log.getReadByUser());
+        return beverageLogInfo;
+    }
+
+    private Map<Long, Alarm> getAlarmMapWithin(Long userId, LocalDateTime oneWeekAgo, LocalDateTime now) {
+        return alarmRepository
+                .findAllByLogUserUserIdAndCreatedAtBetween(userId, oneWeekAgo, now)
+                .stream()
+                .collect(Collectors.toMap(alarm -> alarm.getLog().getLogId(), Function.identity()));
+    }
+
+    private List<BeverageLog> getSortedLogsWithin(Long userId, LocalDateTime oneWeekAgo, LocalDateTime now) {
+        return beverageLogRepository
+                .findAllByUserUserIdAndStatusAndCreatedAtBetween(userId, Status.ACTIVE, oneWeekAgo, now)
+                .stream()
+                .sorted(Comparator.comparing(BeverageLog::getCreatedAt))
+                .collect(Collectors.toList());
+    }
+
+    private static List<BaseEntity> integrateLogsAndAlarmsToList(List<BeverageLog> sortedLogs, Map<Long, Alarm> alarmByLogId) {
+        List<BaseEntity> integratedLogs = new ArrayList<>();
+        for(BeverageLog log: sortedLogs){
+            integratedLogs.add(log);
+
+            Alarm alarm = alarmByLogId.get(log.getLogId());
+            if(alarm != null){
+                integratedLogs.add(alarm);
+            }
         }
-        result.sort(Comparator.comparing(ListNoticeDTO::date));
-
-        return result.reversed();
+        return integratedLogs;
     }
 
     @Override
