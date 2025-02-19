@@ -95,16 +95,16 @@ public class BeverageLogDataServiceImpl implements BeverageLogDataService {
                 .totalSugar((int) Math.round(totalSugar))
                 .averageSugar(Math.round(averageSugar * 10.0) / 10.0)
                 .totalCalories((int) Math.round(totalCalories))
-                .unreadAlarmCount(getNumberOfUnreadLogWithinAWeek())
+                .unreadAlarmCount(getNumberOfUnreadLogWithinAWeek(userId))
                 .dailySugar(dailySugarList)
                 .build();
     }
 
     @Override
-    public int getNumberOfUnreadLogWithinAWeek() {
+    public int getNumberOfUnreadLogWithinAWeek(Long userId) {
         LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
         return beverageLogRepository
-                .findByCreatedAtAfterAndReadByUserFalse(sevenDaysAgo)
+                .findByUser_UserIdAndCreatedAtAfterAndReadByUserFalse(userId, sevenDaysAgo)
                 .size();
     }
 }
