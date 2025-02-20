@@ -19,8 +19,9 @@ public class JWTUtil {
     private SecretKey secretKey;
     private final RefreshTokenRepository refreshTokenRepository;
 
+    private final long accessTokenExpirationMs = 1000L * 10; // 10 seconds
 //    private final long accessTokenExpirationMs = 3600000L; // 1 hour
-    private final long accessTokenExpirationMs = 3600000L * 24 * 90; // 90 days
+//    private final long accessTokenExpirationMs = 3600000L * 24 * 90; // 90 days
     private final long refreshTokenExpirationMs = 3600000L * 24 * 30; // 30 days
 
     @Autowired
