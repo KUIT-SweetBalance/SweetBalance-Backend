@@ -89,6 +89,11 @@ public class BeverageLogManageServiceImpl implements BeverageLogManageService {
         subConsumeCount(beverage);
 
         User user = beverageLog.getUser();
+
+        alarmRepository
+                .findByLogLogId(beverageLog.getLogId())
+                .ifPresent(alarmRepository::delete);
+
         noticeService.updateAlarm(user, beverageLog);
     }
 

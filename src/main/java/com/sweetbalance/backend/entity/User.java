@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder @Getter @Setter
+@ToString
 public class User extends BaseEntity {
 
     @Id
