@@ -123,7 +123,7 @@ public class NoticeServiceImpl implements NoticeService{
     private static Map<String, Object> getBeverageLogInfoMap(BeverageLog log, Beverage beverage) {
         Map<String, Object> beverageLogInfo = new LinkedHashMap<>();
         beverageLogInfo.put("image", beverage.getImgUrl());
-        beverageLogInfo.put("sugar",(int)Math.ceil(beverage.getSugar()));
+        beverageLogInfo.put("sugar",(int)Math.ceil(log.getBeverageSize().getSugar()));
         beverageLogInfo.put("syrupName", log.getSyrupName());
         beverageLogInfo.put("syrupCount", log.getSyrupCount());
         beverageLogInfo.put("size", log.getBeverageSize().getSizeType());
