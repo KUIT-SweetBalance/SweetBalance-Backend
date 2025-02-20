@@ -1,11 +1,14 @@
 package com.sweetbalance.backend.repository;
 
 import com.sweetbalance.backend.entity.Alarm;
+import com.sweetbalance.backend.enums.common.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AlarmRepository extends JpaRepository<Alarm,Long> {
@@ -23,4 +26,13 @@ public interface AlarmRepository extends JpaRepository<Alarm,Long> {
             LocalDateTime endDateTime
     );
 
+    List<Alarm> findAllByLogUserUserIdAndLogCreatedAtBetween(
+            Long userId,
+            LocalDateTime oneWeekAgo,
+            LocalDateTime now
+    );
+
+    Optional<Alarm> findByLogLogId(Long logId);
+
+    List<Alarm> findAllByLogUserUserIdAndLogCreatedAtBetweenAndLogStatus(Long userId, LocalDateTime startOfDay, LocalDateTime endOfDay, Status status);
 }
