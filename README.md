@@ -7,7 +7,7 @@
 ## API Documentation
 
 **Notion API 명세서** 
-[스윗밸런스 API 명세서](https://www.notion.so/API-b0c426a8de234f9387d859c5d6a95e17?pvs=21) 
+https://cheddar-nitrogen-fe5.notion.site/API-b0c426a8de234f9387d859c5d6a95e17?pvs=4
 
 **Swagger UI** 
 https://13.125.187.188.nip.io/swagger-ui.html
