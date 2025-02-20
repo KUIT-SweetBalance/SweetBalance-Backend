@@ -19,10 +19,8 @@ public class JWTUtil {
     private SecretKey secretKey;
     private final RefreshTokenRepository refreshTokenRepository;
 
-    private final long accessTokenExpirationMs = 1000L * 60 * 15; // 15 minutes
-//    private final long accessTokenExpirationMs = 3600000L; // 1 hour
-//    private final long accessTokenExpirationMs = 3600000L * 24 * 90; // 90 days
-    private final long refreshTokenExpirationMs = 3600000L * 24 * 30; // 30 days
+    private final long accessTokenExpirationMs = 1000L * 60 * 30; // 30 minutes
+    private final long refreshTokenExpirationMs = 3600000L * 24 * 14; // 14 days
 
     @Autowired
     public JWTUtil(@Value("${spring.jwt.secret}")String secret, RefreshTokenRepository refreshTokenRepository) {
