@@ -148,21 +148,9 @@ public class CustomLogoutFilter extends GenericFilterBean {
         //Refresh 토큰 DB에서 제거
         jwtUtil.deleteRefreshEntity(refresh);
 
-        resetCookie(response, "refresh");
+        jwtUtil.resetRefreshCookie(response);
 
         InnerFilterResponseSender.sendInnerResponse(response, 200, 0,
                 "로그아웃 성공", null);
-    }
-
-    private void resetCookie(HttpServletResponse response, String name) {
-        ResponseCookie cookie = ResponseCookie.from(name, "")
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .sameSite("None")
-                .maxAge(0)
-                .build();
-
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 }

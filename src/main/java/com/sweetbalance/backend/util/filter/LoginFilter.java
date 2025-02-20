@@ -78,7 +78,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String accessToken = jwtUtil.generateBasicAccessToken(userId, username, role);
         String refreshToken = jwtUtil.generateBasicRefreshToken(userId, username, role);
 
-        addSecureCookie(response, "refresh", refreshToken);
+        jwtUtil.setRefreshCookie(response, refreshToken);
 
         TokenPairDTO tokens = new TokenPairDTO(accessToken, refreshToken);
         InnerFilterResponseSender.sendInnerResponse(response, 200, 0,
@@ -91,18 +91,5 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         InnerFilterResponseSender.sendInnerResponse(response, 400, 999,
                 "로그인 인증 실패", null);
-    }
-
-    private void addSecureCookie(HttpServletResponse response, String name, String value) {
-        ResponseCookie cookie = ResponseCookie.from(name, value)
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .sameSite("None")
-                .maxAge(24 * 60 * 60)
-                //.domain(".nip.io")
-                .build();
-
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 }
