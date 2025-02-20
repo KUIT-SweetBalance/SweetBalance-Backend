@@ -70,7 +70,7 @@ public class BeverageLogDataServiceImpl implements BeverageLogDataService {
 
         int intake = logs.size();
         double totalSugar = logs.stream()
-                .mapToDouble(log -> log.getBeverageSize().getSugar() + log.getAdditionalSugar())
+                .mapToDouble(log -> Math.max(0, log.getBeverageSize().getSugar() + log.getAdditionalSugar()))
                 .sum();
         double totalCalories = logs.stream()
                 .mapToDouble(log -> log.getBeverageSize().getCalories())

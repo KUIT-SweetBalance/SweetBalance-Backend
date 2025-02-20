@@ -37,7 +37,7 @@ public class DailyConsumeBeverageListDTO {
 
         double baseSugar = beverageSize.getSugar();
         double additionalSugar = log.getAdditionalSugar();
-        double totalSugar = baseSugar + additionalSugar;
+        double totalSugar = Math.max(0, baseSugar + additionalSugar);
         int roundedSugar = (int) Math.round(totalSugar);
 
         return DailyConsumeBeverageListDTO.builder()

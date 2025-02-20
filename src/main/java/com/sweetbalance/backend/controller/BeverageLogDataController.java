@@ -102,7 +102,7 @@ public class BeverageLogDataController {
 
         double totalSugarSum = 0.0;
         for (BeverageLog log : dailyBeverageLogs) {
-            totalSugarSum += log.getBeverageSize().getSugar() + log.getAdditionalSugar();
+            totalSugarSum += Math.max(0, log.getBeverageSize().getSugar() + log.getAdditionalSugar());
         }
 
         int totalSugar = (int) Math.round(totalSugarSum);
