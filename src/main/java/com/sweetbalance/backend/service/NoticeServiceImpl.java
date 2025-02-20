@@ -40,6 +40,7 @@ public class NoticeServiceImpl implements NoticeService{
 
         Map<Long, Alarm> alarmByLogId = getAlarmMapWithin(userId,oneWeekAgo, now);
         List<BeverageLog> sortedLogs = getSortedLogsWithin(userId, oneWeekAgo, now);
+        sortedLogs.forEach(System.out::println);
         List<BaseEntity> integratedLogs = integrateLogsAndAlarmsToList(sortedLogs, alarmByLogId);
         List<EachNotice> noticeList = convertToNoticeDTOFormat(integratedLogs, dateTimeFormatter);
         Map<String, List<EachNotice>> groupedMap = groupNoticeListByDate(noticeList, dateTimeFormatter, dateFormatter, timeFormatter);
@@ -92,13 +93,14 @@ public class NoticeServiceImpl implements NoticeService{
                 .stream()
                 .map(entity -> {
 
-                    String timeString = entity.getCreatedAt().format(dateTimeFormatter);
+                    String timeString;
                     String message;
                     Beverage beverage;
                     Map<String, Object> beverageLogInfo;
 
                     switch (entity) {
                         case BeverageLog log -> {
+                            timeString = log.getCreatedAt().format(dateTimeFormatter);
                             beverage =  log.getBeverageSize().getBeverage();
                             message = beverage.getBrand() + " " +  beverage.getName();
                             beverageLogInfo = getBeverageLogInfoMap(log, beverage);
@@ -106,6 +108,7 @@ public class NoticeServiceImpl implements NoticeService{
                         }
 
                         case Alarm alarm -> {
+                            timeString = alarm.getLog().getCreatedAt().format(dateTimeFormatter);
                             message = alarm.getContent();
                             return  new EachNotice(timeString,message,null);
                         }
@@ -131,7 +134,7 @@ public class NoticeServiceImpl implements NoticeService{
 
     private Map<Long, Alarm> getAlarmMapWithin(Long userId, LocalDateTime oneWeekAgo, LocalDateTime now) {
         return alarmRepository
-                .findAllByLogUserUserIdAndCreatedAtBetween(userId, oneWeekAgo, now)
+                .findAllByLogUserUserIdAndLogCreatedAtBetween(userId, oneWeekAgo, now)
                 .stream()
                 .collect(Collectors.toMap(alarm -> alarm.getLog().getLogId(), Function.identity()));
     }
@@ -171,7 +174,7 @@ public class NoticeServiceImpl implements NoticeService{
     public void updateAlarm(User user, BeverageLog beverageLog){
         List<BeverageLog> logsOnSameDay = getLogsOnSameDay(user.getUserId(), beverageLog);
         List<Alarm> alarmsOnSameDay = getAlarmsOnSameDay(user.getUserId(), beverageLog);
-
+        alarmsOnSameDay.forEach(a -> a.getLog().getLogId());
         // 성별에 따라 다른 당 섭취 기준 적용
         Gender gender = user.getGender();
         final int cautionAmountOfSugar = (gender == Gender.MALE) ? 33 : 20;
@@ -179,7 +182,7 @@ public class NoticeServiceImpl implements NoticeService{
 
         // 알람의 위치는 어디가 적절한가?
         List<Pair<Long, SugarWarning>> properAlarmList = getProperAlarmLocation(user.getGender(), logsOnSameDay, (double)cautionAmountOfSugar, (double)exceedAmountOfSugar);
-
+        properAlarmList.forEach(p -> System.out.println(p.getLeft() + ", " + p.getRight()));
         int size1 = alarmsOnSameDay.size();
         int size2 = properAlarmList.size();
         int max_size = Math.max(size1, size2);
@@ -225,7 +228,7 @@ public class NoticeServiceImpl implements NoticeService{
         LocalDate updatedDate = beverageLog.getUpdatedAt().toLocalDate();
         LocalDateTime startOfDay = updatedDate.atStartOfDay();
         LocalDateTime endOfDay = updatedDate.plusDays(1).atStartOfDay().minusNanos(1);
-        return beverageLogRepository.findAllByUserUserIdAndStatusAndUpdatedAtBetween(userId, Status.ACTIVE, startOfDay,endOfDay);
+        return beverageLogRepository.findAllByUserUserIdAndStatusAndCreatedAtBetween(userId, Status.ACTIVE, startOfDay,endOfDay);
     }
 
     // 해당 음료 기록에 해당하는 날짜의 모든 알람 기록을 가져온다.
@@ -233,7 +236,7 @@ public class NoticeServiceImpl implements NoticeService{
         LocalDate updatedDate = beverageLog.getUpdatedAt().toLocalDate();
         LocalDateTime startOfDay = updatedDate.atStartOfDay();
         LocalDateTime endOfDay = updatedDate.plusDays(1).atStartOfDay().minusNanos(1);
-        return alarmRepository.findAllByLogUserUserIdAndUpdatedAtBetween(userId,startOfDay,endOfDay);
+        return alarmRepository.findAllByLogUserUserIdAndLogCreatedAtBetweenAndLogStatus(userId,startOfDay,endOfDay, Status.ACTIVE);
     }
 
     // 주어진 음료 섭취 기록들에 대해 적절한 알람 위치를 계산한다.
@@ -246,6 +249,7 @@ public class NoticeServiceImpl implements NoticeService{
         for (BeverageLog bl : logsOnSameDay) {
             // 해당 날에 섭취한 당 함량
             accumulatedSugar += bl.getBeverageSize().getSugar() + bl.getAdditionalSugar();
+            System.out.println("accumulatedSugar = " + accumulatedSugar);
             // 한번에 초과했을 경우(주의 알람이 필요 없음) 또는 주의 알람 후 당 함량을 초과했을 경우
             if(accumulatedSugar >= exceedAmountOfSugar){
                 properAlarm.add(Pair.of(bl.getLogId(),SugarWarning.EXCEED));
