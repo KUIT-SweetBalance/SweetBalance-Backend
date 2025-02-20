@@ -3,8 +3,11 @@ package com.sweetbalance.backend.util;
 import com.sweetbalance.backend.entity.RefreshEntity;
 import com.sweetbalance.backend.repository.refresh.RefreshTokenRepository;
 import io.jsonwebtoken.Jwts;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -127,5 +130,31 @@ public class JWTUtil {
         refreshEntity.setExpiration(expirationDateTime);
 
         refreshTokenRepository.save(refreshEntity);
+    }
+
+    public void setRefreshCookie(HttpServletResponse response, String refreshTokenString) {
+        ResponseCookie cookie = ResponseCookie.from("refresh", refreshTokenString)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .sameSite("None")
+                .maxAge(refreshTokenExpirationMs / 1000)
+                //.domain(".sweetbalance.site")
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+    }
+
+    public void resetRefreshCookie(HttpServletResponse response) {
+        ResponseCookie cookie = ResponseCookie.from("refresh", "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .sameSite("None")
+                .maxAge(0)
+                //.domain(".sweetbalance.site")
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 }

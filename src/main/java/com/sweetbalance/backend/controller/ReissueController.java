@@ -103,24 +103,11 @@ public class ReissueController {
         }
         jwtUtil.deleteRefreshEntity(refresh);
 
-        addSecureCookie(response, "refresh", newRefreshToken);
+        jwtUtil.setRefreshCookie(response, newRefreshToken);
 
         TokenPairDTO tokens = new TokenPairDTO(newAccessToken, newRefreshToken);
         return ResponseEntity.status(200).body(
                 DefaultResponseDTO.success("토큰 재발급 성공", tokens)
         );
-    }
-
-    private void addSecureCookie(HttpServletResponse response, String name, String value) {
-        ResponseCookie cookie = ResponseCookie.from(name, value)
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .sameSite("None")
-                .maxAge(24 * 60 * 60)
-                //.domain(".nip.io")
-                .build();
-
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 }

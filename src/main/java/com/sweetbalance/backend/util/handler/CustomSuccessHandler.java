@@ -46,24 +46,12 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String role = auth.getAuthority();
 
         String refreshToken = jwtUtil.generateSocialRefreshToken(userId, email, role);
-        boolean isNew = customUserDetails.isNewUser();
 
-        addSecureCookie(response, "new", String.valueOf(isNew));
-        addSecureCookie(response, "refresh", refreshToken);
+        // boolean isNew = customUserDetails.isNewUser();
+        // addSecureCookie(response, "new", String.valueOf(isNew));
+
+        jwtUtil.setRefreshCookie(response, refreshToken);
 
         response.sendRedirect(frontOriginDeployed+"/oauth2_redirect");
-    }
-
-    private void addSecureCookie(HttpServletResponse response, String name, String value) {
-        ResponseCookie cookie = ResponseCookie.from(name, value)
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .sameSite("None")
-                .maxAge(24 * 60 * 60)
-                //.domain(".nip.io")
-                .build();
-
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 }
