@@ -28,4 +28,4 @@ https://13.125.187.188.nip.io/
 
 https://www.erdcloud.com/d/DrFjvGTLXvMDBYLiK
 
-![image](https://github.com/user-attachments/assets/3c4ecb68-365e-4aec-ae0e-cd527cd8c506)
+![image](https://github.com/user-attachments/assets/41bc9668-1a40-4ede-99fd-a9118fdbfebc)
