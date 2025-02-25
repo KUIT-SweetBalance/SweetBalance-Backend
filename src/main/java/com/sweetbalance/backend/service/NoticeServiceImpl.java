@@ -40,7 +40,6 @@ public class NoticeServiceImpl implements NoticeService{
 
         Map<Long, Alarm> alarmByLogId = getAlarmMapWithin(userId,oneWeekAgo, now);
         List<BeverageLog> sortedLogs = getSortedLogsWithin(userId, oneWeekAgo, now);
-        sortedLogs.forEach(System.out::println);
         List<BaseEntity> integratedLogs = integrateLogsAndAlarmsToList(sortedLogs, alarmByLogId);
         List<EachNotice> noticeList = convertToNoticeDTOFormat(integratedLogs, dateTimeFormatter);
         Map<String, List<EachNotice>> groupedMap = groupNoticeListByDate(noticeList, dateTimeFormatter, dateFormatter, timeFormatter);
@@ -123,7 +122,7 @@ public class NoticeServiceImpl implements NoticeService{
     private static Map<String, Object> getBeverageLogInfoMap(BeverageLog log, Beverage beverage) {
         Map<String, Object> beverageLogInfo = new LinkedHashMap<>();
         beverageLogInfo.put("image", beverage.getImgUrl());
-        beverageLogInfo.put("sugar",(int)Math.ceil(beverage.getSugar()));
+        beverageLogInfo.put("sugar",(int)Math.ceil(log.getBeverageSize().getSugar()));
         beverageLogInfo.put("syrupName", log.getSyrupName());
         beverageLogInfo.put("syrupCount", log.getSyrupCount());
         beverageLogInfo.put("size", log.getBeverageSize().getSizeType());
@@ -182,7 +181,6 @@ public class NoticeServiceImpl implements NoticeService{
 
         // 알람의 위치는 어디가 적절한가?
         List<Pair<Long, SugarWarning>> properAlarmList = getProperAlarmLocation(user.getGender(), logsOnSameDay, (double)cautionAmountOfSugar, (double)exceedAmountOfSugar);
-        properAlarmList.forEach(p -> System.out.println(p.getLeft() + ", " + p.getRight()));
         int size1 = alarmsOnSameDay.size();
         int size2 = properAlarmList.size();
         int max_size = Math.max(size1, size2);
@@ -249,7 +247,6 @@ public class NoticeServiceImpl implements NoticeService{
         for (BeverageLog bl : logsOnSameDay) {
             // 해당 날에 섭취한 당 함량
             accumulatedSugar += bl.getBeverageSize().getSugar() + bl.getAdditionalSugar();
-            System.out.println("accumulatedSugar = " + accumulatedSugar);
             // 한번에 초과했을 경우(주의 알람이 필요 없음) 또는 주의 알람 후 당 함량을 초과했을 경우
             if(accumulatedSugar >= exceedAmountOfSugar){
                 properAlarm.add(Pair.of(bl.getLogId(),SugarWarning.EXCEED));
