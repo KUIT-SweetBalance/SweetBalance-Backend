@@ -19,10 +19,17 @@ public class AutoWebConfig implements WebMvcConfigurer {
     @Value("${spring.front.origin-deployed}")
     private String frontOriginDeployed;
 
+    @Value("${spring.front.origin-subdomain-match-http}")
+    private String frontOriginSubdomainMatchHttp;
+
+    @Value("${spring.front.origin-subdomain-match-https}")
+    private String frontOriginSubdomainMatchHttps;
+
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**") // cors를 적용할 spring서버의 url 패턴.
-                .allowedOrigins(frontOriginHttp, frontOriginHttps, frontOriginDeployed)
+                .allowedOrigins(frontOriginHttp, frontOriginHttps, frontOriginDeployed, frontOriginSubdomainMatchHttp, frontOriginSubdomainMatchHttps)
                 .allowedHeaders("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowCredentials(true)
