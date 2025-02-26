@@ -10,26 +10,19 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @ComponentScan
 public class AutoWebConfig implements WebMvcConfigurer {
 
-    @Value("${spring.front.origin-http}")
-    private String frontOriginHttp;
+    @Value("${spring.front.origin-netlify}")
+    private String frontOriginNetlify;
 
-    @Value("${spring.front.origin-https}")
-    private String frontOriginHttps;
+    @Value("${spring.front.origin-domain}")
+    private String frontOriginDomain;
 
-    @Value("${spring.front.origin-deployed}")
-    private String frontOriginDeployed;
-
-    @Value("${spring.front.origin-subdomain-match-http}")
-    private String frontOriginSubdomainMatchHttp;
-
-    @Value("${spring.front.origin-subdomain-match-https}")
-    private String frontOriginSubdomainMatchHttps;
-
+    @Value("${spring.front.origin-subdomain}")
+    private String frontOriginSubdomain;
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**") // cors를 적용할 spring서버의 url 패턴.
-                .allowedOrigins(frontOriginHttp, frontOriginHttps, frontOriginDeployed, frontOriginSubdomainMatchHttp, frontOriginSubdomainMatchHttps)
+                .allowedOrigins(frontOriginNetlify, frontOriginDomain, frontOriginSubdomain)
                 .allowedHeaders("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowCredentials(true)

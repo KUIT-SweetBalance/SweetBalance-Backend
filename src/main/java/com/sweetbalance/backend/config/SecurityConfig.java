@@ -35,20 +35,14 @@ import static com.sweetbalance.backend.enums.user.Role.*;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Value("${spring.front.origin-http}")
-    private String frontOriginHttp;
+    @Value("${spring.front.origin-netlify}")
+    private String frontOriginNetlify;
 
-    @Value("${spring.front.origin-https}")
-    private String frontOriginHttps;
+    @Value("${spring.front.origin-domain}")
+    private String frontOriginDomain;
 
-    @Value("${spring.front.origin-deployed}")
-    private String frontOriginDeployed;
-
-    @Value("${spring.front.origin-subdomain-match-http}")
-    private String frontOriginSubdomainMatchHttp;
-
-    @Value("${spring.front.origin-subdomain-match-https}")
-    private String frontOriginSubdomainMatchHttps;
+    @Value("${spring.front.origin-subdomain}")
+    private String frontOriginSubdomain;
 
     private final AuthenticationConfiguration authenticationConfiguration;
     private final CustomOAuth2UserService customOAuth2UserService;
@@ -89,7 +83,7 @@ public class SecurityConfig {
 
                         CorsConfiguration configuration = new CorsConfiguration();
 
-                        configuration.setAllowedOrigins(List.of(frontOriginHttp, frontOriginHttps, frontOriginDeployed, frontOriginSubdomainMatchHttp, frontOriginSubdomainMatchHttps));
+                        configuration.setAllowedOrigins(List.of(frontOriginNetlify, frontOriginDomain, frontOriginSubdomain));
                         configuration.setAllowedHeaders(Collections.singletonList("*"));
                         configuration.setAllowedMethods(Collections.singletonList("*"));
                         configuration.setAllowCredentials(true);
