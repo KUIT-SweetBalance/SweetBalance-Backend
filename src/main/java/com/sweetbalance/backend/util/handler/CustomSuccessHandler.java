@@ -21,8 +21,8 @@ import java.util.Iterator;
 @Component
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    @Value("${spring.front.origin-deployed}")
-    private String frontOriginDeployed;
+    @Value("${spring.front.origin-subdomain}")
+    private String frontOriginSubdomain;
 
     private final JWTUtil jwtUtil;
 
@@ -52,6 +52,6 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         jwtUtil.setRefreshCookie(response, refreshToken);
 
-        response.sendRedirect(frontOriginDeployed+"/oauth2_redirect");
+        response.sendRedirect(frontOriginSubdomain+"/oauth2_redirect");
     }
 }
