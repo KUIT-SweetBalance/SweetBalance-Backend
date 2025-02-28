@@ -139,7 +139,7 @@ public class JWTUtil {
                 .path("/")
                 .sameSite("None")
                 .maxAge(refreshTokenExpirationMs / 1000)
-                //.domain(".sweetbalance.site")
+                .domain(".sweetbalance.site")
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
@@ -152,7 +152,7 @@ public class JWTUtil {
                 .path("/")
                 .sameSite("None")
                 .maxAge(0)
-                //.domain(".sweetbalance.site")
+                .domain(".sweetbalance.site")
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
