@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/health")
 @Tag(name = "Health", description = "health check API")
 public class HealthCheckController {
-    @GetMapping("/")
+    @GetMapping("")
     public ResponseEntity<?> getHealthCheck(@AuthenticationPrincipal UserIdHolder userIdHolder) {
         return ResponseEntity.ok(DefaultResponseDTO.success("Health Check", null));
     }
