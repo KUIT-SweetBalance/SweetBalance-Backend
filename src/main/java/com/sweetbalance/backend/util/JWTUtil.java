@@ -137,7 +137,6 @@ public class JWTUtil {
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
-                .sameSite("None")
                 .maxAge(refreshTokenExpirationMs / 1000)
                 .domain(".sweetbalance.site")
                 .build();
@@ -150,7 +149,6 @@ public class JWTUtil {
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
-                .sameSite("None")
                 .maxAge(0)
                 .domain(".sweetbalance.site")
                 .build();
