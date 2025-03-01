@@ -2,7 +2,8 @@
 
 ## System Architecture
 
-![백엔드 아키텍처 1차](https://github.com/user-attachments/assets/ec88417b-66d3-4743-a2ec-a9bef00f25c2)
+![백엔드 아키텍처 2차](https://github.com/user-attachments/assets/e08fc0b0-ac75-41a9-b3c5-b32eb1c3d363)
+
 
 ## API Documentation
 
