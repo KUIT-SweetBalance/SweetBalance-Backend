@@ -21,7 +21,7 @@ import java.util.Iterator;
 @Component
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    @Value("${spring.front.origin-subdomain}")
+    @Value("${spring.url.front-origin-subdomain}")
     private String frontOriginSubdomain;
 
     private final JWTUtil jwtUtil;
