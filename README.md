@@ -10,7 +10,7 @@
 https://cheddar-nitrogen-fe5.notion.site/API-b0c426a8de234f9387d859c5d6a95e17?pvs=4
 
 **Swagger UI** 
-https://13.125.187.188.nip.io/swagger-ui.html
+https://api.sweetbalance.site/swagger-ui.html
 
 ## Github Repository
 
@@ -22,7 +22,7 @@ https://github.com/KUIT-SweetBalance/SweetBalance-Backend-Crawling
 
 ## Deployed
 
-https://13.125.187.188.nip.io/
+https://api.sweetbalance.site
 
 ## ERD
 
