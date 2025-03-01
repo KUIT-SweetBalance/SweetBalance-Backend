@@ -19,6 +19,9 @@ import java.util.Date;
 @Component
 public class JWTUtil {
 
+    @Value("${spring.url.domain}")
+    private String domainWithWildCard;
+
     private SecretKey secretKey;
     private final RefreshTokenRepository refreshTokenRepository;
 
@@ -138,7 +141,7 @@ public class JWTUtil {
                 .secure(true)
                 .path("/")
                 .maxAge(refreshTokenExpirationMs / 1000)
-                .domain(".sweetbalance.site")
+                .domain(domainWithWildCard)
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
@@ -150,7 +153,7 @@ public class JWTUtil {
                 .secure(true)
                 .path("/")
                 .maxAge(0)
-                .domain(".sweetbalance.site")
+                .domain(domainWithWildCard)
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());

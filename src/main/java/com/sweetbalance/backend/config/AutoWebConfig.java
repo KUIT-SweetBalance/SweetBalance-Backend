@@ -10,13 +10,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @ComponentScan
 public class AutoWebConfig implements WebMvcConfigurer {
 
-    @Value("${spring.front.origin-netlify}")
+    @Value("${spring.url.front-origin-netlify}")
     private String frontOriginNetlify;
 
-    @Value("${spring.front.origin-domain}")
+    @Value("${spring.url.front-origin-domain}")
     private String frontOriginDomain;
 
-    @Value("${spring.front.origin-subdomain}")
+    @Value("${spring.url.front-origin-subdomain}")
     private String frontOriginSubdomain;
 
     @Override
