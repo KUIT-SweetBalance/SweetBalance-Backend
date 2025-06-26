@@ -20,25 +20,39 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
+          cache: 'gradle'
           server-id: github
           setting-path: ${{ github.workspace }}
 
       - name: add application.yml to directory
         run: echo "${{ secrets.APPLICATION_YML }}" > application.yml
-              
-
+            
       - name: grant execute permission for gradlew
         run: chmod +x gradlew
-
       - name: build with Gradle(without test)
         run: ./gradlew clean build -x test --stacktrace
 
       - name: Docker login
-        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-      - name: Docker build
-        run: docker build -f Dockerfile -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }} .
-      - name: Docker push
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Docker build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}
+          cache-from: type=gha
+          cache-to: |
+            type=gha, mode=max
+            type=inline
+          
+      # - name: Docker build
+      #   run: docker build -f Dockerfile -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }} .
+      # - name: Docker push
+      #   run: docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}
 
       - name: 🚀 deploy to server
         uses: appleboy/ssh-action@v1.2.0
