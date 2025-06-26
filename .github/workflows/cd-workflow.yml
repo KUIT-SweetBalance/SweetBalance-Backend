@@ -52,11 +52,6 @@ jobs:
             type=gha, mode=max
             type=inline
           
-      # - name: Docker build
-      #   run: docker build -f Dockerfile -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }} .
-      # - name: Docker push
-      #   run: docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}
-
       - name: 🚀 deploy to server
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -80,3 +75,9 @@ jobs:
             
             echo "Cleaning up old images"
             sudo docker image prune -f
+
+      # - name: Docker build
+      #   run: docker build -f Dockerfile -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }} .
+      # - name: Docker push
+      #   run: docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}
+
