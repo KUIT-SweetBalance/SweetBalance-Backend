@@ -62,8 +62,8 @@ jobs:
           envs: GITHUB_SHA
           script: |
             echo "Stopping existing container"
-            sudo docker stop kummit4
-            sudo docker rm kummit4
+            sudo docker stop sweetBalanceContainer
+            sudo docker rm sweetBalanceContainer
             
             sudo docker ps -a
             
