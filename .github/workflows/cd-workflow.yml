@@ -73,7 +73,7 @@ jobs:
             echo "Running new container"
             sudo docker run -d -p 8000:8080 --name sweetBalanceContainer -v /etc/localtime:/etc/localtime:ro -e TZ=Asia/Seoul ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}
             
-            echo "Cleaning up old images"
+            echo "Clean up old images"
             sudo docker image prune -f
 
       # - name: Docker build
